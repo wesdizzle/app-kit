@@ -33,6 +33,7 @@
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
     "better-sqlite3": "^12.0.0",
     "dotenv": "^17.0.0"
   },
@@ -44,6 +45,9 @@
       "optional": true
     },
     "@angular/forms": {
+      "optional": true
+    },
+    "@angular/platform-browser": {
       "optional": true
     },
     "better-sqlite3": {

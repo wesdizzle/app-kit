@@ -1,4 +1,5 @@
 import { ElementRef } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 import { BaseUserProfile } from './auth.service.js';
 import * as i0 from "@angular/core";
 export interface ProfileSavePayload {
@@ -8,6 +9,7 @@ export interface ProfileSavePayload {
 }
 export declare class KitProfileModalComponent {
     dialogEl?: ElementRef<HTMLDialogElement>;
+    private readonly sanitizer;
     readonly isOpen: import("@angular/core").InputSignal<boolean>;
     readonly activeView: import("@angular/core").InputSignal<string>;
     readonly isAuthenticated: import("@angular/core").InputSignal<boolean>;
@@ -40,6 +42,9 @@ export declare class KitProfileModalComponent {
     readonly publicUrl: import("@angular/core").Signal<string>;
     constructor();
     copyLink(): void;
+    private isAndroidBrowser;
+    shouldOpenAccountHubInNewTab(): boolean;
+    getAccountHubLaunchUrl(): SafeUrl | string;
     requestClose(): void;
     onDialogClick(event: MouseEvent): void;
     onDialogCancel(event: Event): void;
