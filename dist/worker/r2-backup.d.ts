@@ -3,7 +3,7 @@
  *
  * Performs daily D1 -> R2 JSON snapshot exports with:
  * - Atomic table export verification
- * - Optional zero-write `skipIfUnchanged` diffing against `snapshots/latest.json`
+ * - Zero-write `skipIfUnchanged` diffing against `snapshots/latest.json`
  * - Rolling snapshot retention pruning (default 30 days)
  */
 export interface BackupEnv {
@@ -11,13 +11,14 @@ export interface BackupEnv {
     BACKUP_BUCKET?: R2Bucket;
 }
 export interface ScheduledBackupOptions {
+    isDaily?: boolean;
     skipIfUnchanged?: boolean;
     retentionDays?: number;
     logPrefix?: string;
 }
 export declare function performScheduledBackup(env: BackupEnv, tables: readonly string[], options?: ScheduledBackupOptions): Promise<{
-    skipped: boolean;
-    latestKey: string;
-    dailyKey?: string;
-    prunedCount: number;
+    key: string;
+    rowCount: number;
+    skipped?: boolean;
+    prunedCount?: number;
 }>;

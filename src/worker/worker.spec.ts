@@ -67,7 +67,6 @@ describe('@wesdizzle/app-kit/worker', () => {
   it('converts ASN.1 DER ECDSA signatures to 64-byte IEEE P1363', () => {
     const r = new Uint8Array(32).fill(0x11);
     const s = new Uint8Array(32).fill(0x22);
-    // Construct ASN.1 DER with leading 0x00 pad on r
     const der = new Uint8Array(2 + 2 + 33 + 2 + 32);
     der[0] = 0x30;
     der[1] = 33 + 32 + 4;
@@ -96,12 +95,12 @@ describe('@wesdizzle/app-kit/worker', () => {
       keyPair.publicKey,
     )) as JsonWebKey;
 
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
         keys: [{ ...publicJwk, kid: 'k-es256', alg: 'ES256', use: 'sig' }],
       }),
-    } as Response);
+    } as unknown as Response);
 
     const headerB64 = base64UrlEncode(
       new TextEncoder().encode(JSON.stringify({ alg: 'ES256', kid: 'k-es256' })),
@@ -128,15 +127,15 @@ describe('@wesdizzle/app-kit/worker', () => {
     );
     const idToken = `${headerB64}.${payloadB64}.${base64UrlEncode(new Uint8Array(sigBuf))}`;
 
-    const claims = await verifyOidcIdToken({
-      idToken,
+    const claims = await verifyOidcIdToken(idToken, {
       issuer: 'https://auth.example.com',
       clientId: 'test-client',
       expectedNonce: 'n-123',
+      fetchFn: mockFetch,
     });
 
-    expect(claims.preferred_username).toBe('wesley');
-    expect(claims.role).toBe('admin');
+    expect(claims?.preferred_username).toBe('wesley');
+    expect(claims?.role).toBe('admin');
   });
 
   it('exempts /api/auth/logout from cross-origin mutation guard and blocks foreign POSTs', () => {
@@ -185,16 +184,20 @@ describe('@wesdizzle/app-kit/worker', () => {
       } as unknown as D1Database,
       BACKUP_BUCKET: {
         get: async () => ({
-          json: async () => ({
-            tables: { users: [{ id: 1, username: 'wesley' }] },
-          }),
+          text: async () =>
+            JSON.stringify({
+              tables: { users: [{ id: 1, username: 'wesley' }] },
+            }),
         }),
         put: putSpy,
         list: async () => ({ objects: [], truncated: false }),
       } as unknown as R2Bucket,
     };
 
-    const res = await performScheduledBackup(env, ['users']);
+    const res = await performScheduledBackup(env, ['users'], {
+      isDaily: true,
+      skipIfUnchanged: true,
+    });
     expect(res.skipped).toBe(true);
     expect(putSpy).not.toHaveBeenCalled();
   });

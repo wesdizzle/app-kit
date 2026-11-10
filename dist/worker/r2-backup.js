@@ -3,88 +3,117 @@
  *
  * Performs daily D1 -> R2 JSON snapshot exports with:
  * - Atomic table export verification
- * - Optional zero-write `skipIfUnchanged` diffing against `snapshots/latest.json`
+ * - Zero-write `skipIfUnchanged` diffing against `snapshots/latest.json`
  * - Rolling snapshot retention pruning (default 30 days)
  */
 export async function performScheduledBackup(env, tables, options = {}) {
-    const logPrefix = options.logPrefix ?? '[ScheduledBackup]';
+    const logPrefix = options.logPrefix ?? '[WorkerBackup]';
     const retentionDays = options.retentionDays ?? 30;
-    const skipIfUnchanged = options.skipIfUnchanged ?? true;
+    const isDaily = options.isDaily ?? true;
+    const skipIfUnchanged = options.skipIfUnchanged ?? false;
     if (!env.BACKUP_BUCKET) {
-        console.warn(`${logPrefix} BACKUP_BUCKET R2 binding not configured; skipping backup.`);
-        return { skipped: true, latestKey: 'snapshots/latest.json', prunedCount: 0 };
+        console.warn(`${logPrefix} BACKUP_BUCKET binding not configured. Skipping snapshot.`);
+        return { key: 'none', rowCount: 0, skipped: true };
     }
-    console.log(`${logPrefix} Starting scheduled D1 -> R2 snapshot...`);
-    const snapshotData = {};
+    const backupData = {};
+    let totalRows = 0;
     for (const table of tables) {
         try {
             const { results } = await env.DB.prepare(`SELECT * FROM ${table}`).all();
-            snapshotData[table] = results || [];
+            backupData[table] = results || [];
+            totalRows += (results || []).length;
         }
-        catch (e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            console.error(`${logPrefix} Aborting snapshot: failed to export table ${table}:`, msg);
-            throw new Error(`Scheduled backup aborted: table ${table} failed`);
+        catch (err) {
+            console.error(`${logPrefix} Failed to dump table ${table}:`, err);
+            throw new Error(`Aborted backup to prevent partial overwrite: failed dumping table ${table}`, { cause: err });
         }
     }
     const latestKey = 'snapshots/latest.json';
-    if (skipIfUnchanged) {
+    if (skipIfUnchanged && typeof env.BACKUP_BUCKET.get === 'function') {
         try {
             const existingObj = await env.BACKUP_BUCKET.get(latestKey);
             if (existingObj) {
-                const existingParsed = (await existingObj.json());
+                let existingParsed = null;
+                if (typeof existingObj.text === 'function') {
+                    existingParsed = JSON.parse(await existingObj.text());
+                }
+                else if (typeof existingObj.json === 'function') {
+                    existingParsed = (await existingObj.json());
+                }
                 if (existingParsed?.tables &&
-                    JSON.stringify(existingParsed.tables) === JSON.stringify(snapshotData)) {
-                    console.log(`${logPrefix} Snapshot unchanged since latest.json; skipping R2 write.`);
-                    return { skipped: true, latestKey, prunedCount: 0 };
+                    JSON.stringify(existingParsed.tables) === JSON.stringify(backupData)) {
+                    console.log('[WorkerCron] Database unchanged since last daily backup. Skipping snapshot.');
+                    return { key: 'none', rowCount: totalRows, skipped: true };
                 }
             }
         }
-        catch {
-            // Proceed with writing fresh backup if latest.json is missing or unreadable
+        catch (cmpErr) {
+            console.warn(`${logPrefix} Could not compare against existing latest.json, proceeding with backup:`, cmpErr);
         }
     }
     const now = new Date();
-    const datePart = now.toISOString().split('T')[0];
+    const timestamp = now.toISOString();
+    const dateStr = timestamp.slice(0, 10);
     const payload = JSON.stringify({
-        timestamp: now.toISOString(),
+        timestamp,
         version: '1.0',
-        tables: snapshotData,
-    });
-    const dailyKey = `snapshots/backup-${datePart}-${now.getTime()}.json`;
-    await env.BACKUP_BUCKET.put(dailyKey, payload, {
-        httpMetadata: { contentType: 'application/json' },
-    });
+        metadata: {
+            timestamp,
+            date: dateStr,
+            version: 1,
+            totalRows,
+            tableCounts: Object.fromEntries(Object.entries(backupData).map(([tbl, rows]) => [tbl, rows.length])),
+        },
+        tables: backupData,
+    }, null, 2);
     await env.BACKUP_BUCKET.put(latestKey, payload, {
         httpMetadata: { contentType: 'application/json' },
     });
-    console.log(`${logPrefix} Saved snapshot to R2: ${dailyKey}`);
-    // Prune snapshots older than retentionDays
+    let snapshotKey = latestKey;
     let prunedCount = 0;
-    try {
-        const retentionCutoffMs = now.getTime() - retentionDays * 24 * 60 * 60 * 1000;
-        let cursor;
-        do {
-            const listed = await env.BACKUP_BUCKET.list({
-                prefix: 'snapshots/backup-',
-                cursor,
-            });
-            const keysToDelete = listed.objects
-                .filter((obj) => obj.uploaded.getTime() < retentionCutoffMs)
-                .map((obj) => obj.key);
-            if (keysToDelete.length > 0) {
-                await env.BACKUP_BUCKET.delete(keysToDelete);
-                prunedCount += keysToDelete.length;
+    if (isDaily) {
+        snapshotKey = `snapshots/backup-${dateStr}-${now.getTime()}.json`;
+        await env.BACKUP_BUCKET.put(snapshotKey, payload, {
+            httpMetadata: { contentType: 'application/json' },
+        });
+        console.log(`${logPrefix} Successfully saved daily snapshot ${snapshotKey} (${totalRows} rows)`);
+        try {
+            const cutoffMs = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+            if (typeof env.BACKUP_BUCKET.list === 'function') {
+                const listed = await env.BACKUP_BUCKET.list({
+                    prefix: 'snapshots/backup-',
+                });
+                if (listed && Array.isArray(listed.objects)) {
+                    for (const obj of listed.objects) {
+                        const uploadTime = obj.uploaded ? obj.uploaded.getTime() : null;
+                        let isExpired = false;
+                        if (uploadTime !== null) {
+                            isExpired = uploadTime < cutoffMs;
+                        }
+                        else {
+                            const match = obj.key.match(/-(\d+)\.json$/);
+                            if (match) {
+                                const epoch = parseInt(match[1], 10);
+                                isExpired = epoch < cutoffMs;
+                            }
+                        }
+                        if (isExpired && typeof env.BACKUP_BUCKET.delete === 'function') {
+                            await env.BACKUP_BUCKET.delete(obj.key);
+                            prunedCount++;
+                        }
+                    }
+                    if (prunedCount > 0) {
+                        console.log(`${logPrefix} Pruned ${prunedCount} snapshot(s) older than ${retentionDays} days.`);
+                    }
+                }
             }
-            cursor = listed.truncated ? listed.cursor : undefined;
-        } while (cursor);
-        if (prunedCount > 0) {
-            console.log(`${logPrefix} Pruned ${prunedCount} expired R2 snapshot(s) (> ${retentionDays}d).`);
+        }
+        catch (pruneErr) {
+            console.warn(`${logPrefix} Failed to prune aged snapshots:`, pruneErr);
         }
     }
-    catch (pruneErr) {
-        const msg = pruneErr instanceof Error ? pruneErr.message : String(pruneErr);
-        console.warn(`${logPrefix} Snapshot retention pruning warning: ${msg}`);
+    else {
+        console.log(`${logPrefix} Successfully updated latest snapshot ${latestKey} (${totalRows} rows)`);
     }
-    return { skipped: false, latestKey, dailyKey, prunedCount };
+    return { key: snapshotKey, rowCount: totalRows, prunedCount };
 }
