@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src/angular",
+    "outDir": "./dist/angular",
+    "declaration": true,
+    "sourceMap": false
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "full",
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "include": ["src/angular/**/*.ts"],
+  "exclude": ["src/angular/**/*.spec.ts", "node_modules", "dist"]
+}

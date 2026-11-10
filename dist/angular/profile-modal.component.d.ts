@@ -1,0 +1,51 @@
+import { ElementRef } from '@angular/core';
+import { BaseUserProfile } from './auth.service.js';
+import * as i0 from "@angular/core";
+export interface ProfileSavePayload {
+    displayName: string;
+    bio: string;
+    isPublic: boolean;
+}
+export declare class KitProfileModalComponent {
+    dialogEl?: ElementRef<HTMLDialogElement>;
+    readonly isOpen: import("@angular/core").InputSignal<boolean>;
+    readonly activeView: import("@angular/core").InputSignal<string>;
+    readonly isAuthenticated: import("@angular/core").InputSignal<boolean>;
+    readonly user: import("@angular/core").InputSignal<BaseUserProfile | null>;
+    readonly displayName: import("@angular/core").InputSignal<string>;
+    readonly bio: import("@angular/core").InputSignal<string>;
+    readonly isPublic: import("@angular/core").InputSignal<boolean>;
+    readonly saving: import("@angular/core").InputSignal<boolean>;
+    readonly statusMessage: import("@angular/core").InputSignal<string>;
+    readonly isError: import("@angular/core").InputSignal<boolean>;
+    readonly copied: import("@angular/core").InputSignal<boolean>;
+    readonly accountHubUrl: import("@angular/core").InputSignal<string>;
+    readonly loginUrl: import("@angular/core").InputSignal<string>;
+    readonly collectionNoun: import("@angular/core").InputSignal<string>;
+    readonly guestTitle: import("@angular/core").InputSignal<string>;
+    readonly guestDescription: import("@angular/core").InputSignal<string>;
+    readonly displayNameChange: import("@angular/core").OutputEmitterRef<string>;
+    readonly bioChange: import("@angular/core").OutputEmitterRef<string>;
+    readonly isPublicChange: import("@angular/core").OutputEmitterRef<boolean>;
+    readonly saveClicked: import("@angular/core").OutputEmitterRef<void>;
+    readonly copyClicked: import("@angular/core").OutputEmitterRef<void>;
+    readonly signOutClicked: import("@angular/core").OutputEmitterRef<void>;
+    readonly closed: import("@angular/core").OutputEmitterRef<void>;
+    readonly backToProfile: import("@angular/core").OutputEmitterRef<void>;
+    private touchStartY;
+    readonly dragOffsetY: import("@angular/core").WritableSignal<number>;
+    readonly isDragging: import("@angular/core").WritableSignal<boolean>;
+    readonly effectiveTransformY: import("@angular/core").Signal<number>;
+    readonly publicRelativePath: import("@angular/core").Signal<string>;
+    readonly publicUrl: import("@angular/core").Signal<string>;
+    constructor();
+    copyLink(): void;
+    requestClose(): void;
+    onDialogClick(event: MouseEvent): void;
+    onDialogCancel(event: Event): void;
+    onTouchStart(event: TouchEvent): void;
+    onTouchMove(event: TouchEvent): void;
+    onTouchEnd(): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<KitProfileModalComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<KitProfileModalComponent, "kit-profile-modal", never, { "isOpen": { "alias": "isOpen"; "required": false; "isSignal": true; }; "activeView": { "alias": "activeView"; "required": false; "isSignal": true; }; "isAuthenticated": { "alias": "isAuthenticated"; "required": false; "isSignal": true; }; "user": { "alias": "user"; "required": false; "isSignal": true; }; "displayName": { "alias": "displayName"; "required": false; "isSignal": true; }; "bio": { "alias": "bio"; "required": false; "isSignal": true; }; "isPublic": { "alias": "isPublic"; "required": false; "isSignal": true; }; "saving": { "alias": "saving"; "required": false; "isSignal": true; }; "statusMessage": { "alias": "statusMessage"; "required": false; "isSignal": true; }; "isError": { "alias": "isError"; "required": false; "isSignal": true; }; "copied": { "alias": "copied"; "required": false; "isSignal": true; }; "accountHubUrl": { "alias": "accountHubUrl"; "required": false; "isSignal": true; }; "loginUrl": { "alias": "loginUrl"; "required": false; "isSignal": true; }; "collectionNoun": { "alias": "collectionNoun"; "required": false; "isSignal": true; }; "guestTitle": { "alias": "guestTitle"; "required": false; "isSignal": true; }; "guestDescription": { "alias": "guestDescription"; "required": false; "isSignal": true; }; }, { "displayNameChange": "displayNameChange"; "bioChange": "bioChange"; "isPublicChange": "isPublicChange"; "saveClicked": "saveClicked"; "copyClicked": "copyClicked"; "signOutClicked": "signOutClicked"; "closed": "closed"; "backToProfile": "backToProfile"; }, never, ["[profileSubview]", "[profileExtraFields]", "[profileExtraNav]"], true, never>;
+}
