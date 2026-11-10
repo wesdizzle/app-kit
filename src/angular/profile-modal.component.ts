@@ -3,7 +3,6 @@ import {
   ElementRef,
   ViewChild,
   ViewEncapsulation,
-  inject,
   input,
   output,
   signal,
@@ -12,7 +11,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { BaseUserProfile } from './auth.service.js';
 
 export interface ProfileSavePayload {
@@ -200,11 +198,9 @@ export interface ProfileSavePayload {
 
               <a
                 class="nav-section-btn"
-                [href]="getAccountHubLaunchUrl()"
-                [attr.target]="shouldOpenAccountHubInNewTab() ? '_blank' : null"
-                [attr.rel]="
-                  shouldOpenAccountHubInNewTab() ? 'noopener noreferrer' : null
-                "
+                [href]="accountHubUrl()"
+                target="_blank"
+                rel="noopener noreferrer"
                 data-testid="profile-account-hub-link"
               >
                 <div class="nav-section-left">
@@ -339,8 +335,6 @@ export interface ProfileSavePayload {
 export class KitProfileModalComponent {
   @ViewChild('dialogEl') dialogEl?: ElementRef<HTMLDialogElement>;
 
-  private readonly sanitizer = inject(DomSanitizer, { optional: true });
-
   readonly isOpen = input<boolean>(true);
   readonly activeView = input<string>('profile');
   readonly isAuthenticated = input<boolean>(false);
@@ -410,43 +404,6 @@ export class KitProfileModalComponent {
 
   copyLink(): void {
     this.copyClicked.emit();
-  }
-
-  private isAndroidBrowser(): boolean {
-    return (
-      typeof navigator !== 'undefined' &&
-      /\bAndroid\b/i.test(navigator.userAgent)
-    );
-  }
-
-  shouldOpenAccountHubInNewTab(): boolean {
-    return !this.isAndroidBrowser();
-  }
-
-  getAccountHubLaunchUrl(): SafeUrl | string {
-    const rawUrl = this.accountHubUrl();
-    if (!this.isAndroidBrowser() || !rawUrl) {
-      return rawUrl;
-    }
-    try {
-      const base =
-        typeof window !== 'undefined' && window.location?.origin
-          ? window.location.origin
-          : 'https://localhost';
-      const parsed = new URL(rawUrl, base);
-      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-        return rawUrl;
-      }
-      const scheme = parsed.protocol.slice(0, -1);
-      const hostAndPath = `${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`;
-      const fallback = encodeURIComponent(parsed.toString());
-      const intentUri = `intent://${hostAndPath}#Intent;scheme=${scheme};package=com.android.chrome;S.browser_fallback_url=${fallback};end`;
-      return this.sanitizer
-        ? this.sanitizer.bypassSecurityTrustUrl(intentUri)
-        : intentUri;
-    } catch {
-      return rawUrl;
-    }
   }
 
   requestClose(): void {
