@@ -199,6 +199,8 @@ export interface ProfileSavePayload {
               <a
                 class="nav-section-btn"
                 [href]="accountHubUrl()"
+                target="_blank"
+                rel="noopener noreferrer"
                 data-testid="profile-account-hub-link"
               >
                 <div class="nav-section-left">
