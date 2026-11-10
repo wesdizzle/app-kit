@@ -349,6 +349,7 @@ export function auditSqlCost(
             scanRegex.test(row.detail) &&
             !row.detail.includes('USING INDEX') &&
             !row.detail.includes('USING INTEGER PRIMARY KEY') &&
+            !row.detail.includes('USING PRIMARY KEY') &&
             !row.detail.includes('USING COVERING INDEX')
           ) {
             unindexedScans.push({
@@ -474,10 +475,10 @@ export function auditSqlCost(
                 billableWrites: 0,
               };
             }
-            tableBreakdown[targetTable].rowsChanged += changes;
+            tableBreakdown[targetTable].rowsChanged += effectiveRowOps;
             tableBreakdown[targetTable].billableWrites += billable;
 
-            totalRowsChanged += changes;
+            totalRowsChanged += effectiveRowOps;
             totalBillableWrites += billable;
           }
         }
@@ -788,7 +789,7 @@ export function runStaticSchemaCostGuard(
           /\bSCAN\b/i.test(r.detail) &&
           !/USING COVERING INDEX/i.test(r.detail) &&
           !/USING INDEX/i.test(r.detail) &&
-          !/USING INTEGER PRIMARY KEY/i.test(r.detail),
+          !/USING (?:INTEGER )?PRIMARY KEY/i.test(r.detail),
       );
       if (hasFullScan) {
         errors.push(

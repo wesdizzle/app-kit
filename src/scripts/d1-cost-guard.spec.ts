@@ -159,9 +159,9 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     );
 
     const report = auditSqlCost(sqlPath, 100, baselinePath);
-    // 1 replaced row on a table with K=1 secondary index => 2 * (1 + 1) = 4 billable writes
+    // 1 replaced row on a table with K=1 secondary index => 2 row ops (DELETE + INSERT) * (1 + 1) = 4 billable writes
     expect(report.tableBreakdown['games']).toEqual({
-      rowsChanged: 1,
+      rowsChanged: 2,
       secondaryIndexes: 1,
       multiplier: 2,
       billableWrites: 4,
