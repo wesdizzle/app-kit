@@ -13,7 +13,7 @@ export async function performScheduledBackup(env, tables, options = {}) {
     const skipIfUnchanged = options.skipIfUnchanged ?? false;
     if (!env.BACKUP_BUCKET) {
         console.warn(`${logPrefix} BACKUP_BUCKET binding not configured. Skipping snapshot.`);
-        return { key: 'none', rowCount: 0, skipped: true };
+        return { key: 'none', rowCount: 0 };
     }
     const backupData = {};
     let totalRows = 0;
@@ -115,5 +115,5 @@ export async function performScheduledBackup(env, tables, options = {}) {
     else {
         console.log(`${logPrefix} Successfully updated latest snapshot ${latestKey} (${totalRows} rows)`);
     }
-    return { key: snapshotKey, rowCount: totalRows, prunedCount };
+    return { key: snapshotKey, rowCount: totalRows };
 }

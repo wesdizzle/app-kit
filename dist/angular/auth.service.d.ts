@@ -44,8 +44,8 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
      */
     verifyUpstreamOidcSession(): Promise<void>;
     updateProfile(patch: {
-        displayName?: string;
-        bio?: string;
+        displayName?: string | null;
+        bio?: string | null;
         isPublic?: boolean;
         homeRegion?: string;
     }): Promise<TUser>;

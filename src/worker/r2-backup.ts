@@ -38,7 +38,7 @@ export async function performScheduledBackup(
     console.warn(
       `${logPrefix} BACKUP_BUCKET binding not configured. Skipping snapshot.`,
     );
-    return { key: 'none', rowCount: 0, skipped: true };
+    return { key: 'none', rowCount: 0 };
   }
 
   const backupData: Record<string, unknown[]> = {};
@@ -173,5 +173,5 @@ export async function performScheduledBackup(
     );
   }
 
-  return { key: snapshotKey, rowCount: totalRows, prunedCount };
+  return { key: snapshotKey, rowCount: totalRows };
 }

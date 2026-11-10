@@ -182,8 +182,8 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
   }
 
   async updateProfile(patch: {
-    displayName?: string;
-    bio?: string;
+    displayName?: string | null;
+    bio?: string | null;
     isPublic?: boolean;
     homeRegion?: string;
   }): Promise<TUser> {
