@@ -5,13 +5,13 @@ import {
   ViewEncapsulation,
   input,
   output,
-  signal,
   computed,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseUserProfile } from './auth.service.js';
+import { BottomSheetDragController } from './bottom-sheet-drag.js';
 
 export interface ProfileSavePayload {
   displayName: string;
@@ -41,14 +41,15 @@ export interface ProfileSavePayload {
       (click)="onDialogClick($event)"
       (cancel)="onDialogCancel($event)"
     >
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div
-          class="sheet-drag-area"
-          (touchstart)="onTouchStart($event)"
-          (touchmove)="onTouchMove($event)"
-          (touchend)="onTouchEnd()"
-          (touchcancel)="onTouchEnd()"
-        >
+      <div
+        class="modal-card"
+        (click)="$event.stopPropagation()"
+        (touchstart)="onTouchStart($event)"
+        (touchmove)="onTouchMove($event)"
+        (touchend)="onTouchEnd()"
+        (touchcancel)="onTouchEnd()"
+      >
+        <div class="sheet-drag-area">
           <div class="sheet-handle"></div>
         </div>
 
@@ -364,12 +365,10 @@ export class KitProfileModalComponent {
   readonly closed = output<void>();
   readonly backToProfile = output<void>();
 
-  private touchStartY = 0;
-  readonly dragOffsetY = signal(0);
-  readonly isDragging = signal(false);
-  readonly effectiveTransformY = computed(() =>
-    Math.max(0, this.dragOffsetY()),
-  );
+  private readonly sheetDrag = new BottomSheetDragController(90);
+  readonly dragOffsetY = this.sheetDrag.dragOffsetY;
+  readonly isDragging = this.sheetDrag.isDragging;
+  readonly effectiveTransformY = this.sheetDrag.effectiveTransformY;
 
   readonly publicRelativePath = computed(() => {
     const username = this.user()?.username;
@@ -407,10 +406,11 @@ export class KitProfileModalComponent {
   }
 
   requestClose(): void {
-    this.dragOffsetY.set(0);
-    this.isDragging.set(false);
+    this.sheetDrag.reset();
     const dialog = this.dialogEl?.nativeElement;
-    if (dialog?.open && typeof dialog.close === 'function') {
+    if (dialog?.open && typeof dialog.showModal === 'function') {
+      dialog.close();
+    } else if (dialog?.open && typeof dialog.close === 'function') {
       dialog.close();
     }
     this.closed.emit();
@@ -433,29 +433,14 @@ export class KitProfileModalComponent {
   }
 
   onTouchStart(event: TouchEvent): void {
-    if (event.touches.length !== 1) return;
-    this.touchStartY = event.touches[0].clientY;
-    this.isDragging.set(true);
+    this.sheetDrag.onTouchStart(event);
   }
 
   onTouchMove(event: TouchEvent): void {
-    if (!this.isDragging() || event.touches.length !== 1) return;
-    const deltaY = event.touches[0].clientY - this.touchStartY;
-    if (deltaY > 0) {
-      this.dragOffsetY.set(deltaY);
-    } else {
-      this.dragOffsetY.set(0);
-    }
+    this.sheetDrag.onTouchMove(event);
   }
 
   onTouchEnd(): void {
-    if (!this.isDragging()) return;
-    const finalOffset = this.dragOffsetY();
-    this.isDragging.set(false);
-    if (finalOffset > 90) {
-      this.requestClose();
-    } else {
-      this.dragOffsetY.set(0);
-    }
+    this.sheetDrag.onTouchEnd(() => this.requestClose());
   }
 }

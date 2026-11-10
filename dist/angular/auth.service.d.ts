@@ -17,15 +17,39 @@ export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile>
     unprovisionedEmail?: string | null;
     accountHubUrl?: string | null;
     oidcIssuer?: string | null;
+    oidcClientId?: string | null;
     user: TUser | null;
 }
+export interface UpstreamOidcStatusResult {
+    reachable: boolean;
+    authenticated: boolean;
+    authorized: boolean;
+    user: {
+        id?: number;
+        username?: string;
+        displayName?: string | null;
+        role?: 'admin' | 'user';
+    } | null;
+}
+export declare function shouldAttemptSilentSso(clientId?: string | null): boolean;
+export declare function markSilentSsoAttempt(clientId?: string | null): void;
+export declare function clearSilentSsoAttempt(clientId?: string | null): void;
+export declare function getCurrentReturnToPath(defaultPath?: string): string;
+/**
+ * Queries the OIDC Account Server's `/api/auth/status` endpoint with credentials
+ * to check if an upstream identity session is active and authorized for `oidcClientId`.
+ */
+export declare function checkUpstreamOidcStatus(oidcIssuer: string, oidcClientId?: string | null): Promise<UpstreamOidcStatusResult>;
 export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     readonly currentUser: import("@angular/core").WritableSignal<TUser | null>;
     readonly authInitialized: import("@angular/core").WritableSignal<boolean>;
+    readonly isAutoSigningIn: import("@angular/core").WritableSignal<boolean>;
     readonly isProvisioned: import("@angular/core").WritableSignal<boolean>;
     readonly unprovisionedEmail: import("@angular/core").WritableSignal<string | null>;
     readonly accountHubUrl: import("@angular/core").WritableSignal<string | null>;
     readonly oidcIssuer: import("@angular/core").WritableSignal<string | null>;
+    readonly oidcClientId: import("@angular/core").WritableSignal<string | null>;
+    readonly isLoading: import("@angular/core").Signal<boolean>;
     readonly isAuthenticated: import("@angular/core").Signal<boolean>;
     readonly isAdmin: import("@angular/core").Signal<boolean>;
     readonly userEmail: import("@angular/core").Signal<string | null>;
@@ -40,11 +64,16 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     private registerUpstreamSessionLifecycleListeners;
     ensureAuthLoaded(): Promise<void>;
     checkSession(): Promise<void>;
+    protected canAutoSignIn(): boolean;
+    protected trySilentAutoSignIn(): Promise<boolean>;
     /**
      * Verifies with the central OIDC Account Server (`/api/auth/status`) that the
-     * user's upstream session is still active and belongs to the same account.
+     * user's upstream session is still active, authorized for this client, and
+     * belongs to the same account.
      */
     verifyUpstreamOidcSession(): Promise<void>;
+    getLoginUrl(returnTo?: string): string;
+    protected redirectTo(url: string): void;
     updateProfile(patch: {
         displayName?: string | null;
         bio?: string | null;

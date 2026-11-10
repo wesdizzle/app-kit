@@ -1,6 +1,7 @@
-import { Component, ViewChild, ViewEncapsulation, input, output, signal, computed, effect, } from '@angular/core';
+import { Component, ViewChild, ViewEncapsulation, input, output, computed, effect, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BottomSheetDragController } from './bottom-sheet-drag.js';
 import * as i0 from "@angular/core";
 import * as i1 from "@angular/forms";
 const _c0 = ["dialogEl"];
@@ -272,10 +273,10 @@ export class KitProfileModalComponent {
         this.signOutClicked = output();
         this.closed = output();
         this.backToProfile = output();
-        this.touchStartY = 0;
-        this.dragOffsetY = signal(0, ...(ngDevMode ? [{ debugName: "dragOffsetY" }] : /* istanbul ignore next */ []));
-        this.isDragging = signal(false, ...(ngDevMode ? [{ debugName: "isDragging" }] : /* istanbul ignore next */ []));
-        this.effectiveTransformY = computed(() => Math.max(0, this.dragOffsetY()), ...(ngDevMode ? [{ debugName: "effectiveTransformY" }] : /* istanbul ignore next */ []));
+        this.sheetDrag = new BottomSheetDragController(90);
+        this.dragOffsetY = this.sheetDrag.dragOffsetY;
+        this.isDragging = this.sheetDrag.isDragging;
+        this.effectiveTransformY = this.sheetDrag.effectiveTransformY;
         this.publicRelativePath = computed(() => {
             const username = this.user()?.username;
             if (!username)
@@ -310,10 +311,12 @@ export class KitProfileModalComponent {
         this.copyClicked.emit();
     }
     requestClose() {
-        this.dragOffsetY.set(0);
-        this.isDragging.set(false);
+        this.sheetDrag.reset();
         const dialog = this.dialogEl?.nativeElement;
-        if (dialog?.open && typeof dialog.close === 'function') {
+        if (dialog?.open && typeof dialog.showModal === 'function') {
+            dialog.close();
+        }
+        else if (dialog?.open && typeof dialog.close === 'function') {
             dialog.close();
         }
         this.closed.emit();
@@ -333,33 +336,13 @@ export class KitProfileModalComponent {
         this.requestClose();
     }
     onTouchStart(event) {
-        if (event.touches.length !== 1)
-            return;
-        this.touchStartY = event.touches[0].clientY;
-        this.isDragging.set(true);
+        this.sheetDrag.onTouchStart(event);
     }
     onTouchMove(event) {
-        if (!this.isDragging() || event.touches.length !== 1)
-            return;
-        const deltaY = event.touches[0].clientY - this.touchStartY;
-        if (deltaY > 0) {
-            this.dragOffsetY.set(deltaY);
-        }
-        else {
-            this.dragOffsetY.set(0);
-        }
+        this.sheetDrag.onTouchMove(event);
     }
     onTouchEnd() {
-        if (!this.isDragging())
-            return;
-        const finalOffset = this.dragOffsetY();
-        this.isDragging.set(false);
-        if (finalOffset > 90) {
-            this.requestClose();
-        }
-        else {
-            this.dragOffsetY.set(0);
-        }
+        this.sheetDrag.onTouchEnd(() => this.requestClose());
     }
     static { this.ɵfac = function KitProfileModalComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitProfileModalComponent)(); }; }
     static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitProfileModalComponent, selectors: [["kit-profile-modal"]], viewQuery: function KitProfileModalComponent_Query(rf, ctx) { if (rf & 1) {
@@ -367,14 +350,13 @@ export class KitProfileModalComponent {
         } if (rf & 2) {
             let _t;
             i0.ɵɵqueryRefresh(_t = i0.ɵɵloadQuery()) && (ctx.dialogEl = _t.first);
-        } }, inputs: { isOpen: [1, "isOpen"], activeView: [1, "activeView"], isAuthenticated: [1, "isAuthenticated"], user: [1, "user"], displayName: [1, "displayName"], bio: [1, "bio"], isPublic: [1, "isPublic"], saving: [1, "saving"], statusMessage: [1, "statusMessage"], isError: [1, "isError"], copied: [1, "copied"], accountHubUrl: [1, "accountHubUrl"], loginUrl: [1, "loginUrl"], collectionNoun: [1, "collectionNoun"], guestTitle: [1, "guestTitle"], guestDescription: [1, "guestDescription"] }, outputs: { displayNameChange: "displayNameChange", bioChange: "bioChange", isPublicChange: "isPublicChange", saveClicked: "saveClicked", copyClicked: "copyClicked", signOutClicked: "signOutClicked", closed: "closed", backToProfile: "backToProfile" }, ngContentSelectors: _c2, decls: 7, vars: 5, consts: [["dialogEl", ""], [1, "kit-profile-dialog", "profile-dialog", 3, "click", "cancel"], [1, "modal-card", 3, "click"], [1, "sheet-drag-area", 3, "touchstart", "touchmove", "touchend", "touchcancel"], [1, "sheet-handle"], [1, "modal-header"], [1, "header-title-row"], ["aria-hidden", "true", 1, "header-icon"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"], ["cx", "12", "cy", "7", "r", "4"], ["type", "button", "aria-label", "Close profile dialog", "data-testid", "profile-modal-close-btn", 1, "close-btn", 3, "click"], ["x1", "18", "y1", "6", "x2", "6", "y2", "18"], ["x1", "6", "y1", "6", "x2", "18", "y2", "18"], [1, "modal-body"], ["data-testid", "profile-guest-view", 1, "guest-card"], [1, "status-msg", 3, "error"], [1, "modal-footer"], [1, "identity-banner"], [1, "field-group"], [1, "field-label-row"], ["for", "kit-profile-display-name"], [1, "char-hint"], ["id", "kit-profile-display-name", "type", "text", "maxlength", "60", "placeholder", "Your collector handle", 1, "text-input", 3, "ngModelChange", "ngModel"], [1, "field-hint"], ["for", "kit-profile-bio"], ["id", "kit-profile-bio", "rows", "3", "maxlength", "300", "placeholder", "Share what you collect or hunt...", 1, "text-input", "bio-input", 3, "ngModelChange", "ngModel"], ["for", "kit-profile-is-public", 1, "toggle-row"], [1, "toggle-text"], [1, "toggle-title"], [1, "toggle-desc"], [1, "switch-wrapper"], ["id", "kit-profile-is-public", "type", "checkbox", 1, "sr-only-checkbox", 3, "ngModelChange", "ngModel"], [1, "switch-track"], [1, "switch-thumb"], [1, "share-box"], ["target", "_blank", "rel", "noopener noreferrer", "data-testid", "profile-account-hub-link", 1, "nav-section-btn", 3, "href"], [1, "nav-section-left"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", 1, "nav-section-icon"], ["x", "3", "y", "11", "width", "18", "height", "11", "rx", "2", "ry", "2"], ["d", "M7 11V7a5 5 0 0 1 10 0v4"], [1, "nav-section-text"], [1, "nav-section-title"], [1, "nav-section-desc"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", 1, "nav-section-chevron"], ["points", "9 18 15 12 9 6"], [1, "identity-avatar"], [1, "identity-details"], [1, "identity-primary"], [1, "username-tag"], [1, "role-badge"], [1, "identity-email"], [1, "share-label"], [1, "share-url-row"], [1, "share-url"], ["type", "button", "data-testid", "copy-public-url-btn", 1, "copy-btn", 3, "click"], ["target", "_blank", "rel", "noopener", 1, "share-open-link", 3, "href"], [1, "guest-icon-circle"], ["viewBox", "0 0 24 24", "width", "24", "height", "24", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], [1, "guest-title"], [1, "guest-desc"], ["data-testid", "profile-guest-signin-btn", 1, "signin-cta-btn", 3, "href"], [1, "status-msg"], ["type", "button", "data-testid", "profile-signout-link", 1, "signout-link", 3, "click"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["points", "16 17 21 12 16 7"], ["x1", "21", "y1", "12", "x2", "9", "y2", "12"], [1, "footer-actions"], ["type", "button", 1, "cancel-btn", 3, "click"], ["type", "button", "data-testid", "profile-save-btn", 1, "save-btn", 3, "click", "disabled"]], template: function KitProfileModalComponent_Template(rf, ctx) { if (rf & 1) {
+        } }, inputs: { isOpen: [1, "isOpen"], activeView: [1, "activeView"], isAuthenticated: [1, "isAuthenticated"], user: [1, "user"], displayName: [1, "displayName"], bio: [1, "bio"], isPublic: [1, "isPublic"], saving: [1, "saving"], statusMessage: [1, "statusMessage"], isError: [1, "isError"], copied: [1, "copied"], accountHubUrl: [1, "accountHubUrl"], loginUrl: [1, "loginUrl"], collectionNoun: [1, "collectionNoun"], guestTitle: [1, "guestTitle"], guestDescription: [1, "guestDescription"] }, outputs: { displayNameChange: "displayNameChange", bioChange: "bioChange", isPublicChange: "isPublicChange", saveClicked: "saveClicked", copyClicked: "copyClicked", signOutClicked: "signOutClicked", closed: "closed", backToProfile: "backToProfile" }, ngContentSelectors: _c2, decls: 7, vars: 5, consts: [["dialogEl", ""], [1, "kit-profile-dialog", "profile-dialog", 3, "click", "cancel"], [1, "modal-card", 3, "click", "touchstart", "touchmove", "touchend", "touchcancel"], [1, "sheet-drag-area"], [1, "sheet-handle"], [1, "modal-header"], [1, "header-title-row"], ["aria-hidden", "true", 1, "header-icon"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"], ["cx", "12", "cy", "7", "r", "4"], ["type", "button", "aria-label", "Close profile dialog", "data-testid", "profile-modal-close-btn", 1, "close-btn", 3, "click"], ["x1", "18", "y1", "6", "x2", "6", "y2", "18"], ["x1", "6", "y1", "6", "x2", "18", "y2", "18"], [1, "modal-body"], ["data-testid", "profile-guest-view", 1, "guest-card"], [1, "status-msg", 3, "error"], [1, "modal-footer"], [1, "identity-banner"], [1, "field-group"], [1, "field-label-row"], ["for", "kit-profile-display-name"], [1, "char-hint"], ["id", "kit-profile-display-name", "type", "text", "maxlength", "60", "placeholder", "Your collector handle", 1, "text-input", 3, "ngModelChange", "ngModel"], [1, "field-hint"], ["for", "kit-profile-bio"], ["id", "kit-profile-bio", "rows", "3", "maxlength", "300", "placeholder", "Share what you collect or hunt...", 1, "text-input", "bio-input", 3, "ngModelChange", "ngModel"], ["for", "kit-profile-is-public", 1, "toggle-row"], [1, "toggle-text"], [1, "toggle-title"], [1, "toggle-desc"], [1, "switch-wrapper"], ["id", "kit-profile-is-public", "type", "checkbox", 1, "sr-only-checkbox", 3, "ngModelChange", "ngModel"], [1, "switch-track"], [1, "switch-thumb"], [1, "share-box"], ["target", "_blank", "rel", "noopener noreferrer", "data-testid", "profile-account-hub-link", 1, "nav-section-btn", 3, "href"], [1, "nav-section-left"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", 1, "nav-section-icon"], ["x", "3", "y", "11", "width", "18", "height", "11", "rx", "2", "ry", "2"], ["d", "M7 11V7a5 5 0 0 1 10 0v4"], [1, "nav-section-text"], [1, "nav-section-title"], [1, "nav-section-desc"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", 1, "nav-section-chevron"], ["points", "9 18 15 12 9 6"], [1, "identity-avatar"], [1, "identity-details"], [1, "identity-primary"], [1, "username-tag"], [1, "role-badge"], [1, "identity-email"], [1, "share-label"], [1, "share-url-row"], [1, "share-url"], ["type", "button", "data-testid", "copy-public-url-btn", 1, "copy-btn", 3, "click"], ["target", "_blank", "rel", "noopener", 1, "share-open-link", 3, "href"], [1, "guest-icon-circle"], ["viewBox", "0 0 24 24", "width", "24", "height", "24", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], [1, "guest-title"], [1, "guest-desc"], ["data-testid", "profile-guest-signin-btn", 1, "signin-cta-btn", 3, "href"], [1, "status-msg"], ["type", "button", "data-testid", "profile-signout-link", 1, "signout-link", 3, "click"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["points", "16 17 21 12 16 7"], ["x1", "21", "y1", "12", "x2", "9", "y2", "12"], [1, "footer-actions"], ["type", "button", 1, "cancel-btn", 3, "click"], ["type", "button", "data-testid", "profile-save-btn", 1, "save-btn", 3, "click", "disabled"]], template: function KitProfileModalComponent_Template(rf, ctx) { if (rf & 1) {
             i0.ɵɵprojectionDef(_c1);
             i0.ɵɵelementStart(0, "dialog", 1, 0);
             i0.ɵɵlistener("click", function KitProfileModalComponent_Template_dialog_click_0_listener($event) { return ctx.onDialogClick($event); })("cancel", function KitProfileModalComponent_Template_dialog_cancel_0_listener($event) { return ctx.onDialogCancel($event); });
             i0.ɵɵelementStart(2, "div", 2);
-            i0.ɵɵlistener("click", function KitProfileModalComponent_Template_div_click_2_listener($event) { return $event.stopPropagation(); });
+            i0.ɵɵlistener("click", function KitProfileModalComponent_Template_div_click_2_listener($event) { return $event.stopPropagation(); })("touchstart", function KitProfileModalComponent_Template_div_touchstart_2_listener($event) { return ctx.onTouchStart($event); })("touchmove", function KitProfileModalComponent_Template_div_touchmove_2_listener($event) { return ctx.onTouchMove($event); })("touchend", function KitProfileModalComponent_Template_div_touchend_2_listener() { return ctx.onTouchEnd(); })("touchcancel", function KitProfileModalComponent_Template_div_touchcancel_2_listener() { return ctx.onTouchEnd(); });
             i0.ɵɵelementStart(3, "div", 3);
-            i0.ɵɵlistener("touchstart", function KitProfileModalComponent_Template_div_touchstart_3_listener($event) { return ctx.onTouchStart($event); })("touchmove", function KitProfileModalComponent_Template_div_touchmove_3_listener($event) { return ctx.onTouchMove($event); })("touchend", function KitProfileModalComponent_Template_div_touchend_3_listener() { return ctx.onTouchEnd(); })("touchcancel", function KitProfileModalComponent_Template_div_touchcancel_3_listener() { return ctx.onTouchEnd(); });
             i0.ɵɵelement(4, "div", 4);
             i0.ɵɵelementEnd();
             i0.ɵɵconditionalCreate(5, KitProfileModalComponent_Conditional_5_Template, 1, 0)(6, KitProfileModalComponent_Conditional_6_Template, 20, 3);
@@ -409,14 +391,15 @@ export class KitProfileModalComponent {
       (click)="onDialogClick($event)"
       (cancel)="onDialogCancel($event)"
     >
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div
-          class="sheet-drag-area"
-          (touchstart)="onTouchStart($event)"
-          (touchmove)="onTouchMove($event)"
-          (touchend)="onTouchEnd()"
-          (touchcancel)="onTouchEnd()"
-        >
+      <div
+        class="modal-card"
+        (click)="$event.stopPropagation()"
+        (touchstart)="onTouchStart($event)"
+        (touchmove)="onTouchMove($event)"
+        (touchend)="onTouchEnd()"
+        (touchcancel)="onTouchEnd()"
+      >
+        <div class="sheet-drag-area">
           <div class="sheet-handle"></div>
         </div>
 
@@ -704,4 +687,4 @@ export class KitProfileModalComponent {
             type: ViewChild,
             args: ['dialogEl']
         }], isOpen: [{ type: i0.Input, args: [{ isSignal: true, alias: "isOpen", required: false }] }], activeView: [{ type: i0.Input, args: [{ isSignal: true, alias: "activeView", required: false }] }], isAuthenticated: [{ type: i0.Input, args: [{ isSignal: true, alias: "isAuthenticated", required: false }] }], user: [{ type: i0.Input, args: [{ isSignal: true, alias: "user", required: false }] }], displayName: [{ type: i0.Input, args: [{ isSignal: true, alias: "displayName", required: false }] }], bio: [{ type: i0.Input, args: [{ isSignal: true, alias: "bio", required: false }] }], isPublic: [{ type: i0.Input, args: [{ isSignal: true, alias: "isPublic", required: false }] }], saving: [{ type: i0.Input, args: [{ isSignal: true, alias: "saving", required: false }] }], statusMessage: [{ type: i0.Input, args: [{ isSignal: true, alias: "statusMessage", required: false }] }], isError: [{ type: i0.Input, args: [{ isSignal: true, alias: "isError", required: false }] }], copied: [{ type: i0.Input, args: [{ isSignal: true, alias: "copied", required: false }] }], accountHubUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "accountHubUrl", required: false }] }], loginUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "loginUrl", required: false }] }], collectionNoun: [{ type: i0.Input, args: [{ isSignal: true, alias: "collectionNoun", required: false }] }], guestTitle: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestTitle", required: false }] }], guestDescription: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestDescription", required: false }] }], displayNameChange: [{ type: i0.Output, args: ["displayNameChange"] }], bioChange: [{ type: i0.Output, args: ["bioChange"] }], isPublicChange: [{ type: i0.Output, args: ["isPublicChange"] }], saveClicked: [{ type: i0.Output, args: ["saveClicked"] }], copyClicked: [{ type: i0.Output, args: ["copyClicked"] }], signOutClicked: [{ type: i0.Output, args: ["signOutClicked"] }], closed: [{ type: i0.Output, args: ["closed"] }], backToProfile: [{ type: i0.Output, args: ["backToProfile"] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitProfileModalComponent, { className: "KitProfileModalComponent", filePath: "profile-modal.component.ts", lineNumber: 335 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitProfileModalComponent, { className: "KitProfileModalComponent", filePath: "profile-modal.component.ts", lineNumber: 336 }); })();

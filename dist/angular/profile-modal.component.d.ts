@@ -32,7 +32,7 @@ export declare class KitProfileModalComponent {
     readonly signOutClicked: import("@angular/core").OutputEmitterRef<void>;
     readonly closed: import("@angular/core").OutputEmitterRef<void>;
     readonly backToProfile: import("@angular/core").OutputEmitterRef<void>;
-    private touchStartY;
+    private readonly sheetDrag;
     readonly dragOffsetY: import("@angular/core").WritableSignal<number>;
     readonly isDragging: import("@angular/core").WritableSignal<boolean>;
     readonly effectiveTransformY: import("@angular/core").Signal<number>;

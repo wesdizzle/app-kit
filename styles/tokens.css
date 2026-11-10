@@ -571,7 +571,20 @@
     justify-content: center;
     padding: 10px 0 2px;
     touch-action: none;
+    user-select: none;
     cursor: grab;
+  }
+
+  .kit-profile-dialog .modal-header {
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }
+
+  .kit-profile-dialog .modal-header button,
+  .kit-profile-dialog .modal-header a {
+    touch-action: manipulation;
+    cursor: pointer;
   }
 
   .kit-profile-dialog .sheet-handle {

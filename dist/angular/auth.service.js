@@ -1,13 +1,139 @@
 import { Injectable, signal, computed } from '@angular/core';
 import * as i0 from "@angular/core";
+const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
+const SSO_ATTEMPT_COOLDOWN_MS = 15_000;
+function getSsoAttemptStorageKey(clientId) {
+    return `${SSO_ATTEMPT_KEY_PREFIX}${clientId || 'default'}`;
+}
+export function shouldAttemptSilentSso(clientId) {
+    if (typeof window !== 'undefined' && window.location) {
+        const search = window.location.search || '';
+        if (search.includes('account=missing') ||
+            search.includes('auth_error=')) {
+            return false;
+        }
+    }
+    if (typeof sessionStorage !== 'undefined') {
+        try {
+            const raw = sessionStorage.getItem(getSsoAttemptStorageKey(clientId));
+            if (raw) {
+                const ts = Number(raw);
+                if (!Number.isNaN(ts) && Date.now() - ts < SSO_ATTEMPT_COOLDOWN_MS) {
+                    return false;
+                }
+            }
+        }
+        catch {
+            // Ignore storage errors
+        }
+    }
+    return true;
+}
+export function markSilentSsoAttempt(clientId) {
+    if (typeof sessionStorage !== 'undefined') {
+        try {
+            sessionStorage.setItem(getSsoAttemptStorageKey(clientId), String(Date.now()));
+        }
+        catch {
+            // Ignore storage errors
+        }
+    }
+}
+export function clearSilentSsoAttempt(clientId) {
+    if (typeof sessionStorage !== 'undefined') {
+        try {
+            sessionStorage.removeItem(getSsoAttemptStorageKey(clientId));
+        }
+        catch {
+            // Ignore storage errors
+        }
+    }
+}
+export function getCurrentReturnToPath(defaultPath = '/') {
+    if (typeof window !== 'undefined' && window.location) {
+        const combined = (window.location.pathname || '/') +
+            (window.location.search || '') +
+            (window.location.hash || '');
+        if (combined.startsWith('/') && !combined.startsWith('//')) {
+            return combined;
+        }
+    }
+    return defaultPath;
+}
+/**
+ * Queries the OIDC Account Server's `/api/auth/status` endpoint with credentials
+ * to check if an upstream identity session is active and authorized for `oidcClientId`.
+ */
+export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
+    if (typeof fetch !== 'function' || !oidcIssuer) {
+        return {
+            reachable: false,
+            authenticated: false,
+            authorized: false,
+            user: null,
+        };
+    }
+    try {
+        const base = oidcIssuer.replace(/\/+$/, '');
+        const statusUrl = oidcClientId
+            ? `${base}/api/auth/status?client_id=${encodeURIComponent(oidcClientId)}`
+            : `${base}/api/auth/status`;
+        const res = await fetch(statusUrl, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) {
+            return {
+                reachable: false,
+                authenticated: false,
+                authorized: false,
+                user: null,
+            };
+        }
+        const data = (await res.json().catch(() => null));
+        if (!data) {
+            return {
+                reachable: false,
+                authenticated: false,
+                authorized: false,
+                user: null,
+            };
+        }
+        const authenticated = Boolean(data.authenticated && data.user);
+        const authorized = authenticated
+            ? data.authorized !== undefined
+                ? Boolean(data.authorized)
+                : true
+            : false;
+        return {
+            reachable: true,
+            authenticated,
+            authorized,
+            user: authenticated ? (data.user ?? null) : null,
+        };
+    }
+    catch {
+        return {
+            reachable: false,
+            authenticated: false,
+            authorized: false,
+            user: null,
+        };
+    }
+}
 export class KitAuthService {
     constructor() {
         this.currentUser = signal(null, ...(ngDevMode ? [{ debugName: "currentUser" }] : /* istanbul ignore next */ []));
         this.authInitialized = signal(false, ...(ngDevMode ? [{ debugName: "authInitialized" }] : /* istanbul ignore next */ []));
+        this.isAutoSigningIn = signal(false, ...(ngDevMode ? [{ debugName: "isAutoSigningIn" }] : /* istanbul ignore next */ []));
         this.isProvisioned = signal(true, ...(ngDevMode ? [{ debugName: "isProvisioned" }] : /* istanbul ignore next */ []));
         this.unprovisionedEmail = signal(null, ...(ngDevMode ? [{ debugName: "unprovisionedEmail" }] : /* istanbul ignore next */ []));
         this.accountHubUrl = signal(null, ...(ngDevMode ? [{ debugName: "accountHubUrl" }] : /* istanbul ignore next */ []));
         this.oidcIssuer = signal(null, ...(ngDevMode ? [{ debugName: "oidcIssuer" }] : /* istanbul ignore next */ []));
+        this.oidcClientId = signal(null, ...(ngDevMode ? [{ debugName: "oidcClientId" }] : /* istanbul ignore next */ []));
+        this.isLoading = computed(() => !this.authInitialized() || this.isAutoSigningIn(), ...(ngDevMode ? [{ debugName: "isLoading" }] : /* istanbul ignore next */ []));
         this.isAuthenticated = computed(() => this.currentUser() !== null, ...(ngDevMode ? [{ debugName: "isAuthenticated" }] : /* istanbul ignore next */ []));
         this.isAdmin = computed(() => this.currentUser()?.role === 'admin', ...(ngDevMode ? [{ debugName: "isAdmin" }] : /* istanbul ignore next */ []));
         this.userEmail = computed(() => this.currentUser()?.email ?? null, ...(ngDevMode ? [{ debugName: "userEmail" }] : /* istanbul ignore next */ []));
@@ -90,7 +216,15 @@ export class KitAuthService {
             else {
                 this.oidcIssuer.set(null);
             }
+            if (typeof data.oidcClientId === 'string' && data.oidcClientId) {
+                this.oidcClientId.set(data.oidcClientId);
+            }
+            else {
+                this.oidcClientId.set(null);
+            }
             if (data.authenticated && data.user) {
+                clearSilentSsoAttempt(this.oidcClientId());
+                this.isAutoSigningIn.set(false);
                 const u = data.user;
                 const fallbackUsername = u.username ||
                     (u.email ? u.email.split('@')[0] : 'trainer') ||
@@ -118,6 +252,7 @@ export class KitAuthService {
                 else {
                     this.isProvisioned.set(true);
                     this.unprovisionedEmail.set(data.unprovisionedEmail ?? null);
+                    await this.trySilentAutoSignIn();
                 }
             }
         }
@@ -130,47 +265,69 @@ export class KitAuthService {
             this.authInitialized.set(true);
         }
     }
+    canAutoSignIn() {
+        if (typeof window !== 'undefined' && window.location) {
+            const path = window.location.pathname || '/';
+            if (path.startsWith('/u/')) {
+                return false;
+            }
+        }
+        return shouldAttemptSilentSso(this.oidcClientId());
+    }
+    async trySilentAutoSignIn() {
+        const issuer = this.oidcIssuer();
+        const clientId = this.oidcClientId();
+        if (!issuer || !this.canAutoSignIn()) {
+            return false;
+        }
+        const status = await checkUpstreamOidcStatus(issuer, clientId);
+        if (!status.reachable || !status.authenticated || !status.authorized) {
+            return false;
+        }
+        markSilentSsoAttempt(clientId);
+        this.isAutoSigningIn.set(true);
+        const returnTo = getCurrentReturnToPath('/');
+        this.redirectTo(this.getLoginUrl(returnTo));
+        return true;
+    }
     /**
      * Verifies with the central OIDC Account Server (`/api/auth/status`) that the
-     * user's upstream session is still active and belongs to the same account.
+     * user's upstream session is still active, authorized for this client, and
+     * belongs to the same account.
      */
     async verifyUpstreamOidcSession() {
         const issuer = this.oidcIssuer();
+        const clientId = this.oidcClientId();
         const localUser = this.currentUser();
         if (!issuer || !localUser)
             return;
-        try {
-            const statusUrl = `${issuer.replace(/\/+$/, '')}/api/auth/status`;
-            const res = await fetch(statusUrl, {
+        const status = await checkUpstreamOidcStatus(issuer, clientId);
+        if (!status.reachable)
+            return;
+        if (!status.authenticated || !status.user || !status.authorized) {
+            await fetch('/api/auth/logout?silent=1', {
                 method: 'GET',
-                credentials: 'include',
+                credentials: 'same-origin',
                 cache: 'no-store',
-                headers: { Accept: 'application/json' },
-            });
-            if (!res.ok)
-                return;
-            const status = (await res.json());
-            if (!status.authenticated || !status.user) {
-                await fetch('/api/auth/logout?silent=1', {
-                    method: 'GET',
-                    credentials: 'same-origin',
-                    cache: 'no-store',
-                }).catch(() => null);
-                this.currentUser.set(null);
-                return;
-            }
-            if ((status.user.username &&
-                localUser.username &&
-                status.user.username.toLowerCase() !==
-                    localUser.username.toLowerCase()) ||
-                (status.user.role && status.user.role !== localUser.role)) {
-                if (typeof window !== 'undefined' && window.location) {
-                    window.location.assign('/api/auth/login');
-                }
-            }
+            }).catch(() => null);
+            this.currentUser.set(null);
+            return;
         }
-        catch {
-            // Network or CORS unavailable (e.g., offline mode); preserve local session
+        if ((status.user.username &&
+            localUser.username &&
+            status.user.username.toLowerCase() !==
+                localUser.username.toLowerCase()) ||
+            (status.user.role && status.user.role !== localUser.role)) {
+            const returnTo = getCurrentReturnToPath('/');
+            this.redirectTo(this.getLoginUrl(returnTo));
+        }
+    }
+    getLoginUrl(returnTo = '/') {
+        return `/api/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+    }
+    redirectTo(url) {
+        if (typeof window !== 'undefined' && window.location) {
+            window.location.assign(url);
         }
     }
     async updateProfile(patch) {
