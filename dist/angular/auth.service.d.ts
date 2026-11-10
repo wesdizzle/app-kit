@@ -13,6 +13,7 @@ export interface BaseUserProfile {
 export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile> {
     authenticated: boolean;
     provisioned?: boolean;
+    email?: string | null;
     unprovisionedEmail?: string | null;
     accountHubUrl?: string | null;
     oidcIssuer?: string | null;
@@ -21,12 +22,12 @@ export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile>
 export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     readonly currentUser: import("@angular/core").WritableSignal<TUser | null>;
     readonly authInitialized: import("@angular/core").WritableSignal<boolean>;
+    readonly isProvisioned: import("@angular/core").WritableSignal<boolean>;
     readonly unprovisionedEmail: import("@angular/core").WritableSignal<string | null>;
     readonly accountHubUrl: import("@angular/core").WritableSignal<string | null>;
     readonly oidcIssuer: import("@angular/core").WritableSignal<string | null>;
     readonly isAuthenticated: import("@angular/core").Signal<boolean>;
     readonly isAdmin: import("@angular/core").Signal<boolean>;
-    readonly isProvisioned: import("@angular/core").Signal<boolean>;
     readonly userEmail: import("@angular/core").Signal<string | null>;
     readonly username: import("@angular/core").Signal<string | null>;
     readonly displayName: import("@angular/core").Signal<string | null>;
@@ -34,6 +35,7 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     readonly isPublic: import("@angular/core").Signal<boolean>;
     private authLoadPromise;
     private lastUpstreamCheckMs;
+    private sessionEpoch;
     constructor();
     private registerUpstreamSessionLifecycleListeners;
     ensureAuthLoaded(): Promise<void>;

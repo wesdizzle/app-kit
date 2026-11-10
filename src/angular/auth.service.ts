@@ -12,9 +12,12 @@ export interface BaseUserProfile {
   homeRegion?: string;
 }
 
-export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile> {
+export interface AuthMeResponse<
+  TUser extends BaseUserProfile = BaseUserProfile,
+> {
   authenticated: boolean;
   provisioned?: boolean;
+  email?: string | null;
   unprovisionedEmail?: string | null;
   accountHubUrl?: string | null;
   oidcIssuer?: string | null;
@@ -27,15 +30,13 @@ export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile>
 export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
   readonly currentUser = signal<TUser | null>(null);
   readonly authInitialized = signal<boolean>(false);
+  readonly isProvisioned = signal<boolean>(true);
   readonly unprovisionedEmail = signal<string | null>(null);
   readonly accountHubUrl = signal<string | null>(null);
   readonly oidcIssuer = signal<string | null>(null);
 
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isAdmin = computed(() => this.currentUser()?.role === 'admin');
-  readonly isProvisioned = computed(
-    () => this.currentUser() !== null || this.unprovisionedEmail() === null,
-  );
   readonly userEmail = computed(() => this.currentUser()?.email ?? null);
   readonly username = computed(() => this.currentUser()?.username ?? null);
   readonly displayName = computed(
@@ -47,8 +48,10 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
 
   private authLoadPromise: Promise<void> | null = null;
   private lastUpstreamCheckMs = 0;
+  private sessionEpoch = 0;
 
   constructor() {
+    this.authLoadPromise = this.checkSession();
     this.registerUpstreamSessionLifecycleListeners();
   }
 
@@ -60,25 +63,28 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     const triggerCheck = () => {
       const now = Date.now();
       if (now - this.lastUpstreamCheckMs < 2000) return;
-      this.lastUpstreamCheckMs = now;
-      void this.verifyUpstreamOidcSession();
+      void this.checkSession();
     };
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        triggerCheck();
-      }
-    });
+    if (typeof document.addEventListener === 'function') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          triggerCheck();
+        }
+      });
+    }
 
-    window.addEventListener('focus', () => {
-      triggerCheck();
-    });
-
-    window.addEventListener('pageshow', (event) => {
-      if (event.persisted) {
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('focus', () => {
         triggerCheck();
-      }
-    });
+      });
+
+      window.addEventListener('pageshow', (event: PageTransitionEvent) => {
+        if (event.persisted) {
+          triggerCheck();
+        }
+      });
+    }
   }
 
   async ensureAuthLoaded(): Promise<void> {
@@ -86,10 +92,12 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     if (!this.authLoadPromise) {
       this.authLoadPromise = this.checkSession();
     }
-    return this.authLoadPromise;
+    await this.authLoadPromise;
   }
 
   async checkSession(): Promise<void> {
+    this.lastUpstreamCheckMs = Date.now();
+    const epoch = ++this.sessionEpoch;
     try {
       const response = await fetch('/api/auth/me', {
         credentials: 'same-origin',
@@ -99,33 +107,60 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
           'Cache-Control': 'no-cache',
         },
       });
+      if (epoch !== this.sessionEpoch) return;
       if (!response.ok) {
         this.currentUser.set(null);
         return;
       }
       const data = (await response.json()) as AuthMeResponse<TUser>;
-      if (data.accountHubUrl) {
+      if (epoch !== this.sessionEpoch) return;
+
+      if (typeof data.accountHubUrl === 'string' && data.accountHubUrl) {
         this.accountHubUrl.set(data.accountHubUrl);
+      } else {
+        this.accountHubUrl.set(null);
       }
-      if (data.oidcIssuer) {
+      if (typeof data.oidcIssuer === 'string' && data.oidcIssuer) {
         this.oidcIssuer.set(data.oidcIssuer);
+      } else {
+        this.oidcIssuer.set(null);
       }
+
       if (data.authenticated && data.user) {
+        const u = data.user;
+        const fallbackUsername =
+          u.username ||
+          (u.email ? u.email.split('@')[0] : 'trainer') ||
+          'trainer';
         this.currentUser.set({
-          ...data.user,
-          username: data.user.username || 'trainer',
-          isPublic: data.user.isPublic ?? true,
-          displayName: data.user.displayName ?? null,
-          bio: data.user.bio ?? null,
+          ...u,
+          id: typeof u.id === 'number' ? u.id : 1,
+          email: u.email ?? null,
+          username: fallbackUsername,
+          role: u.role === 'user' ? 'user' : 'admin',
+          isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : true,
+          displayName: u.displayName ?? fallbackUsername,
+          bio: u.bio ?? null,
         });
+        this.isProvisioned.set(true);
         this.unprovisionedEmail.set(null);
         await this.verifyUpstreamOidcSession();
       } else {
         this.currentUser.set(null);
-        this.unprovisionedEmail.set(data.unprovisionedEmail ?? null);
+        if (data.provisioned === false) {
+          this.isProvisioned.set(false);
+          this.unprovisionedEmail.set(
+            data.unprovisionedEmail ?? data.email ?? null,
+          );
+        } else {
+          this.isProvisioned.set(true);
+          this.unprovisionedEmail.set(data.unprovisionedEmail ?? null);
+        }
       }
     } catch {
-      this.currentUser.set(null);
+      if (epoch === this.sessionEpoch) {
+        this.currentUser.set(null);
+      }
     } finally {
       this.authInitialized.set(true);
     }
@@ -160,7 +195,7 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
           method: 'GET',
           credentials: 'same-origin',
           cache: 'no-store',
-        });
+        }).catch(() => null);
         this.currentUser.set(null);
         return;
       }
@@ -172,7 +207,7 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
             localUser.username.toLowerCase()) ||
         (status.user.role && status.user.role !== localUser.role)
       ) {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && window.location) {
           window.location.assign('/api/auth/login');
         }
       }
@@ -187,6 +222,7 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     isPublic?: boolean;
     homeRegion?: string;
   }): Promise<TUser> {
+    this.sessionEpoch++;
     const response = await fetch('/api/user/profile', {
       method: 'PUT',
       credentials: 'same-origin',
@@ -201,27 +237,38 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
       const errBody = (await response.json().catch(() => ({}))) as {
         error?: string;
       };
-      throw new Error(errBody.error || 'Failed to update profile');
+      throw new Error(
+        errBody.error || `Failed to save profile (${response.status})`,
+      );
     }
 
     const data = (await response.json()) as { user: TUser };
-    this.currentUser.set(data.user);
+    if (data?.user) {
+      this.currentUser.set(data.user);
+    }
     return data.user;
   }
 
   async logout(): Promise<void> {
+    this.sessionEpoch++;
     try {
       await fetch('/api/auth/logout?silent=1', {
         method: 'POST',
         credentials: 'same-origin',
         cache: 'no-store',
       });
+    } catch {
+      // Ignore network errors on logout
     } finally {
       this.currentUser.set(null);
     }
   }
 
   getLogoutRedirectUrl(): string {
-    return '/api/auth/logout';
+    const issuer = this.oidcIssuer();
+    if (issuer && typeof window !== 'undefined' && window.location?.origin) {
+      return `${issuer.replace(/\/+$/, '')}/logout?post_logout_redirect_uri=${encodeURIComponent(window.location.origin + '/')}`;
+    }
+    return '/';
   }
 }
