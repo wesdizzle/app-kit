@@ -1,11 +1,40 @@
 import { Injectable, signal, computed } from '@angular/core';
 import * as i0 from "@angular/core";
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
-const SSO_ATTEMPT_COOLDOWN_MS = 15_000;
+const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
+const ssoCheckedInMemory = new Set();
 function getSsoAttemptStorageKey(clientId) {
     return `${SSO_ATTEMPT_KEY_PREFIX}${clientId || 'default'}`;
 }
+export function consumeSilentSsoCallbackParam(clientId) {
+    if (typeof window === 'undefined' || !window.location) {
+        return false;
+    }
+    const search = window.location.search || '';
+    if (!search.includes('sso=checked') && !search.includes('sso=none')) {
+        return false;
+    }
+    markSilentSsoAttempt(clientId);
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('sso');
+        const cleanUrl = url.pathname +
+            (url.search ? url.search : '') +
+            (url.hash ? url.hash : '');
+        if (typeof window.history !== 'undefined' &&
+            typeof window.history.replaceState === 'function') {
+            window.history.replaceState(window.history.state, '', cleanUrl);
+        }
+    }
+    catch {
+        // Ignore URL/history cleanup errors
+    }
+    return true;
+}
 export function shouldAttemptSilentSso(clientId) {
+    if (consumeSilentSsoCallbackParam(clientId)) {
+        return false;
+    }
     if (typeof window !== 'undefined' && window.location) {
         const search = window.location.search || '';
         if (search.includes('account=missing') ||
@@ -13,9 +42,13 @@ export function shouldAttemptSilentSso(clientId) {
             return false;
         }
     }
+    const key = getSsoAttemptStorageKey(clientId);
+    if (ssoCheckedInMemory.has(key)) {
+        return false;
+    }
     if (typeof sessionStorage !== 'undefined') {
         try {
-            const raw = sessionStorage.getItem(getSsoAttemptStorageKey(clientId));
+            const raw = sessionStorage.getItem(key);
             if (raw) {
                 const ts = Number(raw);
                 if (!Number.isNaN(ts) && Date.now() - ts < SSO_ATTEMPT_COOLDOWN_MS) {
@@ -30,9 +63,11 @@ export function shouldAttemptSilentSso(clientId) {
     return true;
 }
 export function markSilentSsoAttempt(clientId) {
+    const key = getSsoAttemptStorageKey(clientId);
+    ssoCheckedInMemory.add(key);
     if (typeof sessionStorage !== 'undefined') {
         try {
-            sessionStorage.setItem(getSsoAttemptStorageKey(clientId), String(Date.now()));
+            sessionStorage.setItem(key, String(Date.now()));
         }
         catch {
             // Ignore storage errors
@@ -40,9 +75,14 @@ export function markSilentSsoAttempt(clientId) {
     }
 }
 export function clearSilentSsoAttempt(clientId) {
+    const key = getSsoAttemptStorageKey(clientId);
+    ssoCheckedInMemory.delete(key);
+    if (!clientId) {
+        ssoCheckedInMemory.clear();
+    }
     if (typeof sessionStorage !== 'undefined') {
         try {
-            sessionStorage.removeItem(getSsoAttemptStorageKey(clientId));
+            sessionStorage.removeItem(key);
         }
         catch {
             // Ignore storage errors
@@ -51,11 +91,23 @@ export function clearSilentSsoAttempt(clientId) {
 }
 export function getCurrentReturnToPath(defaultPath = '/') {
     if (typeof window !== 'undefined' && window.location) {
-        const combined = (window.location.pathname || '/') +
-            (window.location.search || '') +
-            (window.location.hash || '');
-        if (combined.startsWith('/') && !combined.startsWith('//')) {
-            return combined;
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('sso');
+            const combined = (url.pathname || '/') +
+                (url.search ? url.search : '') +
+                (url.hash ? url.hash : '');
+            if (combined.startsWith('/') && !combined.startsWith('//')) {
+                return combined;
+            }
+        }
+        catch {
+            const combined = (window.location.pathname || '/') +
+                (window.location.search || '') +
+                (window.location.hash || '');
+            if (combined.startsWith('/') && !combined.startsWith('//')) {
+                return combined;
+            }
         }
     }
     return defaultPath;
@@ -111,6 +163,9 @@ export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
             reachable: true,
             authenticated,
             authorized,
+            cookiePresent: typeof data.cookiePresent === 'boolean'
+                ? data.cookiePresent
+                : undefined,
             user: authenticated ? (data.user ?? null) : null,
         };
     }
@@ -159,7 +214,10 @@ export class KitAuthService {
         };
         if (typeof document.addEventListener === 'function') {
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
+                if (document.visibilityState === 'hidden') {
+                    ssoCheckedInMemory.clear();
+                }
+                else if (document.visibilityState === 'visible') {
                     triggerCheck();
                 }
             });
@@ -281,14 +339,24 @@ export class KitAuthService {
             return false;
         }
         const status = await checkUpstreamOidcStatus(issuer, clientId);
-        if (!status.reachable || !status.authenticated || !status.authorized) {
-            return false;
+        if (status.reachable && status.authenticated) {
+            if (!status.authorized) {
+                return false;
+            }
+            markSilentSsoAttempt(clientId);
+            this.isAutoSigningIn.set(true);
+            const returnTo = getCurrentReturnToPath('/');
+            this.redirectTo(this.getLoginUrl(returnTo));
+            return true;
         }
-        markSilentSsoAttempt(clientId);
-        this.isAutoSigningIn.set(true);
-        const returnTo = getCurrentReturnToPath('/');
-        this.redirectTo(this.getLoginUrl(returnTo));
-        return true;
+        if (status.reachable && status.cookiePresent === false) {
+            markSilentSsoAttempt(clientId);
+            this.isAutoSigningIn.set(true);
+            const returnTo = getCurrentReturnToPath('/');
+            this.redirectTo(this.getLoginUrl(returnTo, { prompt: 'none' }));
+            return true;
+        }
+        return false;
     }
     /**
      * Verifies with the central OIDC Account Server (`/api/auth/status`) that the
@@ -304,6 +372,9 @@ export class KitAuthService {
         const status = await checkUpstreamOidcStatus(issuer, clientId);
         if (!status.reachable)
             return;
+        if (!status.authenticated && status.cookiePresent === false) {
+            return;
+        }
         if (!status.authenticated || !status.user || !status.authorized) {
             await fetch('/api/auth/logout?silent=1', {
                 method: 'GET',
@@ -322,8 +393,12 @@ export class KitAuthService {
             this.redirectTo(this.getLoginUrl(returnTo));
         }
     }
-    getLoginUrl(returnTo = '/') {
-        return `/api/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+    getLoginUrl(returnTo = '/', options) {
+        const base = `/api/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+        if (options?.prompt) {
+            return `${base}&prompt=${encodeURIComponent(options.prompt)}`;
+        }
+        return base;
     }
     redirectTo(url) {
         if (typeof window !== 'undefined' && window.location) {

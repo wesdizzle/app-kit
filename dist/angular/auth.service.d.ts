@@ -24,6 +24,7 @@ export interface UpstreamOidcStatusResult {
     reachable: boolean;
     authenticated: boolean;
     authorized: boolean;
+    cookiePresent?: boolean;
     user: {
         id?: number;
         username?: string;
@@ -31,6 +32,7 @@ export interface UpstreamOidcStatusResult {
         role?: 'admin' | 'user';
     } | null;
 }
+export declare function consumeSilentSsoCallbackParam(clientId?: string | null): boolean;
 export declare function shouldAttemptSilentSso(clientId?: string | null): boolean;
 export declare function markSilentSsoAttempt(clientId?: string | null): void;
 export declare function clearSilentSsoAttempt(clientId?: string | null): void;
@@ -72,7 +74,9 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
      * belongs to the same account.
      */
     verifyUpstreamOidcSession(): Promise<void>;
-    getLoginUrl(returnTo?: string): string;
+    getLoginUrl(returnTo?: string, options?: {
+        prompt?: 'none' | 'login' | 'select_account';
+    }): string;
     protected redirectTo(url: string): void;
     updateProfile(patch: {
         displayName?: string | null;

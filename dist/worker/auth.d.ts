@@ -28,6 +28,7 @@ export interface OidcStatePayload {
     nonce: string;
     redirectUri?: string;
     returnTo?: string;
+    silent?: boolean;
     exp: number;
 }
 export interface OidcIdTokenClaims {
