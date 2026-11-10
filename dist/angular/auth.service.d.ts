@@ -1,12 +1,12 @@
 import * as i0 from "@angular/core";
 export interface BaseUserProfile {
     id: number;
-    email: string;
+    email?: string | null;
     username: string;
     role: 'admin' | 'user';
     isPublic: boolean;
-    displayName: string | null;
-    bio: string | null;
+    displayName?: string | null;
+    bio?: string | null;
     createdAt?: string;
     homeRegion?: string;
 }
