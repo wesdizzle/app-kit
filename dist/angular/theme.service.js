@@ -1,10 +1,13 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, InjectionToken, inject, signal, } from '@angular/core';
 import * as i0 from "@angular/core";
+export const KIT_THEME_CONFIG = new InjectionToken('KIT_THEME_CONFIG');
 export class KitThemeService {
     constructor() {
         this.theme = signal('auto', ...(ngDevMode ? [{ debugName: "theme" }] : /* istanbul ignore next */ []));
         this.resolvedTheme = signal('dark', ...(ngDevMode ? [{ debugName: "resolvedTheme" }] : /* istanbul ignore next */ []));
         this.storageKey = 'app-theme';
+        this.darkThemeColor = '#121214';
+        this.lightThemeColor = '#f8fafc';
         this.mediaQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
             ? window.matchMedia('(prefers-color-scheme: dark)')
             : null;
@@ -13,6 +16,13 @@ export class KitThemeService {
                 this.applyTheme('auto');
             }
         };
+        let injectedConfig;
+        try {
+            injectedConfig = inject(KIT_THEME_CONFIG, { optional: true });
+        }
+        catch {
+            injectedConfig = null;
+        }
         if (this.mediaQuery) {
             if (typeof this.mediaQuery.addEventListener === 'function') {
                 this.mediaQuery.addEventListener('change', this.mediaQueryListener);
@@ -21,10 +31,19 @@ export class KitThemeService {
                 this.mediaQuery.addListener(this.mediaQueryListener);
             }
         }
-        this.init();
+        this.init(injectedConfig?.storageKey ?? 'app-theme', injectedConfig?.legacyKeys ?? ['living-dex_theme', 'theme'], injectedConfig?.defaultMode ?? 'auto', {
+            darkThemeColor: injectedConfig?.darkThemeColor,
+            lightThemeColor: injectedConfig?.lightThemeColor,
+        });
     }
-    init(storageKey = 'app-theme', legacyKeys = ['living-dex_theme'], defaultMode = 'auto') {
+    init(storageKey = 'app-theme', legacyKeys = ['living-dex_theme', 'theme'], defaultMode = 'auto', colors) {
         this.storageKey = storageKey;
+        if (colors?.darkThemeColor) {
+            this.darkThemeColor = colors.darkThemeColor;
+        }
+        if (colors?.lightThemeColor) {
+            this.lightThemeColor = colors.lightThemeColor;
+        }
         let saved = null;
         if (typeof localStorage !== 'undefined') {
             try {
@@ -93,6 +112,7 @@ export class KitThemeService {
             const root = document.documentElement;
             const body = document.body;
             root.setAttribute('data-theme', effective);
+            root.style.colorScheme = effective;
             root.classList.remove('theme-light', 'theme-dark');
             root.classList.add(effective === 'dark' ? 'theme-dark' : 'theme-light');
             if (body) {
@@ -125,8 +145,8 @@ export class KitThemeService {
     updateThemeColorMeta(mode, effective) {
         if (typeof document === 'undefined')
             return;
-        const darkColor = '#121214';
-        const lightColor = '#f8fafc';
+        const darkColor = this.darkThemeColor;
+        const lightColor = this.lightThemeColor;
         const metas = document.querySelectorAll('meta[name="theme-color"]');
         metas.forEach((meta) => {
             const media = meta.getAttribute('media');

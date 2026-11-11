@@ -1,47 +1,266 @@
 /**
- * @wesdizzle/app-kit Semantic CSS Token Contract & Shared Component Styles
+ * @wesdizzle/app-kit Material 3 Expressive Token Contract & Shared Component Styles
  *
- * Maps `--kit-*` custom properties to Material 3 (`--m3-*` in collection-tracker)
- * and theme palette (`--bg-*`, `--text-*`, `--primary` in living-dex) variables.
+ * Provides a unified Dark & Light mode token foundation across `account-server`,
+ * `collection-tracker`, and `living-dex`, including WCAG 2.1 AA (>= 4.5:1)
+ * semantic status colors, shared typography, `<kit-public-banner>`,
+ * `<kit-profile-modal>`, state layers, focus rings, and reduced-motion guards.
  */
 
 :root {
-  --kit-surface: var(--m3-surface, var(--bg-card, #121214));
-  --kit-surface-container: var(
-    --m3-surface-container,
-    var(--bg-recessed, #1a1a20)
+  --kit-font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --kit-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --kit-font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+
+  --kit-radius-xs: 8px;
+  --kit-radius-sm: 12px;
+  --kit-radius-md: 16px;
+  --kit-radius-lg: 24px;
+  --kit-radius-full: 9999px;
+}
+
+/* Default / Dark Mode Semantic Tokens */
+:root,
+.theme-dark,
+[data-theme='dark'] {
+  --kit-surface: var(--m3-surface, var(--bg-main, #121214));
+  --kit-surface-container-low: var(
+    --m3-surface-container-low,
+    var(--bg-recessed, #17171c)
   );
-  --kit-surface-high: var(
+  --kit-surface-container: var(--m3-surface-container, var(--bg-card, #1e1e24));
+  --kit-surface-container-high: var(
     --m3-surface-container-high,
-    var(--bg-card, #1e1e24)
+    var(--bg-card-hover, #27272f)
   );
-  --kit-surface-highest: var(
-    --m3-surface-container-highest,
-    var(--bg-card-hover, #26262e)
-  );
-  --kit-on-surface: var(--m3-on-surface, var(--text-main, #f1f1f5));
-  --kit-on-surface-muted: var(
+  --kit-surface-container-highest: var(--m3-surface-container-highest, #32323c);
+
+  /* Bidirectional aliases for backward compatibility */
+  --kit-surface-high: var(--kit-surface-container-high);
+  --kit-surface-highest: var(--kit-surface-container-highest);
+
+  --kit-on-surface: var(--m3-on-surface, var(--text-main, #f1f5f9));
+  --kit-on-surface-variant: var(
     --m3-on-surface-variant,
-    var(--text-muted, #a2a2b4)
+    var(--text-muted, #a1a1b5)
   );
-  --kit-primary: var(--m3-primary, var(--primary, #38bdf8));
-  --kit-on-primary: var(--m3-on-primary, var(--on-primary, #003549));
+  --kit-on-surface-muted: var(--kit-on-surface-variant);
+
+  --kit-primary: var(--m3-primary, var(--primary, #60a5fa));
+  --kit-on-primary: var(--m3-on-primary, var(--on-primary, #06203a));
   --kit-primary-container: var(
     --m3-primary-container,
-    var(--primary-container, #004d67)
+    var(--primary-container, #17355a)
   );
   --kit-on-primary-container: var(
     --m3-on-primary-container,
-    var(--on-primary-container, #bfe9ff)
+    var(--on-primary-container, #dbeafe)
   );
-  --kit-outline: var(--m3-outline, var(--border-strong, #8e8e9c));
+
+  --kit-outline: var(--m3-outline, var(--border-strong, #64748b));
   --kit-outline-variant: var(
     --m3-outline-variant,
     var(--border-color, #2e2e38)
   );
+
+  --kit-glass-bg: var(--glass-bg, rgba(18, 18, 20, 0.82));
+
+  /* WCAG AA Dark-Mode Status Tokens */
+  --kit-success: #34d399;
+  --kit-success-subtle: rgba(16, 185, 129, 0.14);
+  --kit-success-border: rgba(52, 211, 153, 0.35);
+
+  --kit-warning: #fbbf24;
+  --kit-warning-subtle: rgba(245, 158, 11, 0.14);
+  --kit-warning-border: rgba(251, 191, 36, 0.38);
+
+  --kit-danger: #f87171;
+  --kit-danger-subtle: rgba(239, 68, 68, 0.14);
+  --kit-danger-border: rgba(248, 113, 113, 0.38);
 }
 
-/* Shared Profile Modal Styles */
+/* Light Mode Semantic Tokens (WCAG AA >= 4.5:1 Verified) */
+.theme-light,
+[data-theme='light'] {
+  --kit-surface: var(--m3-surface, var(--bg-main, #f8fafc));
+  --kit-surface-container-low: var(
+    --m3-surface-container-low,
+    var(--bg-recessed, #f1f5f9)
+  );
+  --kit-surface-container: var(--m3-surface-container, var(--bg-card, #ffffff));
+  --kit-surface-container-high: var(
+    --m3-surface-container-high,
+    var(--bg-card-hover, #e2e8f0)
+  );
+  --kit-surface-container-highest: var(--m3-surface-container-highest, #cbd5e1);
+
+  --kit-surface-high: var(--kit-surface-container-high);
+  --kit-surface-highest: var(--kit-surface-container-highest);
+
+  --kit-on-surface: var(--m3-on-surface, var(--text-main, #0f172a));
+  --kit-on-surface-variant: var(
+    --m3-on-surface-variant,
+    var(--text-muted, #475569)
+  );
+  --kit-on-surface-muted: var(--kit-on-surface-variant);
+
+  --kit-primary: var(--m3-primary, var(--primary, #2563eb));
+  --kit-on-primary: var(--m3-on-primary, var(--on-primary, #ffffff));
+  --kit-primary-container: var(
+    --m3-primary-container,
+    var(--primary-container, #dbeafe)
+  );
+  --kit-on-primary-container: var(
+    --m3-on-primary-container,
+    var(--on-primary-container, #1e3a8a)
+  );
+
+  --kit-outline: var(--m3-outline, var(--border-strong, #64748b));
+  --kit-outline-variant: var(
+    --m3-outline-variant,
+    var(--border-color, #cbd5e1)
+  );
+
+  --kit-glass-bg: var(--glass-bg, rgba(248, 250, 252, 0.85));
+
+  /* WCAG AA Light-Mode Status Tokens */
+  --kit-success: #047857;
+  --kit-success-subtle: rgba(4, 120, 87, 0.1);
+  --kit-success-border: rgba(4, 120, 87, 0.3);
+
+  --kit-warning: #b45309;
+  --kit-warning-subtle: rgba(180, 83, 9, 0.1);
+  --kit-warning-border: rgba(180, 83, 9, 0.32);
+
+  --kit-danger: #dc2626;
+  --kit-danger-subtle: rgba(220, 38, 38, 0.09);
+  --kit-danger-border: rgba(220, 38, 38, 0.3);
+}
+
+/* Shared Interaction Utilities */
+.disable-theme-transitions,
+.disable-theme-transitions * {
+  transition: none !important;
+}
+
+.state-layer {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes kitExpressiveIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-expressive {
+  animation: kitExpressiveIn 0.24s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* Accessible Focus Rings Across Shared Kit Components */
+:where(
+  .kit-header-bar a,
+  .kit-header-bar button,
+  .kit-profile-dialog a,
+  .kit-profile-dialog button,
+  .kit-profile-dialog input,
+  .kit-profile-dialog select,
+  .kit-profile-dialog textarea,
+  .kit-public-banner a,
+  .kit-landing-container a,
+  .kit-landing-container button
+):focus-visible {
+  outline: 2px solid var(--kit-primary);
+  outline-offset: 2px;
+}
+
+/* Shared `<kit-public-banner>` Styles */
+.public-collection-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border-radius: var(--kit-radius-lg);
+  background: var(--kit-surface-container);
+  border: 1px solid var(--kit-outline-variant);
+  color: var(--kit-on-surface);
+}
+
+.public-collection-banner .public-banner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.public-collection-banner .public-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: var(--kit-radius-full);
+  background: var(--kit-primary-container);
+  color: var(--kit-on-primary-container);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.public-collection-banner h2 {
+  margin: 2px 0 0;
+  font-family: var(--kit-font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kit-on-surface);
+}
+
+.public-collection-banner .public-handle {
+  font-family: var(--kit-font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--kit-primary);
+}
+
+.public-collection-banner .public-bio {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--kit-on-surface-variant);
+  max-width: 65ch;
+}
+
+.public-collection-banner .my-dex-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--kit-radius-full);
+  background: var(--kit-primary);
+  color: var(--kit-on-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.public-collection-banner .my-dex-link:hover {
+  opacity: 0.92;
+}
+
+/* Shared `<kit-profile-modal>` Styles */
 .kit-profile-dialog {
   padding: 0;
   border: 1px solid var(--kit-outline-variant);
@@ -50,13 +269,13 @@
   color: var(--kit-on-surface);
   width: min(92vw, 480px);
   max-height: 90vh;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   margin: auto;
 }
 
 .kit-profile-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
 }
 
@@ -92,6 +311,7 @@
 
 .kit-profile-dialog .modal-header h2 {
   margin: 0;
+  font-family: var(--kit-font-heading);
   font-size: 1.15rem;
   font-weight: 700;
 }
@@ -226,7 +446,6 @@
 
 .kit-profile-dialog .text-input:focus,
 .kit-profile-dialog .select-input:focus {
-  outline: none;
   border-color: var(--kit-primary);
 }
 
@@ -280,6 +499,11 @@
   opacity: 0;
   width: 0;
   height: 0;
+}
+
+.kit-profile-dialog .sr-only-checkbox:focus-visible + .switch-track {
+  outline: 2px solid var(--kit-primary);
+  outline-offset: 2px;
 }
 
 .kit-profile-dialog .switch-track {
@@ -343,7 +567,8 @@
 
 .kit-profile-dialog .share-url {
   flex: 1;
-  font-size: 0.84rem;
+  font-family: var(--kit-font-mono);
+  font-size: 0.82rem;
   padding: 7px 10px;
   border-radius: 8px;
   background: var(--kit-surface);
@@ -459,6 +684,7 @@
 
 .kit-profile-dialog .guest-title {
   margin: 4px 0 0;
+  font-family: var(--kit-font-heading);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -477,7 +703,7 @@
   justify-content: center;
   width: 100%;
   padding: 11px 18px;
-  border-radius: 10px;
+  border-radius: 9999px;
   background: var(--kit-primary);
   color: var(--kit-on-primary);
   font-size: 0.92rem;
@@ -489,12 +715,12 @@
 .kit-profile-dialog .status-msg {
   margin: 0;
   font-size: 0.84rem;
-  font-weight: 500;
-  color: #34d399;
+  font-weight: 600;
+  color: var(--kit-success);
 }
 
 .kit-profile-dialog .status-msg.error {
-  color: #f87171;
+  color: var(--kit-danger);
 }
 
 .kit-profile-dialog .modal-footer {
@@ -518,10 +744,11 @@
   gap: 6px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #f87171;
+  color: var(--kit-danger);
   background: transparent;
   border: none;
-  padding: 0;
+  padding: 4px 6px;
+  border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
 }
@@ -532,7 +759,7 @@
 
 .kit-profile-dialog .cancel-btn {
   padding: 9px 16px;
-  border-radius: 10px;
+  border-radius: 9999px;
   border: 1px solid var(--kit-outline-variant);
   background: transparent;
   color: var(--kit-on-surface);
@@ -543,7 +770,7 @@
 
 .kit-profile-dialog .save-btn {
   padding: 9px 18px;
-  border-radius: 10px;
+  border-radius: 9999px;
   border: none;
   background: var(--kit-primary);
   color: var(--kit-on-primary);
@@ -593,5 +820,16 @@
     border-radius: 999px;
     background: var(--kit-outline);
     opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-expressive,
+  .kit-header-bar *,
+  .kit-profile-dialog *,
+  .kit-landing-container * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

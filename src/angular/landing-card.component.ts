@@ -1,11 +1,16 @@
-import { Component, ViewEncapsulation, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  input,
+  output,
+} from '@angular/core';
 
 @Component({
   selector: 'kit-landing-card',
   standalone: true,
-  imports: [CommonModule],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="landing-container kit-landing-container">
       @if (!loading()) {
@@ -16,10 +21,15 @@ import { CommonModule } from '@angular/common';
               alt=""
               aria-hidden="true"
               class="app-logo"
+              width="40"
+              height="40"
             />
           </div>
 
           <h1 class="welcome-title">{{ appName() }}</h1>
+          @if (subtitle()) {
+            <p class="welcome-subtitle">{{ subtitle() }}</p>
+          }
 
           @if (accountMissing()) {
             <div
@@ -28,11 +38,7 @@ import { CommonModule } from '@angular/common';
               data-testid="account-missing-alert"
             >
               <span class="alert-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                >
+                <svg viewBox="0 0 24 24" width="18" height="18">
                   <path
                     d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
                     fill="none"
@@ -92,29 +98,29 @@ import { CommonModule } from '@angular/common';
         align-items: center;
         justify-content: center;
         padding: 1.5rem;
-        background: var(--kit-surface, #1a1b20);
-        color: var(--kit-on-surface, #f1f5f9);
+        background: var(--kit-surface);
+        color: var(--kit-on-surface);
       }
 
       .kit-landing-container .welcome-card {
         width: 100%;
         max-width: 420px;
-        background: var(--kit-surface-container, #22232a);
-        border: 1px solid var(--kit-outline-variant, #2d3039);
+        background: var(--kit-surface-container);
+        border: 1px solid var(--kit-outline-variant);
         border-radius: 1.5rem;
         padding: 2.5rem 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
       }
 
       .kit-landing-container .logo-wrapper {
         width: 64px;
         height: 64px;
         border-radius: 1rem;
-        background: var(--kit-surface-container-high, #272930);
+        background: var(--kit-surface-container-high);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -127,10 +133,23 @@ import { CommonModule } from '@angular/common';
       }
 
       .kit-landing-container .welcome-title {
+        font-family: var(--kit-font-heading);
         font-size: 1.75rem;
         font-weight: 700;
-        margin: 0 0 2rem;
-        color: var(--kit-on-surface, #f1f5f9);
+        margin: 0 0 0.5rem;
+        color: var(--kit-on-surface);
+      }
+
+      .kit-landing-container .welcome-subtitle {
+        margin: 0 0 1.75rem;
+        font-size: 0.925rem;
+        line-height: 1.5;
+        color: var(--kit-on-surface-variant);
+      }
+
+      .kit-landing-container .welcome-title:has(+ .sign-in-btn),
+      .kit-landing-container .welcome-title:has(+ .account-missing-alert) {
+        margin-bottom: 1.75rem;
       }
 
       .kit-landing-container .account-missing-alert {
@@ -141,14 +160,14 @@ import { CommonModule } from '@angular/common';
         padding: 0.875rem 1rem;
         margin-bottom: 1.5rem;
         border-radius: 0.75rem;
-        background: rgba(245, 158, 11, 0.12);
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        color: var(--kit-on-surface, #f1f5f9);
+        background: var(--kit-warning-subtle);
+        border: 1px solid var(--kit-warning-border);
+        color: var(--kit-on-surface);
         text-align: left;
       }
 
       .kit-landing-container .alert-icon {
-        color: #f59e0b;
+        color: var(--kit-warning);
         flex-shrink: 0;
         margin-top: 0.125rem;
       }
@@ -162,14 +181,14 @@ import { CommonModule } from '@angular/common';
       .kit-landing-container .alert-content strong {
         font-size: 0.875rem;
         font-weight: 700;
-        color: #f59e0b;
+        color: var(--kit-warning);
       }
 
       .kit-landing-container .alert-content p {
         margin: 0;
         font-size: 0.8125rem;
         line-height: 1.45;
-        color: var(--kit-on-surface-variant, #94a3b8);
+        color: var(--kit-on-surface-variant);
       }
 
       .kit-landing-container .sign-in-btn {
@@ -177,8 +196,8 @@ import { CommonModule } from '@angular/common';
         padding: 0.875rem 1.5rem;
         border: none;
         border-radius: 9999px;
-        background: var(--kit-primary, #60a5fa);
-        color: var(--kit-on-primary, #0f172a);
+        background: var(--kit-primary);
+        color: var(--kit-on-primary);
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
@@ -203,6 +222,7 @@ import { CommonModule } from '@angular/common';
 })
 export class KitLandingCardComponent {
   readonly appName = input<string>('');
+  readonly subtitle = input<string>('');
   readonly logoUrl = input<string>('/favicon.svg');
   readonly accountMissing = input<boolean>(false);
   readonly accountMissingMessage = input<string>(

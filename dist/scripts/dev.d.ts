@@ -1,10 +1,11 @@
 /**
  * HYBRID DEV SERVER ORCHESTRATOR (@wesdizzle/app-kit/scripts)
  *
- * Runs optional pre-start commands (e.g., local D1 migrations or initial build)
+ * Runs optional pre-start commands (e.g., local D1 schema init or initial build)
  * and spawns parallel processes (Wrangler local Worker + Angular dev server)
- * with clean SIGINT/SIGTERM teardown.
+ * with clean process-tree SIGINT/SIGTERM teardown on Windows (`taskkill /T /F`) and POSIX.
  */
+import { ChildProcess } from 'child_process';
 export interface HybridDevProcessSpec {
     name: string;
     command: string;
@@ -20,4 +21,5 @@ export interface HybridDevConfig {
     }>;
     processes: HybridDevProcessSpec[];
 }
+export declare function terminateChildProcessTree(child: ChildProcess): void;
 export declare function runHybridDev(config: HybridDevConfig): void;

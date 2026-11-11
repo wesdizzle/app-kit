@@ -2,9 +2,46 @@ import { Injectable, signal, computed } from '@angular/core';
 import * as i0 from "@angular/core";
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
 const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
+const DEFAULT_FOCUS_RECHECK_COOLDOWN_MS = 60_000;
 const ssoCheckedInMemory = new Set();
 function getSsoAttemptStorageKey(clientId) {
     return `${SSO_ATTEMPT_KEY_PREFIX}${clientId || 'default'}`;
+}
+function hasAsciiControlChars(value) {
+    for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i);
+        if (code <= 0x1f || code === 0x7f)
+            return true;
+    }
+    return false;
+}
+export function sanitizeClientReturnToPath(raw, defaultPath = '/') {
+    if (!raw || typeof raw !== 'string')
+        return defaultPath;
+    const trimmed = raw.trim();
+    if (!trimmed.startsWith('/') ||
+        trimmed.startsWith('//') ||
+        trimmed.includes('\\') ||
+        hasAsciiControlChars(trimmed) ||
+        /^\/%5c/i.test(trimmed)) {
+        return defaultPath;
+    }
+    try {
+        const origin = typeof window !== 'undefined' && window.location?.origin
+            ? window.location.origin
+            : 'https://app.local';
+        const parsed = new URL(trimmed, origin);
+        if (parsed.origin !== origin ||
+            !parsed.pathname.startsWith('/') ||
+            parsed.pathname.startsWith('//') ||
+            parsed.pathname.includes('\\')) {
+            return defaultPath;
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+    catch {
+        return defaultPath;
+    }
 }
 export function consumeSilentSsoCallbackParam(clientId) {
     if (typeof window === 'undefined' || !window.location) {
@@ -37,8 +74,7 @@ export function shouldAttemptSilentSso(clientId) {
     }
     if (typeof window !== 'undefined' && window.location) {
         const search = window.location.search || '';
-        if (search.includes('account=missing') ||
-            search.includes('auth_error=')) {
+        if (search.includes('account=missing') || search.includes('auth_error=')) {
             return false;
         }
     }
@@ -97,17 +133,13 @@ export function getCurrentReturnToPath(defaultPath = '/') {
             const combined = (url.pathname || '/') +
                 (url.search ? url.search : '') +
                 (url.hash ? url.hash : '');
-            if (combined.startsWith('/') && !combined.startsWith('//')) {
-                return combined;
-            }
+            return sanitizeClientReturnToPath(combined, defaultPath);
         }
         catch {
             const combined = (window.location.pathname || '/') +
                 (window.location.search || '') +
                 (window.location.hash || '');
-            if (combined.startsWith('/') && !combined.startsWith('//')) {
-                return combined;
-            }
+            return sanitizeClientReturnToPath(combined, defaultPath);
         }
     }
     return defaultPath;
@@ -195,41 +227,58 @@ export class KitAuthService {
         this.username = computed(() => this.currentUser()?.username ?? null, ...(ngDevMode ? [{ debugName: "username" }] : /* istanbul ignore next */ []));
         this.displayName = computed(() => this.currentUser()?.displayName || this.currentUser()?.username || null, ...(ngDevMode ? [{ debugName: "displayName" }] : /* istanbul ignore next */ []));
         this.bio = computed(() => this.currentUser()?.bio ?? null, ...(ngDevMode ? [{ debugName: "bio" }] : /* istanbul ignore next */ []));
-        this.isPublic = computed(() => this.currentUser()?.isPublic ?? true, ...(ngDevMode ? [{ debugName: "isPublic" }] : /* istanbul ignore next */ []));
+        this.isPublic = computed(() => this.currentUser()?.isPublic ?? false, ...(ngDevMode ? [{ debugName: "isPublic" }] : /* istanbul ignore next */ []));
         this.authLoadPromise = null;
         this.lastUpstreamCheckMs = 0;
         this.sessionEpoch = 0;
+        this.cleanupCallbacks = [];
         this.authLoadPromise = this.checkSession();
         this.registerUpstreamSessionLifecycleListeners();
+    }
+    ngOnDestroy() {
+        for (const fn of this.cleanupCallbacks) {
+            fn();
+        }
+        this.cleanupCallbacks.length = 0;
     }
     registerUpstreamSessionLifecycleListeners() {
         if (typeof window === 'undefined' || typeof document === 'undefined') {
             return;
         }
-        const triggerCheck = () => {
+        const triggerCheck = (force = false) => {
             const now = Date.now();
-            if (now - this.lastUpstreamCheckMs < 2000)
+            if (!force &&
+                now - this.lastUpstreamCheckMs < DEFAULT_FOCUS_RECHECK_COOLDOWN_MS) {
                 return;
+            }
             void this.checkSession();
         };
         if (typeof document.addEventListener === 'function') {
-            document.addEventListener('visibilitychange', () => {
+            const onVisibilityChange = () => {
                 if (document.visibilityState === 'hidden') {
                     ssoCheckedInMemory.clear();
                 }
                 else if (document.visibilityState === 'visible') {
-                    triggerCheck();
+                    triggerCheck(false);
                 }
-            });
+            };
+            document.addEventListener('visibilitychange', onVisibilityChange);
+            this.cleanupCallbacks.push(() => document.removeEventListener('visibilitychange', onVisibilityChange));
         }
         if (typeof window.addEventListener === 'function') {
-            window.addEventListener('focus', () => {
-                triggerCheck();
-            });
-            window.addEventListener('pageshow', (event) => {
+            const onFocus = () => {
+                triggerCheck(false);
+            };
+            const onPageShow = (event) => {
                 if (event.persisted) {
-                    triggerCheck();
+                    triggerCheck(true);
                 }
+            };
+            window.addEventListener('focus', onFocus);
+            window.addEventListener('pageshow', onPageShow);
+            this.cleanupCallbacks.push(() => {
+                window.removeEventListener('focus', onFocus);
+                window.removeEventListener('pageshow', onPageShow);
             });
         }
     }
@@ -284,16 +333,14 @@ export class KitAuthService {
                 clearSilentSsoAttempt(this.oidcClientId());
                 this.isAutoSigningIn.set(false);
                 const u = data.user;
-                const fallbackUsername = u.username ||
-                    (u.email ? u.email.split('@')[0] : 'trainer') ||
-                    'trainer';
+                const fallbackUsername = u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
                 this.currentUser.set({
                     ...u,
                     id: typeof u.id === 'number' ? u.id : 1,
                     email: u.email ?? null,
                     username: fallbackUsername,
-                    role: u.role === 'user' ? 'user' : 'admin',
-                    isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : true,
+                    role: u.role === 'admin' ? 'admin' : 'user',
+                    isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : false,
                     displayName: u.displayName ?? fallbackUsername,
                     bio: u.bio ?? null,
                 });
@@ -377,7 +424,7 @@ export class KitAuthService {
         }
         if (!status.authenticated || !status.user || !status.authorized) {
             await fetch('/api/auth/logout?silent=1', {
-                method: 'GET',
+                method: 'POST',
                 credentials: 'same-origin',
                 cache: 'no-store',
             }).catch(() => null);
@@ -394,7 +441,8 @@ export class KitAuthService {
         }
     }
     getLoginUrl(returnTo = '/', options) {
-        const base = `/api/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+        const safeReturnTo = sanitizeClientReturnToPath(returnTo, '/');
+        const base = `/api/auth/login?return_to=${encodeURIComponent(safeReturnTo)}`;
         if (options?.prompt) {
             return `${base}&prompt=${encodeURIComponent(options.prompt)}`;
         }

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   auditSqlCost,
+  diffSqliteSchema,
   extractTargetTable,
   isSecondaryIndexOrigin,
   runStaticSchemaCostGuard,
@@ -32,13 +33,16 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     }
   });
 
-  it('classifies SQLite PRAGMA index_list origins accurately', () => {
+  it('classifies SQLite PRAGMA index_list origins accurately across rowid and WITHOUT ROWID tables', () => {
     expect(isSecondaryIndexOrigin('c')).toBe(true);
     expect(isSecondaryIndexOrigin('u')).toBe(true);
-    expect(isSecondaryIndexOrigin('pk')).toBe(false);
+    // On a standard rowid table, a TEXT/composite PRIMARY KEY creates an additional autoindex B-tree
+    expect(isSecondaryIndexOrigin('pk', false)).toBe(true);
+    // On a WITHOUT ROWID table, the PRIMARY KEY B-tree IS the base table storage itself
+    expect(isSecondaryIndexOrigin('pk', true)).toBe(false);
   });
 
-  it('counts both explicit CREATE INDEX (c) and inline UNIQUE (u) constraints while excluding WITHOUT ROWID PK (pk)', () => {
+  it('counts explicit CREATE INDEX (c), inline UNIQUE (u), and rowid TEXT PKs while excluding WITHOUT ROWID PKs', () => {
     const baselinePath = createTempPath('baseline', '.db');
     const sqlPath = createTempPath('migration', '.sql');
 
@@ -102,10 +106,11 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     });
 
     expect(report.totalBillableWrites).toBe(7);
+    expect(report.hasDdlStatements).toBe(false);
     expect(report.isWithinBudget).toBe(true);
   });
 
-  it('preserves existing inline UNIQUE index counts when CREATE INDEX is executed in a migration', () => {
+  it('counts rowid TEXT PRIMARY KEY autoindex + inline UNIQUE + CREATE INDEX accurately', () => {
     const baselinePath = createTempPath('baseline_idx', '.db');
     const sqlPath = createTempPath('migration_idx', '.sql');
 
@@ -130,9 +135,13 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     );
 
     const report = auditSqlCost(sqlPath, 100, baselinePath);
-    expect(report.tableBreakdown['platforms'].secondaryIndexes).toBe(2);
-    expect(report.tableBreakdown['platforms'].multiplier).toBe(3);
-    expect(report.tableBreakdown['platforms'].billableWrites).toBe(5);
+    // platforms is a standard rowid table with id TEXT PRIMARY KEY ('pk') + name UNIQUE ('u') => K=2 before CREATE INDEX.
+    // Creating idx_platforms_name_2 ('c') populates 2 existing rows (2 writes) and increases K from 2 to 3 (multiplier = 4).
+    // Inserting 'n64' incurs 1 * 4 = 4 writes. Total = 2 + 4 = 6 writes.
+    expect(report.hasDdlStatements).toBe(true);
+    expect(report.tableBreakdown['platforms'].secondaryIndexes).toBe(3);
+    expect(report.tableBreakdown['platforms'].multiplier).toBe(4);
+    expect(report.tableBreakdown['platforms'].billableWrites).toBe(6);
   });
 
   it('accounts for 2*(1+K) write amplification on INSERT OR REPLACE of existing rows', () => {
@@ -144,7 +153,7 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
       CREATE TABLE games (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL
-      );
+      ) WITHOUT ROWID;
       CREATE INDEX idx_games_title ON games (title);
       INSERT INTO games (id, title) VALUES ('g1', 'Metroid');
     `);
@@ -159,13 +168,62 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     );
 
     const report = auditSqlCost(sqlPath, 100, baselinePath);
-    // 1 replaced row on a table with K=1 secondary index => 2 row ops (DELETE + INSERT) * (1 + 1) = 4 billable writes
     expect(report.tableBreakdown['games']).toEqual({
       rowsChanged: 2,
       secondaryIndexes: 1,
       multiplier: 2,
       billableWrites: 4,
     });
+  });
+
+  it('diffs an existing baseline database against declarative schema.sql and emits additive DDL', () => {
+    const baselinePath = createTempPath('baseline_diff', '.db');
+    const schemaPath = createTempPath('target_schema', '.sql');
+
+    const db = new Database(baselinePath);
+    db.exec(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE
+      );
+    `);
+    db.close();
+
+    fs.writeFileSync(
+      schemaPath,
+      `
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oidc_sub TEXT,
+        username TEXT NOT NULL UNIQUE,
+        is_public INTEGER NOT NULL DEFAULT 0
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_sub
+        ON users (oidc_sub)
+        WHERE oidc_sub IS NOT NULL;
+    `,
+      'utf8',
+    );
+
+    const diff = diffSqliteSchema(baselinePath, schemaPath);
+    expect(diff.inSync).toBe(false);
+    expect(diff.manualReviewWarnings).toEqual([]);
+    expect(diff.additiveSql).toEqual([
+      'ALTER TABLE "users" ADD COLUMN oidc_sub TEXT;',
+      'ALTER TABLE "users" ADD COLUMN is_public INTEGER NOT NULL DEFAULT 0;',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_sub\n        ON users (oidc_sub)\n        WHERE oidc_sub IS NOT NULL;',
+    ]);
+
+    // Applying the emitted additive SQL brings the baseline DB into full sync
+    const mutDb = new Database(baselinePath);
+    for (const sql of diff.additiveSql) {
+      mutDb.exec(sql);
+    }
+    mutDb.close();
+
+    const afterDiff = diffSqliteSchema(baselinePath, schemaPath);
+    expect(afterDiff.inSync).toBe(true);
+    expect(afterDiff.additiveSql).toEqual([]);
   });
 
   it('splits SQL statements and extracts target tables accurately even with leading comments', () => {
@@ -198,7 +256,7 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
         {
           name: 'Lookup user by username',
           sql: 'SELECT id FROM users WHERE username = ?',
-          params: ['wesley'],
+          params: ['alice'],
         },
       ],
     });

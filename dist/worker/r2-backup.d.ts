@@ -1,10 +1,12 @@
 /**
  * R2 SCHEDULED BACKUP ENGINE (@wesdizzle/app-kit/worker)
  *
- * Performs daily D1 -> R2 JSON snapshot exports with:
- * - Atomic table export verification
- * - Zero-write `skipIfUnchanged` diffing against `snapshots/latest.json`
- * - Rolling snapshot retention pruning (default 30 days)
+ * Performs daily D1 -> R2 JSON snapshot exports within Cloudflare Workers' 10ms
+ * CPU budget:
+ * - Strict SQL table identifier validation
+ * - Single-pass compact JSON serialization + native C++ WebCrypto SHA-256 hash
+ * - Zero-download `BACKUP_BUCKET.head()` `customMetadata.sha256` `skipIfUnchanged` check
+ * - Cursor-paginated rolling snapshot retention pruning (default 30 days)
  */
 export interface BackupEnv {
     DB: D1Database;

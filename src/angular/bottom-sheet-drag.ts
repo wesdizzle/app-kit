@@ -15,7 +15,9 @@ export class BottomSheetDragController {
 
   readonly dragOffsetY = signal(0);
   readonly isDragging = signal(false);
-  readonly effectiveTransformY = computed(() => Math.max(0, this.dragOffsetY()));
+  readonly effectiveTransformY = computed(() =>
+    Math.max(0, this.dragOffsetY()),
+  );
 
   constructor(private readonly dismissThresholdPx = 90) {}
 

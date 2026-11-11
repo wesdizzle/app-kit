@@ -1,11 +1,23 @@
 /**
  * HYBRID DEV SERVER ORCHESTRATOR (@wesdizzle/app-kit/scripts)
  *
- * Runs optional pre-start commands (e.g., local D1 migrations or initial build)
+ * Runs optional pre-start commands (e.g., local D1 schema init or initial build)
  * and spawns parallel processes (Wrangler local Worker + Angular dev server)
- * with clean SIGINT/SIGTERM teardown.
+ * with clean process-tree SIGINT/SIGTERM teardown on Windows (`taskkill /T /F`) and POSIX.
  */
 import { spawn, spawnSync } from 'child_process';
+export function terminateChildProcessTree(child) {
+    if (child.killed || child.exitCode !== null)
+        return;
+    if (process.platform === 'win32' && typeof child.pid === 'number') {
+        spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
+            stdio: 'ignore',
+            timeout: 5_000,
+        });
+        return;
+    }
+    child.kill('SIGTERM');
+}
 export function runHybridDev(config) {
     const cwd = config.cwd ?? process.cwd();
     if (config.banner) {
@@ -29,9 +41,7 @@ export function runHybridDev(config) {
             return;
         shuttingDown = true;
         for (const child of children) {
-            if (!child.killed) {
-                child.kill();
-            }
+            terminateChildProcessTree(child);
         }
         process.exit(code);
     };

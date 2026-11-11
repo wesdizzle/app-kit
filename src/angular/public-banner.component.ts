@@ -1,18 +1,18 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   input,
   output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'kit-public-banner',
   standalone: true,
-  imports: [CommonModule],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="public-collection-banner">
+    <div class="public-collection-banner kit-public-banner">
       <div class="public-banner-info">
         <span class="public-badge">{{ badgeLabel() }}</span>
         <h2>{{ title() }}</h2>
@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
       @if (showBackLink()) {
         <a
           [href]="backHref()"
-          class="my-dex-link"
+          class="my-dex-link state-layer"
           (click)="onBackClick($event)"
         >
           {{ backLabel() }}

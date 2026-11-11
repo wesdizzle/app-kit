@@ -1,18 +1,58 @@
 /**
  * STATELESS SESSION & OIDC RELYING PARTY AUTHENTICATION (@wesdizzle/app-kit/worker)
  *
- * Unifies the best of `living-dex/worker/auth.ts` and `collection-tracker/worker/auth.ts`:
- * - Zero-D1-read session verification via HMAC-SHA256 signed cookies (`uid`, `un`, `r`, optional `hr`)
- * - OIDC 1.0 Authorization Code Flow with PKCE (`S256`) state/nonce cookies (`redirectUri` & `returnTo`)
- * - Resilient JWKS verification (`ES256` with `derToP1363` ASN.1 DER -> IEEE P1363 conversion, `RS256`,
- *   fallback `kid` resolution, 60s refetch cooldown, 1h TTL cache, injectable `fetchFn` & `nowMs`)
- * - CSRF Origin guard exempting `/api/auth/logout` and standard security headers (`withSecurityHeaders`)
+ * Unifies stateless session verification, OIDC 1.0 Authorization Code + PKCE (`S256`),
+ * `__Host-` cookie management (with rolling legacy cookie fallback), strict URL
+ * `return_to` validation, Fetch Metadata + Origin CSRF protection, and CSP/HSTS
+ * security headers.
  */
 
+import {
+  base64UrlDecode,
+  base64UrlEncode,
+  computePkceCodeChallenge,
+  derToP1363,
+  generatePkceChallenge,
+  generateRandomBase64Url,
+  generateRandomBytes,
+  generateRandomToken,
+  getCachedHmacKey,
+  hmacSha256Bytes,
+  hmacSha256Hex,
+  resolveStrongSecret,
+  sha256Base64Url,
+  sha256Bytes,
+  sha256Hex,
+  timingSafeEqualBytes,
+  timingSafeEqualStrings,
+} from './crypto.js';
+
+export {
+  base64UrlDecode,
+  base64UrlEncode,
+  computePkceCodeChallenge,
+  derToP1363,
+  generatePkceChallenge,
+  generateRandomBase64Url,
+  generateRandomBytes,
+  generateRandomToken,
+  hmacSha256Bytes,
+  hmacSha256Hex,
+  resolveStrongSecret,
+  sha256Base64Url,
+  sha256Bytes,
+  sha256Hex,
+  timingSafeEqualBytes,
+  timingSafeEqualStrings,
+};
+
+export const HOST_SESSION_COOKIE = '__Host-app_user_session';
 export const SESSION_COOKIE = 'app_user_session';
 export const LEGACY_SESSION_COOKIE = 'living_dex_session';
 export const DEFAULT_SESSION_DAYS = 30;
 export const SESSION_TTL_SECONDS = DEFAULT_SESSION_DAYS * 24 * 60 * 60;
+
+export const HOST_OIDC_STATE_COOKIE = '__Host-app_oidc_state';
 export const OIDC_STATE_COOKIE = 'app_oidc_state';
 export const LEGACY_OIDC_STATE_COOKIE = 'oidc_login_state';
 export const OIDC_STATE_TTL_SECONDS = 600; // 10 minutes
@@ -54,6 +94,7 @@ export interface OidcIdTokenClaims {
   iat?: number;
   nbf?: number;
   nonce?: string;
+  token_use?: string;
   preferred_username?: string;
   name?: string | null;
   email?: string | null;
@@ -63,71 +104,6 @@ export interface OidcIdTokenClaims {
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-
-export function base64UrlEncode(bytes: Uint8Array): string {
-  let binary = '';
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-
-export function base64UrlDecode(input: string): Uint8Array {
-  let b64 = input.replace(/-/g, '+').replace(/_/g, '/');
-  while (b64.length % 4 !== 0) b64 += '=';
-  const binary = atob(b64);
-  const out = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
-  return out;
-}
-
-export function timingSafeEqualStrings(a: string, b: string): boolean {
-  const aBytes = encoder.encode(a);
-  const bBytes = encoder.encode(b);
-  const maxLen = Math.max(aBytes.length, bBytes.length);
-  let diff = aBytes.length ^ bBytes.length;
-  for (let i = 0; i < maxLen; i++) {
-    diff |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0);
-  }
-  return diff === 0 && aBytes.length > 0;
-}
-
-export function generateRandomBase64Url(byteLength = 32): string {
-  const bytes = new Uint8Array(byteLength);
-  crypto.getRandomValues(bytes);
-  return base64UrlEncode(bytes);
-}
-
-export const generateRandomToken = generateRandomBase64Url;
-
-export async function sha256Base64Url(input: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    'SHA-256',
-    encoder.encode(input) as unknown as BufferSource,
-  );
-  return base64UrlEncode(new Uint8Array(digest));
-}
-
-export const computePkceCodeChallenge = sha256Base64Url;
-export const generatePkceChallenge = sha256Base64Url;
-
-const hmacKeyCache = new Map<string, Promise<CryptoKey>>();
-
-function getHmacKey(secret: string): Promise<CryptoKey> {
-  let key = hmacKeyCache.get(secret);
-  if (!key) {
-    key = crypto.subtle.importKey(
-      'raw',
-      encoder.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign', 'verify'],
-    );
-    hmacKeyCache.set(secret, key);
-  }
-  return key;
-}
 
 export async function signSession(
   user: SessionUser,
@@ -146,7 +122,7 @@ export async function signSession(
   const body = base64UrlEncode(encoder.encode(JSON.stringify(payload)));
   const sig = await crypto.subtle.sign(
     'HMAC',
-    await getHmacKey(secret),
+    await getCachedHmacKey(`session:${secret}`),
     encoder.encode(body),
   );
   return `${body}.${base64UrlEncode(new Uint8Array(sig))}`;
@@ -170,12 +146,22 @@ export async function verifySession(
   }
 
   try {
-    const valid = await crypto.subtle.verify(
+    // Verify domain-separated key first, with fallback to v1 unprefixed secret
+    // so rolling upgrades preserve existing active sessions seamlessly.
+    let valid = await crypto.subtle.verify(
       'HMAC',
-      await getHmacKey(secret),
+      await getCachedHmacKey(`session:${secret}`),
       sigBytes as unknown as BufferSource,
       encoder.encode(body),
     );
+    if (!valid) {
+      valid = await crypto.subtle.verify(
+        'HMAC',
+        await getCachedHmacKey(secret),
+        sigBytes as unknown as BufferSource,
+        encoder.encode(body),
+      );
+    }
     if (!valid) return null;
 
     const payload = JSON.parse(
@@ -226,7 +212,7 @@ export async function signOidcStateCookie(
   const body = base64UrlEncode(encoder.encode(JSON.stringify(fullPayload)));
   const sig = await crypto.subtle.sign(
     'HMAC',
-    await getHmacKey(`oidc_state:${secret}`),
+    await getCachedHmacKey(`oidc_state:${secret}`),
     encoder.encode(body),
   );
   return `${body}.${base64UrlEncode(new Uint8Array(sig))}`;
@@ -254,7 +240,7 @@ export async function verifyOidcStateCookie(
   try {
     const valid = await crypto.subtle.verify(
       'HMAC',
-      await getHmacKey(`oidc_state:${secret}`),
+      await getCachedHmacKey(`oidc_state:${secret}`),
       sigBytes as unknown as BufferSource,
       encoder.encode(body),
     );
@@ -282,43 +268,6 @@ export async function verifyOidcStateCookie(
 }
 
 export const verifyOidcState = verifyOidcStateCookie;
-
-/**
- * Converts an ASN.1 DER-encoded ECDSA signature into a 64-byte IEEE P1363
- * (r || s) signature if needed, or returns the original bytes if already P1363.
- */
-export function derToP1363(sig: Uint8Array, componentLength = 32): Uint8Array {
-  if (sig.length === componentLength * 2) return sig;
-  if (sig.length < 8 || sig[0] !== 0x30) return sig;
-  let offset = 2;
-  if ((sig[1] & 0x80) !== 0) {
-    offset = 2 + (sig[1] & 0x7f);
-  }
-  if (offset + 2 > sig.length || sig[offset] !== 0x02) return sig;
-  const rLen = sig[offset + 1];
-  const rStart = offset + 2;
-  if (rStart + rLen > sig.length) return sig;
-  const rBytes = sig.slice(rStart, rStart + rLen);
-  offset = rStart + rLen;
-  if (offset + 2 > sig.length || sig[offset] !== 0x02) return sig;
-  const sLen = sig[offset + 1];
-  const sStart = offset + 2;
-  if (sStart + sLen > sig.length) return sig;
-  const sBytes = sig.slice(sStart, sStart + sLen);
-
-  const out = new Uint8Array(componentLength * 2);
-  const rTrim =
-    rBytes.length > componentLength
-      ? rBytes.slice(rBytes.length - componentLength)
-      : rBytes;
-  const sTrim =
-    sBytes.length > componentLength
-      ? sBytes.slice(sBytes.length - componentLength)
-      : sBytes;
-  out.set(rTrim, componentLength - rTrim.length);
-  out.set(sTrim, componentLength * 2 - sTrim.length);
-  return out;
-}
 
 interface CachedJwksEntry {
   alg: 'ES256' | 'RS256';
@@ -427,7 +376,8 @@ export interface VerifyOidcIdTokenOptions {
 
 /**
  * Cryptographically verifies an OIDC ID Token (ES256 or RS256) against the
- * provider's `.well-known/jwks.json` endpoint and validates standard OIDC claims.
+ * provider's `.well-known/jwks.json` endpoint and validates standard OIDC claims,
+ * explicitly rejecting OAuth2 `at+jwt` / `token_use: "access"` tokens.
  */
 export async function verifyOidcIdToken(
   idToken: string | null | undefined,
@@ -442,8 +392,15 @@ export async function verifyOidcIdToken(
     const header = JSON.parse(decoder.decode(base64UrlDecode(headerB64))) as {
       alg?: string;
       kid?: string;
+      typ?: string;
     };
     if (header.alg !== 'ES256' && header.alg !== 'RS256') return null;
+    if (
+      typeof header.typ === 'string' &&
+      header.typ.toLowerCase() === 'at+jwt'
+    ) {
+      return null;
+    }
 
     const nowMs = opts.nowMs ?? Date.now();
     const normalizedIssuer = opts.issuer.trim().replace(/\/+$/, '');
@@ -484,6 +441,11 @@ export async function verifyOidcIdToken(
       return null;
     }
 
+    // Prevent RFC 9068 / OAuth2 access_token substitution into ID token verification
+    if (payload.token_use !== undefined && payload.token_use !== 'id') {
+      return null;
+    }
+
     if (payload.iss.replace(/\/+$/, '') !== normalizedIssuer) {
       return null;
     }
@@ -514,7 +476,10 @@ export async function verifyOidcIdToken(
       }
     }
 
-    return payload;
+    return {
+      ...payload,
+      email_verified: payload.email_verified === true,
+    };
   } catch {
     return null;
   }
@@ -549,51 +514,281 @@ export function isLoopbackRequest(input: Request | URL): boolean {
   }
 }
 
+export function isSecureOrigin(input: Request | URL): boolean {
+  try {
+    const url = input instanceof URL ? input : new URL(input.url);
+    return url.protocol === 'https:' && !isLoopbackRequest(url);
+  } catch {
+    return false;
+  }
+}
+
+export function getSessionCookieName(secure: boolean): string {
+  return secure ? HOST_SESSION_COOKIE : SESSION_COOKIE;
+}
+
+export function getOidcStateCookieName(secure: boolean): string {
+  return secure ? HOST_OIDC_STATE_COOKIE : OIDC_STATE_COOKIE;
+}
+
+export function readSessionCookie(
+  cookies: Record<string, string>,
+): string | null {
+  return (
+    cookies[HOST_SESSION_COOKIE] ||
+    cookies[SESSION_COOKIE] ||
+    cookies[LEGACY_SESSION_COOKIE] ||
+    null
+  );
+}
+
+export function readOidcStateCookie(
+  cookies: Record<string, string>,
+): string | null {
+  return (
+    cookies[HOST_OIDC_STATE_COOKIE] ||
+    cookies[OIDC_STATE_COOKIE] ||
+    cookies[LEGACY_OIDC_STATE_COOKIE] ||
+    null
+  );
+}
+
+export function serializeSessionCookie(
+  token: string,
+  secure: boolean,
+  maxAgeSeconds = SESSION_TTL_SECONDS,
+): string {
+  const name = getSessionCookieName(secure);
+  const parts = [
+    `${name}=${token}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${maxAgeSeconds}`,
+  ];
+  if (secure) parts.push('Secure');
+  return parts.join('; ');
+}
+
+export function serializeClearSessionCookies(secure: boolean): string[] {
+  const headers: string[] = [];
+  if (secure) {
+    headers.push(
+      `${HOST_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`,
+    );
+  }
+  const secFlag = secure ? '; Secure' : '';
+  headers.push(
+    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secFlag}`,
+    `${LEGACY_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secFlag}`,
+  );
+  return headers;
+}
+
+export function serializeOidcStateCookie(
+  token: string,
+  secure: boolean,
+  maxAgeSeconds = OIDC_STATE_TTL_SECONDS,
+): string {
+  const name = getOidcStateCookieName(secure);
+  const parts = [
+    `${name}=${token}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${maxAgeSeconds}`,
+  ];
+  if (secure) parts.push('Secure');
+  return parts.join('; ');
+}
+
+export function serializeClearOidcStateCookies(secure: boolean): string[] {
+  const headers: string[] = [];
+  if (secure) {
+    headers.push(
+      `${HOST_OIDC_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`,
+    );
+  }
+  const secFlag = secure ? '; Secure' : '';
+  headers.push(
+    `${OIDC_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secFlag}`,
+    `${LEGACY_OIDC_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secFlag}`,
+  );
+  return headers;
+}
+
+function hasAsciiControlChars(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f) return true;
+  }
+  return false;
+}
+
 /**
- * Validates that state-mutating requests (POST/PUT/DELETE) originate from the
- * same origin, while explicitly exempting `/api/auth/logout` so privacy browsers
- * sending `Origin: null` or upstream front-channel logout requests are never blocked.
+ * Strictly validates an internal post-login `return_to` path against open-redirect
+ * vectors, including WHATWG URL backslash authority normalization (`/\evil.com`),
+ * protocol-relative paths (`//evil.com`), and ASCII control characters.
+ */
+export function sanitizeReturnToPath(
+  raw: string | null | undefined,
+  baseOrigin = 'https://app.local',
+  defaultPath = '/',
+): string {
+  if (!raw || typeof raw !== 'string') return defaultPath;
+  const trimmed = raw.trim();
+  if (
+    !trimmed.startsWith('/') ||
+    trimmed.startsWith('//') ||
+    trimmed.includes('\\') ||
+    hasAsciiControlChars(trimmed) ||
+    /^\/%5c/i.test(trimmed)
+  ) {
+    return defaultPath;
+  }
+
+  try {
+    const base = new URL(baseOrigin);
+    const parsed = new URL(trimmed, base.origin);
+    if (
+      parsed.origin !== base.origin ||
+      !parsed.pathname.startsWith('/') ||
+      parsed.pathname.startsWith('//') ||
+      parsed.pathname.includes('\\')
+    ) {
+      return defaultPath;
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return defaultPath;
+  }
+}
+
+export interface SameOriginMutationOptions {
+  allowedOrigins?: readonly string[];
+}
+
+/**
+ * Validates that state-mutating requests (`POST`, `PUT`, `PATCH`, `DELETE`)
+ * originate from the exact same origin (or an explicit `allowedOrigins` list),
+ * blocking cross-site AND sibling-subdomain (`Sec-Fetch-Site: same-site`) CSRF
+ * as well as `Origin: null` sandboxed submissions.
  */
 export function isCrossOriginMutatingRequest(
   request: Request,
   url: URL,
+  options?: SameOriginMutationOptions,
 ): boolean {
+  const method = request.method.toUpperCase();
   if (
-    request.method !== 'POST' &&
-    request.method !== 'PUT' &&
-    request.method !== 'DELETE'
+    method !== 'POST' &&
+    method !== 'PUT' &&
+    method !== 'PATCH' &&
+    method !== 'DELETE'
   ) {
     return false;
   }
-  if (url.pathname === '/api/auth/logout') {
-    return false;
-  }
+
+  const allowed = new Set<string>([
+    url.origin,
+    ...(options?.allowedOrigins ?? []),
+  ]);
   const originHeader = request.headers.get('Origin');
-  return originHeader !== null && originHeader !== url.origin;
+
+  if (originHeader !== null) {
+    return !allowed.has(originHeader);
+  }
+
+  const secFetchSite = request.headers.get('Sec-Fetch-Site')?.toLowerCase();
+  if (secFetchSite === 'cross-site' || secFetchSite === 'same-site') {
+    return true;
+  }
+
+  const refererHeader = request.headers.get('Referer');
+  if (refererHeader !== null) {
+    try {
+      const refOrigin = new URL(refererHeader).origin;
+      return !allowed.has(refOrigin);
+    } catch {
+      return true;
+    }
+  }
+
+  return false;
 }
 
-const DEFAULT_HTML_CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' https: data: blob:",
-  "connect-src 'self' https:",
-  "worker-src 'self' blob:",
-  "manifest-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "frame-ancestors 'none'",
-].join('; ');
+export function validateSameOriginMutation(
+  request: Request,
+  url: URL,
+  options?: SameOriginMutationOptions,
+): boolean {
+  return !isCrossOriginMutatingRequest(request, url, options);
+}
+
+export interface CspOptions {
+  scriptSrc?: string;
+  styleSrc?: string;
+  fontSrc?: string;
+  imgSrc?: string;
+  connectSrc?: string;
+  frameSrc?: string;
+  workerSrc?: string;
+}
+
+export function buildCspHeader(options: CspOptions = {}): string {
+  const directives = [
+    "default-src 'self'",
+    `script-src ${options.scriptSrc ?? "'self'"}`,
+    `style-src ${options.styleSrc ?? "'self' 'unsafe-inline' https://fonts.googleapis.com"}`,
+    `font-src ${options.fontSrc ?? "'self' https://fonts.gstatic.com data:"}`,
+    `img-src ${options.imgSrc ?? "'self' https: data: blob:"}`,
+    `connect-src ${options.connectSrc ?? "'self' https:"}`,
+    `worker-src ${options.workerSrc ?? "'self' blob:"}`,
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+  ];
+  if (options.frameSrc) {
+    directives.push(`frame-src ${options.frameSrc}`);
+  }
+  return directives.join('; ');
+}
+
+export const DEFAULT_HTML_CSP = buildCspHeader();
+
+export const DEFAULT_PERMISSIONS_POLICY =
+  'camera=(), microphone=(), geolocation=(), payment=()';
+
+export interface SecurityHeadersOptions {
+  htmlCsp?: string;
+  includeHsts?: boolean;
+}
 
 export function withSecurityHeaders(
   response: Response,
-  htmlCsp = DEFAULT_HTML_CSP,
+  htmlCspOrOptions: string | SecurityHeadersOptions = DEFAULT_HTML_CSP,
 ): Response {
+  const opts: SecurityHeadersOptions =
+    typeof htmlCspOrOptions === 'string'
+      ? { htmlCsp: htmlCspOrOptions }
+      : htmlCspOrOptions;
+  const htmlCsp = opts.htmlCsp ?? DEFAULT_HTML_CSP;
+  const includeHsts = opts.includeHsts ?? true;
+
   const headers = new Headers(response.headers);
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('X-Frame-Options', 'DENY');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (!headers.has('Permissions-Policy')) {
+    headers.set('Permissions-Policy', DEFAULT_PERMISSIONS_POLICY);
+  }
+  if (includeHsts && !headers.has('Strict-Transport-Security')) {
+    headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains',
+    );
+  }
   const contentType = headers.get('Content-Type') || '';
   if (
     contentType.includes('text/html') &&

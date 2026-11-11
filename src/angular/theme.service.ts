@@ -1,6 +1,24 @@
-import { Injectable, OnDestroy, signal } from '@angular/core';
+import {
+  Injectable,
+  InjectionToken,
+  OnDestroy,
+  inject,
+  signal,
+} from '@angular/core';
 
 export type KitThemeMode = 'light' | 'dark' | 'auto';
+
+export interface KitThemeConfig {
+  storageKey?: string;
+  legacyKeys?: string[];
+  defaultMode?: KitThemeMode;
+  darkThemeColor?: string;
+  lightThemeColor?: string;
+}
+
+export const KIT_THEME_CONFIG = new InjectionToken<KitThemeConfig>(
+  'KIT_THEME_CONFIG',
+);
 
 @Injectable({ providedIn: 'root' })
 export class KitThemeService implements OnDestroy {
@@ -8,6 +26,9 @@ export class KitThemeService implements OnDestroy {
   readonly resolvedTheme = signal<'light' | 'dark'>('dark');
 
   private storageKey = 'app-theme';
+  private darkThemeColor = '#121214';
+  private lightThemeColor = '#f8fafc';
+
   private mediaQuery: MediaQueryList | null =
     typeof window !== 'undefined' && typeof window.matchMedia === 'function'
       ? window.matchMedia('(prefers-color-scheme: dark)')
@@ -20,6 +41,12 @@ export class KitThemeService implements OnDestroy {
   };
 
   constructor() {
+    let injectedConfig: KitThemeConfig | null;
+    try {
+      injectedConfig = inject(KIT_THEME_CONFIG, { optional: true });
+    } catch {
+      injectedConfig = null;
+    }
     if (this.mediaQuery) {
       if (typeof this.mediaQuery.addEventListener === 'function') {
         this.mediaQuery.addEventListener('change', this.mediaQueryListener);
@@ -31,15 +58,31 @@ export class KitThemeService implements OnDestroy {
         ).addListener(this.mediaQueryListener);
       }
     }
-    this.init();
+    this.init(
+      injectedConfig?.storageKey ?? 'app-theme',
+      injectedConfig?.legacyKeys ?? ['living-dex_theme', 'theme'],
+      injectedConfig?.defaultMode ?? 'auto',
+      {
+        darkThemeColor: injectedConfig?.darkThemeColor,
+        lightThemeColor: injectedConfig?.lightThemeColor,
+      },
+    );
   }
 
   init(
     storageKey = 'app-theme',
-    legacyKeys: string[] = ['living-dex_theme'],
+    legacyKeys: string[] = ['living-dex_theme', 'theme'],
     defaultMode: KitThemeMode = 'auto',
+    colors?: { darkThemeColor?: string; lightThemeColor?: string },
   ): void {
     this.storageKey = storageKey;
+    if (colors?.darkThemeColor) {
+      this.darkThemeColor = colors.darkThemeColor;
+    }
+    if (colors?.lightThemeColor) {
+      this.lightThemeColor = colors.lightThemeColor;
+    }
+
     let saved: KitThemeMode | null = null;
     if (typeof localStorage !== 'undefined') {
       try {
@@ -86,7 +129,7 @@ export class KitThemeService implements OnDestroy {
 
   toggleTheme(): KitThemeMode {
     const modes: KitThemeMode[] = ['light', 'dark', 'auto'];
-    const next = modes[(modes.indexOf(this.theme()) + 1) % modes.length];
+    const next = modes[(modes.indexOf(this.theme()) + 1) % modes.length]!;
     this.setTheme(next);
     return next;
   }
@@ -106,8 +149,8 @@ export class KitThemeService implements OnDestroy {
   applyTheme(mode: KitThemeMode): void {
     const prefersDark = Boolean(
       typeof window !== 'undefined' &&
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches,
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches,
     );
     const effective: 'light' | 'dark' =
       mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
@@ -120,6 +163,7 @@ export class KitThemeService implements OnDestroy {
       const body = document.body;
 
       root.setAttribute('data-theme', effective);
+      root.style.colorScheme = effective;
       root.classList.remove('theme-light', 'theme-dark');
       root.classList.add(effective === 'dark' ? 'theme-dark' : 'theme-light');
 
@@ -163,8 +207,8 @@ export class KitThemeService implements OnDestroy {
     effective: 'light' | 'dark',
   ): void {
     if (typeof document === 'undefined') return;
-    const darkColor = '#121214';
-    const lightColor = '#f8fafc';
+    const darkColor = this.darkThemeColor;
+    const lightColor = this.lightThemeColor;
 
     const metas = document.querySelectorAll<HTMLMetaElement>(
       'meta[name="theme-color"]',

@@ -1,5 +1,4 @@
-import { Component, ViewEncapsulation, input, output, } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, output, } from '@angular/core';
 import * as i0 from "@angular/core";
 function KitPublicBannerComponent_Conditional_8_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵdomElementStart(0, "p", 4);
@@ -41,7 +40,7 @@ export class KitPublicBannerComponent {
         this.backClicked.emit(event);
     }
     static { this.ɵfac = function KitPublicBannerComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitPublicBannerComponent)(); }; }
-    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitPublicBannerComponent, selectors: [["kit-public-banner"]], inputs: { badgeLabel: [1, "badgeLabel"], title: [1, "title"], username: [1, "username"], bio: [1, "bio"], showBackLink: [1, "showBackLink"], backHref: [1, "backHref"], backLabel: [1, "backLabel"], interceptBackClick: [1, "interceptBackClick"] }, outputs: { backClicked: "backClicked" }, decls: 10, vars: 5, consts: [[1, "public-collection-banner"], [1, "public-banner-info"], [1, "public-badge"], [1, "public-handle"], [1, "public-bio"], [1, "my-dex-link", 3, "href"], [1, "my-dex-link", 3, "click", "href"]], template: function KitPublicBannerComponent_Template(rf, ctx) { if (rf & 1) {
+    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitPublicBannerComponent, selectors: [["kit-public-banner"]], inputs: { badgeLabel: [1, "badgeLabel"], title: [1, "title"], username: [1, "username"], bio: [1, "bio"], showBackLink: [1, "showBackLink"], backHref: [1, "backHref"], backLabel: [1, "backLabel"], interceptBackClick: [1, "interceptBackClick"] }, outputs: { backClicked: "backClicked" }, decls: 10, vars: 5, consts: [[1, "public-collection-banner", "kit-public-banner"], [1, "public-banner-info"], [1, "public-badge"], [1, "public-handle"], [1, "public-bio"], [1, "my-dex-link", "state-layer", 3, "href"], [1, "my-dex-link", "state-layer", 3, "click", "href"]], template: function KitPublicBannerComponent_Template(rf, ctx) { if (rf & 1) {
             i0.ɵɵdomElementStart(0, "div", 0)(1, "div", 1)(2, "span", 2);
             i0.ɵɵtext(3);
             i0.ɵɵdomElementEnd();
@@ -66,17 +65,17 @@ export class KitPublicBannerComponent {
             i0.ɵɵconditional(ctx.bio() ? 8 : -1);
             i0.ɵɵadvance();
             i0.ɵɵconditional(ctx.showBackLink() ? 9 : -1);
-        } }, dependencies: [CommonModule], encapsulation: 2 }); }
+        } }, encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitPublicBannerComponent, [{
         type: Component,
         args: [{
                 selector: 'kit-public-banner',
                 standalone: true,
-                imports: [CommonModule],
                 encapsulation: ViewEncapsulation.None,
+                changeDetection: ChangeDetectionStrategy.OnPush,
                 template: `
-    <div class="public-collection-banner">
+    <div class="public-collection-banner kit-public-banner">
       <div class="public-banner-info">
         <span class="public-badge">{{ badgeLabel() }}</span>
         <h2>{{ title() }}</h2>
@@ -88,7 +87,7 @@ export class KitPublicBannerComponent {
       @if (showBackLink()) {
         <a
           [href]="backHref()"
-          class="my-dex-link"
+          class="my-dex-link state-layer"
           (click)="onBackClick($event)"
         >
           {{ backLabel() }}

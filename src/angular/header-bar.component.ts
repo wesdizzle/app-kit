@@ -1,11 +1,11 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
   input,
   output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { BaseUserProfile } from './auth.service.js';
 import { KitThemeMode } from './theme.service.js';
 
@@ -19,8 +19,8 @@ export interface KitHeaderTab {
 @Component({
   selector: 'kit-header-bar',
   standalone: true,
-  imports: [CommonModule],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="main-header kit-header-bar">
       <div class="header-inner">
@@ -37,9 +37,16 @@ export interface KitHeaderTab {
                 alt=""
                 aria-hidden="true"
                 class="brand-icon"
+                width="32"
+                height="32"
               />
             }
-            <span class="brand-title">{{ appName() }}</span>
+            <div class="brand-copy">
+              <span class="brand-title">{{ appName() }}</span>
+              @if (subtitle()) {
+                <span class="brand-subtitle">{{ subtitle() }}</span>
+              }
+            </div>
           </a>
         </div>
 
@@ -75,53 +82,56 @@ export interface KitHeaderTab {
           </nav>
         } @else {
           <div class="kit-header-center">
-            <ng-content select="[headerCenter]" />
+            <ng-content select="[headerCenter],[kitHeaderCenter]" />
           </div>
         }
 
         <div class="header-right">
-          <ng-content select="[headerRightStart]" />
-          <button
-            type="button"
-            class="m3-button-icon state-layer"
-            (click)="profileClicked.emit()"
-            [title]="resolvedProfileTitle()"
-            [attr.aria-label]="profileAriaLabel()"
-            [attr.data-testid]="profileTestId()"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              aria-hidden="true"
+          <ng-content select="[headerRightStart],[kitHeaderActions]" />
+
+          @if (showProfileButton()) {
+            <button
+              type="button"
+              class="m3-button-icon state-layer"
+              (click)="profileClicked.emit()"
+              [title]="resolvedProfileTitle()"
+              [attr.aria-label]="profileAriaLabel()"
+              [attr.data-testid]="profileTestId()"
             >
-              <path
-                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <circle
-                cx="12"
-                cy="7"
-                r="4"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                aria-hidden="true"
+              >
+                <path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          }
 
           <button
             type="button"
             class="m3-button-icon state-layer"
             (click)="themeToggled.emit()"
             [title]="'Theme: ' + theme()"
-            aria-label="Toggle color theme"
+            [attr.aria-label]="'Toggle color theme (current: ' + theme() + ')'"
             [attr.data-testid]="themeTestId()"
           >
             @switch (theme()) {
@@ -263,8 +273,10 @@ export interface KitHeaderTab {
         top: 0;
         z-index: 100;
         width: 100%;
-        background: var(--kit-surface, #1a1b20);
-        border-bottom: 1px solid var(--kit-outline-variant, #2d3039);
+        background: var(--kit-glass-bg, var(--kit-surface));
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid var(--kit-outline-variant);
       }
 
       .kit-header-bar .header-inner {
@@ -282,7 +294,7 @@ export interface KitHeaderTab {
       .kit-header-bar .header-right {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
         flex: 1;
       }
 
@@ -302,7 +314,7 @@ export interface KitHeaderTab {
       }
 
       .kit-header-bar .brand-link:hover {
-        background: var(--kit-surface-container, rgba(255, 255, 255, 0.05));
+        background: var(--kit-surface-container);
       }
 
       .kit-header-bar .brand-icon {
@@ -311,12 +323,26 @@ export interface KitHeaderTab {
         flex-shrink: 0;
       }
 
+      .kit-header-bar .brand-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+
       .kit-header-bar .brand-title {
-        font-size: 1.5rem;
+        font-family: var(--kit-font-heading);
+        font-size: 1.35rem;
         font-weight: 700;
-        color: var(--kit-on-surface, #f1f5f9);
+        color: var(--kit-on-surface);
         margin: 0;
         line-height: 1.1;
+      }
+
+      .kit-header-bar .brand-subtitle {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--kit-on-surface-variant);
+        letter-spacing: 0.02em;
       }
 
       .kit-header-bar .main-nav {
@@ -344,7 +370,7 @@ export interface KitHeaderTab {
         padding: 0 24px;
         height: 100%;
         position: relative;
-        color: var(--kit-on-surface-variant, #94a3b8);
+        color: var(--kit-on-surface-variant);
         transition: color 0.2s;
         cursor: pointer;
         text-decoration: none;
@@ -366,7 +392,7 @@ export interface KitHeaderTab {
         left: 24px;
         right: 24px;
         height: 3px;
-        background: var(--kit-primary, #60a5fa);
+        background: var(--kit-primary);
         border-radius: 3px 3px 0 0;
         opacity: 0;
         transform: scaleX(0.5);
@@ -374,7 +400,7 @@ export interface KitHeaderTab {
       }
 
       .kit-header-bar .nav-item.active {
-        color: var(--kit-primary, #60a5fa);
+        color: var(--kit-primary);
       }
 
       .kit-header-bar .nav-item.active .indicator {
@@ -383,7 +409,7 @@ export interface KitHeaderTab {
       }
 
       .kit-header-bar .nav-item:hover {
-        color: var(--kit-on-surface, #f1f5f9);
+        color: var(--kit-on-surface);
       }
 
       .kit-header-bar .m3-button-icon {
@@ -395,7 +421,7 @@ export interface KitHeaderTab {
         border-radius: 50%;
         border: none;
         background: transparent;
-        color: var(--kit-on-surface-variant, #94a3b8);
+        color: var(--kit-on-surface-variant);
         cursor: pointer;
         font-size: 1.25rem;
         transition:
@@ -404,12 +430,12 @@ export interface KitHeaderTab {
       }
 
       .kit-header-bar .m3-button-icon:hover {
-        background: var(--kit-surface-container-high, rgba(255, 255, 255, 0.08));
-        color: var(--kit-on-surface, #f1f5f9);
+        background: var(--kit-surface-container-high);
+        color: var(--kit-on-surface);
       }
 
       @media (max-width: 768px) {
-        .kit-header-bar .brand-title {
+        .kit-header-bar .brand-copy {
           display: none;
         }
 
@@ -419,8 +445,8 @@ export interface KitHeaderTab {
           left: 0;
           right: 0;
           height: 80px;
-          background: var(--kit-surface-container-high, #272930);
-          border-top: 1px solid var(--kit-outline-variant, #2d3039);
+          background: var(--kit-surface-container-high);
+          border-top: 1px solid var(--kit-outline-variant);
           padding-bottom: env(safe-area-inset-bottom);
           box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
           transform: none;
@@ -450,11 +476,11 @@ export interface KitHeaderTab {
         .kit-header-bar .nav-item.active .label {
           background: var(
             --m3-secondary-container,
-            var(--kit-primary-container, rgba(96, 165, 250, 0.2))
+            var(--kit-primary-container)
           );
           color: var(
             --m3-on-secondary-container,
-            var(--kit-on-primary-container, #dbeafe)
+            var(--kit-on-primary-container)
           );
         }
       }
@@ -471,6 +497,7 @@ export class KitHeaderBarComponent {
   readonly theme = input<KitThemeMode>('auto');
   readonly isAuthenticated = input<boolean>(false);
   readonly user = input<BaseUserProfile | null>(null);
+  readonly showProfileButton = input<boolean>(true);
   readonly profileTitle = input<string>('');
   readonly profileAriaLabel = input<string>('Profile and account settings');
   readonly profileTestId = input<string>('open-profile-modal-btn');

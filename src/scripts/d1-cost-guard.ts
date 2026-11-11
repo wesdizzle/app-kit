@@ -1,20 +1,25 @@
 /**
- * D1 PRE-FLIGHT COST GUARD & STATIC SCHEMA / QUERY PLAN AUDITOR (@wesdizzle/app-kit/scripts)
+ * D1 PRE-FLIGHT COST GUARD, SCHEMA DIFFER & STATIC QUERY PLAN AUDITOR (@wesdizzle/app-kit/scripts)
  *
- * Provides two complementary D1 cost protection modes:
+ * Provides three complementary D1 cost & schema protection modes:
  * 1. Pre-Flight SQL Migration Sandbox Cost Guard (`auditSqlCost`, `printCostReport`, `runWithD1CostGuard`):
- *    - Validates SQL migration files against a local clone of remote state (`data/remote_baseline.db`)
+ *    - Validates SQL delta files against a local clone of remote state (`data/remote_baseline.db`)
  *      in an isolated `os.tmpdir()` sandbox before any remote execution.
- *    - Accounts for $(1 + K)$ write amplification across both explicit `CREATE INDEX` (`origin === 'c'`)
- *      and inline `UNIQUE` constraint auto-indexes (`origin === 'u'`), while excluding `PRIMARY KEY`
- *      (`origin === 'pk'`).
+ *    - Accounts for $(1 + K)$ write amplification across explicit `CREATE INDEX` (`origin === 'c'`),
+ *      inline `UNIQUE` auto-indexes (`origin === 'u'`), and `PRIMARY KEY` auto-indexes (`origin === 'pk'`)
+ *      on standard `rowid` tables, while excluding `'pk'` on `WITHOUT ROWID` tables (where the PK B-tree
+ *      is the base table storage itself).
  *    - Accounts for `CREATE INDEX` $N$-row B-Tree population writes and increments $(1 + K)$ for
  *      subsequent statements in the same migration.
  *    - Accounts for `INSERT OR REPLACE` / `REPLACE INTO` $2 \times (1 + K)$ write amplification on
  *      replaced rows (`netInserted + replacedCount * 2`).
  *    - Runs `EXPLAIN QUERY PLAN` on every statement to block unindexed table scans on protected tables.
- * 2. Static Schema & Runtime Query Plan CI Auditor (`runStaticSchemaCostGuard`):
- *    - Applies schema migrations to an in-memory `better-sqlite3` (`:memory:`) DB during CI.
+ * 2. Declarative Schema Differ (`diffSqliteSchema`):
+ *    - Compares an R2-hydrated `data/remote_baseline.db` against `:memory:` initialized from canonical
+ *      `migrations/schema.sql` and emits minimal additive `CREATE TABLE`, `ALTER TABLE ... ADD COLUMN`,
+ *      and `CREATE INDEX` statements (plus warnings for destructive/incompatible drift).
+ * 3. Static Schema & Runtime Query Plan CI Auditor (`runStaticSchemaCostGuard`):
+ *    - Applies `migrations/schema.sql` to an in-memory `better-sqlite3` (`:memory:`) DB during CI.
  *    - Verifies per-table secondary index bounds and audits parameterized runtime queries with
  *      `EXPLAIN QUERY PLAN` to guarantee zero full-table scans.
  */
@@ -35,6 +40,7 @@ export interface TableWriteCost {
 export interface CostGuardReport {
   sqlFilePath: string;
   statementCount: number;
+  hasDdlStatements: boolean;
   totalRowsChanged: number;
   totalBillableWrites: number;
   maxAllowedWrites: number;
@@ -61,6 +67,12 @@ export interface RunWithD1CostGuardOptions {
   patchWranglerConfig?: <T>(fn: () => T) => T;
 }
 
+export interface SchemaDiffReport {
+  inSync: boolean;
+  additiveSql: string[];
+  manualReviewWarnings: string[];
+}
+
 export const DEFAULT_PROTECTED_TABLES = [
   'games',
   'toys',
@@ -75,6 +87,9 @@ export const DEFAULT_PROTECTED_TABLES = [
   'sessions',
   'oauth_clients',
   'oauth_codes',
+  'auth_codes',
+  'action_tokens',
+  'user_client_access',
   'totp_credentials',
   'passkey_credentials',
   'backup_codes',
@@ -82,16 +97,59 @@ export const DEFAULT_PROTECTED_TABLES = [
 ] as const;
 
 /**
+ * Determines whether a SQLite table was declared with `WITHOUT ROWID`.
+ */
+export function isTableWithoutRowid(
+  db: Database.Database,
+  tableName: string,
+): boolean {
+  const row = db
+    .prepare(
+      "SELECT sql FROM sqlite_master WHERE type='table' AND lower(name)=lower(?)",
+    )
+    .get(tableName) as { sql: string | null } | undefined;
+  return Boolean(row?.sql && /\bWITHOUT\s+ROWID\b/i.test(row.sql));
+}
+
+/**
  * Determines whether a SQLite `PRAGMA index_list` entry represents a secondary
  * index B-Tree that incurs an additional write per row mutation (`1 + K`).
  *
  * SQLite index `origin` codes:
  * - `'c'`: Explicit `CREATE [UNIQUE] INDEX` statement -> Secondary index (counts in K)
- * - `'u'`: Inline `UNIQUE` column or table constraint (`sqlite_autoindex_*`) -> Secondary index B-Tree on rowid tables (counts in K)
- * - `'pk'`: `PRIMARY KEY` constraint (`sqlite_autoindex_*`) -> On `WITHOUT ROWID` tables, this is the base table storage itself (already counted as the `1` in `1 + K`).
+ * - `'u'`: Inline `UNIQUE` column or table constraint (`sqlite_autoindex_*`) -> Secondary index B-Tree (counts in K)
+ * - `'pk'`: `PRIMARY KEY` auto-index (`sqlite_autoindex_*` for TEXT or composite PKs):
+ *   - On `WITHOUT ROWID` tables (`isWithoutRowid === true`), this IS the base table storage (`false`).
+ *   - On standard `rowid` tables (`isWithoutRowid === false`), this is an additional B-Tree alongside the `rowid` table (`true`).
+ *   (Note: `INTEGER PRIMARY KEY` on a `rowid` table aliases `rowid` directly and does not appear in `PRAGMA index_list`.)
  */
-export function isSecondaryIndexOrigin(origin: string): boolean {
-  return origin === 'c' || origin === 'u';
+export function isSecondaryIndexOrigin(
+  origin: string,
+  isWithoutRowid = false,
+): boolean {
+  if (origin === 'c' || origin === 'u') {
+    return true;
+  }
+  if (origin === 'pk') {
+    return !isWithoutRowid;
+  }
+  return false;
+}
+
+function countTableSecondaryIndexes(
+  db: Database.Database,
+  tableName: string,
+): number {
+  const withoutRowid = isTableWithoutRowid(db, tableName);
+  const indexes = db
+    .prepare(`PRAGMA index_list("${tableName.replace(/"/g, '""')}")`)
+    .all() as {
+    name: string;
+    origin: string;
+  }[];
+  return indexes.filter((idx) =>
+    isSecondaryIndexOrigin(idx.origin, withoutRowid),
+  ).length;
 }
 
 function getSecondaryIndexMap(db: Database.Database): Record<string, number> {
@@ -103,16 +161,7 @@ function getSecondaryIndexMap(db: Database.Database): Record<string, number> {
 
   const indexMap: Record<string, number> = {};
   for (const t of tables) {
-    const indexes = db
-      .prepare(`PRAGMA index_list("${t.name.replace(/"/g, '""')}")`)
-      .all() as {
-      name: string;
-      origin: string;
-    }[];
-    const secondaryCount = indexes.filter((idx) =>
-      isSecondaryIndexOrigin(idx.origin),
-    ).length;
-    indexMap[t.name.toLowerCase()] = secondaryCount;
+    indexMap[t.name.toLowerCase()] = countTableSecondaryIndexes(db, t.name);
   }
   return indexMap;
 }
@@ -239,9 +288,7 @@ export function extractTargetTable(stmt: string): string | null {
   );
   if (insertMatch) return insertMatch[1].toLowerCase();
 
-  const replaceMatch = cleaned.match(
-    /^REPLACE\s+INTO\s+["`[]?(\w+)["`\]]?/i,
-  );
+  const replaceMatch = cleaned.match(/^REPLACE\s+INTO\s+["`[]?(\w+)["`\]]?/i);
   if (replaceMatch) return replaceMatch[1].toLowerCase();
 
   const updateMatch = cleaned.match(
@@ -249,9 +296,7 @@ export function extractTargetTable(stmt: string): string | null {
   );
   if (updateMatch) return updateMatch[1].toLowerCase();
 
-  const deleteMatch = cleaned.match(
-    /^DELETE\s+FROM\s+["`[]?(\w+)["`\]]?/i,
-  );
+  const deleteMatch = cleaned.match(/^DELETE\s+FROM\s+["`[]?(\w+)["`\]]?/i);
   if (deleteMatch) return deleteMatch[1].toLowerCase();
 
   const createIndexMatch = cleaned.match(
@@ -264,6 +309,10 @@ export function extractTargetTable(stmt: string): string | null {
 
 export function isCreateIndexStatement(stmt: string): boolean {
   return /^CREATE\s+(?:UNIQUE\s+)?INDEX\b/i.test(stripLeadingSqlComments(stmt));
+}
+
+export function isDdlStatement(stmt: string): boolean {
+  return /^(?:CREATE|ALTER|DROP)\s+/i.test(stripLeadingSqlComments(stmt));
 }
 
 export function isInsertOrReplaceStatement(stmt: string): boolean {
@@ -318,6 +367,7 @@ export function auditSqlCost(
     const indexMap = getSecondaryIndexMap(db);
     const rawSql = fs.readFileSync(sqlFilePath, 'utf8');
     const statements = splitSqlStatements(rawSql);
+    const hasDdlStatements = statements.some((s) => isDdlStatement(s));
 
     const tableBreakdown: Record<string, TableWriteCost> = {};
     const unindexedScans: { statementPreview: string; planDetail: string }[] =
@@ -341,9 +391,9 @@ export function auditSqlCost(
       }
 
       try {
-        const planRows = db
-          .prepare(`EXPLAIN QUERY PLAN ${stmt}`)
-          .all() as { detail: string }[];
+        const planRows = db.prepare(`EXPLAIN QUERY PLAN ${stmt}`).all() as {
+          detail: string;
+        }[];
         for (const row of planRows) {
           if (
             scanRegex.test(row.detail) &&
@@ -379,27 +429,18 @@ export function auditSqlCost(
 
         const targetTable = extractTargetTable(stmt);
 
+        // Refresh index map if CREATE TABLE was executed
+        if (/^CREATE\s+TABLE\b/i.test(upper)) {
+          db.exec(stmt);
+          Object.assign(indexMap, getSecondaryIndexMap(db));
+          continue;
+        }
+
         // Handle CREATE INDEX write amplification (populates 1 B-tree entry per existing row in table)
         if (targetTable && isCreateIndexStatement(stmt)) {
-          const indexesBefore = db
-            .prepare(
-              `PRAGMA index_list("${targetTable.replace(/"/g, '""')}")`,
-            )
-            .all() as { name: string; origin: string }[];
-          const secBefore = indexesBefore.filter((idx) =>
-            isSecondaryIndexOrigin(idx.origin),
-          ).length;
-
+          const secBefore = countTableSecondaryIndexes(db, targetTable);
           db.exec(stmt);
-
-          const indexesAfter = db
-            .prepare(
-              `PRAGMA index_list("${targetTable.replace(/"/g, '""')}")`,
-            )
-            .all() as { name: string; origin: string }[];
-          const secAfter = indexesAfter.filter((idx) =>
-            isSecondaryIndexOrigin(idx.origin),
-          ).length;
+          const secAfter = countTableSecondaryIndexes(db, targetTable);
 
           if (secAfter > secBefore) {
             indexMap[targetTable] = secAfter;
@@ -448,7 +489,10 @@ export function auditSqlCost(
         if (targetTable) {
           const changes = (changesStmt.get() as { c: number }).c;
           if (changes > 0) {
-            const k = indexMap[targetTable] ?? 0;
+            const k =
+              indexMap[targetTable] ??
+              countTableSecondaryIndexes(db, targetTable);
+            indexMap[targetTable] = k;
             const multiplier = 1 + k;
 
             // INSERT OR REPLACE on an existing row performs a DELETE + INSERT (2x write amplification)
@@ -490,6 +534,7 @@ export function auditSqlCost(
     return {
       sqlFilePath,
       statementCount: statements.length,
+      hasDdlStatements,
       totalRowsChanged,
       totalBillableWrites,
       maxAllowedWrites,
@@ -519,6 +564,9 @@ export function printCostReport(report: CostGuardReport): void {
   console.log('======================================================');
   console.log(` SQL File           : ${path.basename(report.sqlFilePath)}`);
   console.log(` Statements         : ${report.statementCount}`);
+  console.log(
+    ` DDL Statements     : ${report.hasDdlStatements ? 'yes' : 'no'}`,
+  );
   console.log(` Total Rows Changed : ${report.totalRowsChanged}`);
   console.log(
     ` Est. D1 Writes     : ${report.totalBillableWrites} (Budget: ${report.maxAllowedWrites})`,
@@ -527,7 +575,11 @@ export function printCostReport(report: CostGuardReport): void {
 
   const tables = Object.entries(report.tableBreakdown);
   if (tables.length === 0) {
-    console.log(' No rows modified (0 billable writes — no-op delta!).');
+    console.log(
+      report.hasDdlStatements
+        ? ' Pure DDL schema delta (0 row data writes).'
+        : ' No rows modified (0 billable writes — no-op delta!).',
+    );
   } else {
     for (const [table, stats] of tables) {
       console.log(
@@ -553,12 +605,14 @@ export function printCostReport(report: CostGuardReport): void {
  * Executes a SQL file remotely via `wrangler d1 execute --remote` ONLY if:
  * 1. It passes the Pre-Flight Cost Guard (`totalBillableWrites <= maxWrites` and 0 unindexed scans).
  * 2. `executeRemote` (`--confirm`) is explicitly enabled.
- * 3. `totalBillableWrites > 0` (skips remote execution if 0 rows changed).
+ * 3. `totalBillableWrites > 0` OR `hasDdlStatements === true` (skips pure DML no-ops).
  *
  * Upon successful remote execution, applies the exact same SQL to `data/remote_baseline.db`
  * so the local clone stays in lockstep with remote D1 without needing a remote read pull.
  */
-export function runWithD1CostGuard(options: RunWithD1CostGuardOptions): CostGuardReport {
+export function runWithD1CostGuard(
+  options: RunWithD1CostGuardOptions,
+): CostGuardReport {
   const maxWrites = options.maxWrites ?? 5000;
   const executeRemote = options.executeRemote ?? false;
   const remoteDbName = options.remoteDbName ?? 'collection_db';
@@ -587,9 +641,9 @@ export function runWithD1CostGuard(options: RunWithD1CostGuardOptions): CostGuar
     );
   }
 
-  if (report.totalBillableWrites === 0) {
+  if (report.totalBillableWrites === 0 && !report.hasDdlStatements) {
     console.log(
-      '[CostGuard] ✅ 0 rows changed against remote baseline. Skipping remote D1 execution entirely!',
+      '[CostGuard] ✅ 0 rows changed against remote baseline and no DDL statements present. Skipping remote D1 execution entirely!',
     );
     return report;
   }
@@ -623,10 +677,7 @@ export function runWithD1CostGuard(options: RunWithD1CostGuardOptions): CostGuar
   for (const stmt of allStatements) {
     const stmtWithSemi = `${stmt};`;
     const byteLen = Buffer.byteLength(stmtWithSemi, 'utf8');
-    if (
-      currentBatch.length > 0 &&
-      currentBytes + byteLen > MAX_BATCH_BYTES
-    ) {
+    if (currentBatch.length > 0 && currentBytes + byteLen > MAX_BATCH_BYTES) {
       batches.push(currentBatch);
       currentBatch = [];
       currentBytes = 0;
@@ -729,6 +780,316 @@ export function runWithD1CostGuard(options: RunWithD1CostGuardOptions): CostGuar
   return report;
 }
 
+interface TableInfoRow {
+  cid: number;
+  name: string;
+  type: string;
+  notnull: number;
+  dflt_value: string | null;
+  pk: number;
+}
+
+function extractColumnClausesFromCreateTable(
+  createTableSql: string,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  const openIdx = createTableSql.indexOf('(');
+  if (openIdx === -1) return map;
+
+  let depth = 0;
+  let closeIdx = -1;
+  let inSingle = false;
+  let inDouble = false;
+
+  for (let i = openIdx; i < createTableSql.length; i++) {
+    const ch = createTableSql[i];
+    if (ch === "'" && !inDouble) {
+      if (inSingle && createTableSql[i + 1] === "'") {
+        i++;
+        continue;
+      }
+      inSingle = !inSingle;
+    } else if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+    } else if (!inSingle && !inDouble) {
+      if (ch === '(') depth++;
+      else if (ch === ')') {
+        depth--;
+        if (depth === 0) {
+          closeIdx = i;
+          break;
+        }
+      }
+    }
+  }
+
+  if (closeIdx === -1) return map;
+  const body = createTableSql.slice(openIdx + 1, closeIdx);
+  const parts: string[] = [];
+  let current = '';
+  depth = 0;
+  inSingle = false;
+  inDouble = false;
+
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    const next = body[i + 1];
+    if (!inSingle && !inDouble && ch === '-' && next === '-') {
+      const nl = body.indexOf('\n', i);
+      if (nl === -1) break;
+      i = nl;
+      continue;
+    }
+    if (ch === "'" && !inDouble) {
+      if (inSingle && next === "'") {
+        current += "''";
+        i++;
+        continue;
+      }
+      inSingle = !inSingle;
+      current += ch;
+      continue;
+    }
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+      current += ch;
+      continue;
+    }
+    if (!inSingle && !inDouble) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      else if (ch === ',' && depth === 0) {
+        if (current.trim()) parts.push(current.trim());
+        current = '';
+        continue;
+      }
+    }
+    current += ch;
+  }
+  if (current.trim()) parts.push(current.trim());
+
+  const constraintKeywords = new Set([
+    'PRIMARY',
+    'UNIQUE',
+    'CHECK',
+    'FOREIGN',
+    'CONSTRAINT',
+  ]);
+
+  for (const part of parts) {
+    const cleaned = stripLeadingSqlComments(part).trim();
+    if (!cleaned) continue;
+    const match = cleaned.match(
+      /^(?:"([^"]+)"|`([^`]+)`|\[([^\]]+)\]|(\w+))\b/,
+    );
+    if (!match) continue;
+    const ident = match[1] ?? match[2] ?? match[3] ?? match[4];
+    const isQuoted = Boolean(match[1] ?? match[2] ?? match[3]);
+    if (!isQuoted && constraintKeywords.has(ident.toUpperCase())) {
+      continue;
+    }
+    map.set(ident.toLowerCase(), cleaned.replace(/\s+/g, ' '));
+  }
+
+  return map;
+}
+
+function normalizeCreateStatementIfNotExists(sql: string): string {
+  const trimmed = sql.trim().replace(/;+\s*$/, '');
+  if (/^CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS\b)/i.test(trimmed)) {
+    return `${trimmed.replace(/^CREATE\s+TABLE\s+/i, 'CREATE TABLE IF NOT EXISTS ')};`;
+  }
+  if (/^CREATE\s+(UNIQUE\s+)?INDEX\s+(?!IF\s+NOT\s+EXISTS\b)/i.test(trimmed)) {
+    return `${trimmed.replace(
+      /^CREATE\s+(UNIQUE\s+)?INDEX\s+/i,
+      (_m, u) => `CREATE ${u ?? ''}INDEX IF NOT EXISTS `,
+    )};`;
+  }
+  return `${trimmed};`;
+}
+
+/**
+ * Compares an existing SQLite baseline database (e.g., `data/remote_baseline.db`)
+ * against the canonical declarative schema (`migrations/schema.sql`) loaded in `:memory:`.
+ *
+ * Emits minimal additive SQL statements (`CREATE TABLE IF NOT EXISTS`,
+ * `ALTER TABLE ... ADD COLUMN`, `CREATE [UNIQUE] INDEX IF NOT EXISTS`) and flags any
+ * non-additive differences (dropped columns, type/PK changes, WITHOUT ROWID changes)
+ * for manual review.
+ */
+export function diffSqliteSchema(
+  baselineDbPath: string,
+  schemaSqlPaths: string | readonly string[],
+): SchemaDiffReport {
+  if (!fs.existsSync(baselineDbPath)) {
+    throw new Error(
+      `[SchemaDiff] Baseline database not found at ${baselineDbPath}`,
+    );
+  }
+  const paths =
+    typeof schemaSqlPaths === 'string' ? [schemaSqlPaths] : schemaSqlPaths;
+
+  const targetDb = new Database(':memory:');
+  const baseDb = new Database(baselineDbPath, { readonly: true });
+
+  const additiveSql: string[] = [];
+  const manualReviewWarnings: string[] = [];
+
+  try {
+    for (const p of paths) {
+      if (!fs.existsSync(p)) {
+        throw new Error(`[SchemaDiff] Schema SQL file not found: ${p}`);
+      }
+      targetDb.exec(fs.readFileSync(p, 'utf8'));
+    }
+
+    const tableQuery =
+      "SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' AND name != 'd1_migrations' ORDER BY name";
+    const targetTables = targetDb.prepare(tableQuery).all() as Array<{
+      name: string;
+      sql: string;
+    }>;
+    const baseTables = baseDb.prepare(tableQuery).all() as Array<{
+      name: string;
+      sql: string;
+    }>;
+
+    const baseTableMap = new Map(
+      baseTables.map((t) => [t.name.toLowerCase(), t]),
+    );
+    const targetTableMap = new Map(
+      targetTables.map((t) => [t.name.toLowerCase(), t]),
+    );
+
+    for (const baseTable of baseTables) {
+      if (!targetTableMap.has(baseTable.name.toLowerCase())) {
+        manualReviewWarnings.push(
+          `Baseline has extra table '${baseTable.name}' not present in target schema.`,
+        );
+      }
+    }
+
+    for (const targetTable of targetTables) {
+      const key = targetTable.name.toLowerCase();
+      const existing = baseTableMap.get(key);
+      if (!existing) {
+        additiveSql.push(normalizeCreateStatementIfNotExists(targetTable.sql));
+        continue;
+      }
+
+      const targetWithoutRowid = /\bWITHOUT\s+ROWID\b/i.test(targetTable.sql);
+      const baseWithoutRowid = /\bWITHOUT\s+ROWID\b/i.test(existing.sql);
+      if (targetWithoutRowid !== baseWithoutRowid) {
+        manualReviewWarnings.push(
+          `Table '${targetTable.name}' WITHOUT ROWID mismatch (baseline=${baseWithoutRowid}, target=${targetWithoutRowid}).`,
+        );
+      }
+
+      const targetCols = targetDb
+        .prepare(`PRAGMA table_info("${targetTable.name.replace(/"/g, '""')}")`)
+        .all() as TableInfoRow[];
+      const baseCols = baseDb
+        .prepare(`PRAGMA table_info("${existing.name.replace(/"/g, '""')}")`)
+        .all() as TableInfoRow[];
+
+      const baseColMap = new Map(
+        baseCols.map((c) => [c.name.toLowerCase(), c]),
+      );
+      const targetColMap = new Map(
+        targetCols.map((c) => [c.name.toLowerCase(), c]),
+      );
+      const clauseMap = extractColumnClausesFromCreateTable(targetTable.sql);
+
+      for (const bCol of baseCols) {
+        if (!targetColMap.has(bCol.name.toLowerCase())) {
+          manualReviewWarnings.push(
+            `Table '${targetTable.name}' has legacy column '${bCol.name}' in baseline that is absent from target schema.`,
+          );
+        }
+      }
+
+      for (const tCol of targetCols) {
+        const bCol = baseColMap.get(tCol.name.toLowerCase());
+        if (!bCol) {
+          if (tCol.pk > 0) {
+            manualReviewWarnings.push(
+              `Table '${targetTable.name}' adds PRIMARY KEY column '${tCol.name}', which SQLite ALTER TABLE ADD COLUMN cannot apply.`,
+            );
+            continue;
+          }
+          const rawClause = clauseMap.get(tCol.name.toLowerCase());
+          const fallbackDef = [
+            `"${tCol.name.replace(/"/g, '""')}"`,
+            tCol.type || 'TEXT',
+            tCol.notnull ? 'NOT NULL' : '',
+            tCol.dflt_value !== null ? `DEFAULT ${tCol.dflt_value}` : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          const colDef = rawClause ?? fallbackDef;
+          additiveSql.push(
+            `ALTER TABLE "${targetTable.name.replace(/"/g, '""')}" ADD COLUMN ${colDef};`,
+          );
+          continue;
+        }
+
+        if (
+          tCol.type.toUpperCase() !== bCol.type.toUpperCase() ||
+          tCol.pk !== bCol.pk ||
+          tCol.notnull !== bCol.notnull
+        ) {
+          manualReviewWarnings.push(
+            `Column '${targetTable.name}.${tCol.name}' definition differs between baseline (${bCol.type}, notnull=${bCol.notnull}, pk=${bCol.pk}) and target (${tCol.type}, notnull=${tCol.notnull}, pk=${tCol.pk}).`,
+          );
+        }
+      }
+    }
+
+    const indexQuery =
+      "SELECT name, tbl_name, sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND name NOT LIKE 'sqlite_%' ORDER BY name";
+    const targetIndexes = targetDb.prepare(indexQuery).all() as Array<{
+      name: string;
+      tbl_name: string;
+      sql: string;
+    }>;
+    const baseIndexes = baseDb.prepare(indexQuery).all() as Array<{
+      name: string;
+      tbl_name: string;
+      sql: string;
+    }>;
+
+    const baseIdxMap = new Map(
+      baseIndexes.map((idx) => [idx.name.toLowerCase(), idx]),
+    );
+    const targetIdxMap = new Map(
+      targetIndexes.map((idx) => [idx.name.toLowerCase(), idx]),
+    );
+
+    for (const bIdx of baseIndexes) {
+      if (!targetIdxMap.has(bIdx.name.toLowerCase())) {
+        manualReviewWarnings.push(
+          `Baseline has extra explicit index '${bIdx.name}' on '${bIdx.tbl_name}' not present in target schema.`,
+        );
+      }
+    }
+
+    for (const tIdx of targetIndexes) {
+      if (!baseIdxMap.has(tIdx.name.toLowerCase())) {
+        additiveSql.push(normalizeCreateStatementIfNotExists(tIdx.sql));
+      }
+    }
+
+    return {
+      inSync: additiveSql.length === 0 && manualReviewWarnings.length === 0,
+      additiveSql,
+      manualReviewWarnings,
+    };
+  } finally {
+    targetDb.close();
+    baseDb.close();
+  }
+}
+
 export interface StaticSchemaCostGuardConfig {
   schemaSqlPaths: string[];
   maxSecondaryIndexes: Record<string, number>;
@@ -741,9 +1102,11 @@ export interface StaticSchemaCostGuardConfig {
  * Applies schema SQL files to an in-memory `:memory:` SQLite database, enforces
  * secondary index caps (`1 + K`), and runs `EXPLAIN QUERY PLAN` on critical queries.
  */
-export function runStaticSchemaCostGuard(
-  config: StaticSchemaCostGuardConfig,
-): { passed: boolean; errors: string[]; tableSummaries: string[] } {
+export function runStaticSchemaCostGuard(config: StaticSchemaCostGuardConfig): {
+  passed: boolean;
+  errors: string[];
+  tableSummaries: string[];
+} {
   const db = new Database(':memory:');
   const errors: string[] = [];
   const tableSummaries: string[] = [];
@@ -758,6 +1121,7 @@ export function runStaticSchemaCostGuard(
     }
 
     for (const [table, maxIdx] of Object.entries(config.maxSecondaryIndexes)) {
+      const withoutRowid = isTableWithoutRowid(db, table);
       const indexes = db
         .prepare(`PRAGMA index_list("${table.replace(/"/g, '""')}")`)
         .all() as Array<{
@@ -767,7 +1131,9 @@ export function runStaticSchemaCostGuard(
       }>;
       const countedIndexes = config.countAllIndexOrigins
         ? indexes.length
-        : indexes.filter((idx) => isSecondaryIndexOrigin(idx.origin)).length;
+        : indexes.filter((idx) =>
+            isSecondaryIndexOrigin(idx.origin, withoutRowid),
+          ).length;
       const writeMultiplier = 1 + countedIndexes;
       tableSummaries.push(
         `[d1-cost-guard] Table '${table}': ${countedIndexes} index(es) -> Write amplification = ${writeMultiplier}x (1 + ${countedIndexes})`,
@@ -792,9 +1158,7 @@ export function runStaticSchemaCostGuard(
           !/USING (?:INTEGER )?PRIMARY KEY/i.test(r.detail),
       );
       if (hasFullScan) {
-        errors.push(
-          `Unindexed table SCAN detected in '${q.name}': ${details}`,
-        );
+        errors.push(`Unindexed table SCAN detected in '${q.name}': ${details}`);
       } else {
         tableSummaries.push(`[d1-cost-guard] Query '${q.name}': ${details}`);
       }

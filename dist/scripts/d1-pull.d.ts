@@ -1,8 +1,9 @@
 /**
  * ZERO-D1-READ R2 SNAPSHOT LOCAL HYDRATION UTILITY (@wesdizzle/app-kit/scripts)
  *
- * Pulls `snapshots/latest.json` from Cloudflare R2 (`0` D1 row reads) and hydrates
- * a local SQLite database (with atomic WAL-safe `.bak` backup via `await db.backup(...)`).
+ * Pulls `snapshots/latest.json` from Cloudflare R2 (`0` D1 row reads) into an isolated
+ * `os.tmpdir()` scratch file and hydrates a local SQLite database initialized from
+ * canonical `migrations/schema.sql` (with atomic WAL-safe `.bak` backup via `await db.backup(...)`).
  */
 export interface R2SnapshotPayload {
     timestamp?: string;
@@ -14,7 +15,7 @@ export interface D1PullFromR2Config {
     r2BucketName: string;
     r2ObjectKey?: string;
     localDbPath: string;
-    schemaSqlPaths: string[];
+    schemaSqlPaths?: readonly string[];
     tableOrder: readonly string[];
 }
 export declare function findWranglerSqliteFile(wranglerStateDir: string): string | null;

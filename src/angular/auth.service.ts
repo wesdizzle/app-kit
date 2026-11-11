@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, OnDestroy, signal, computed } from '@angular/core';
 
 export interface BaseUserProfile {
   id: number;
@@ -40,10 +40,54 @@ export interface UpstreamOidcStatusResult {
 
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
 const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
+const DEFAULT_FOCUS_RECHECK_COOLDOWN_MS = 60_000;
 const ssoCheckedInMemory = new Set<string>();
 
 function getSsoAttemptStorageKey(clientId?: string | null): string {
   return `${SSO_ATTEMPT_KEY_PREFIX}${clientId || 'default'}`;
+}
+
+function hasAsciiControlChars(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f) return true;
+  }
+  return false;
+}
+
+export function sanitizeClientReturnToPath(
+  raw: string | null | undefined,
+  defaultPath = '/',
+): string {
+  if (!raw || typeof raw !== 'string') return defaultPath;
+  const trimmed = raw.trim();
+  if (
+    !trimmed.startsWith('/') ||
+    trimmed.startsWith('//') ||
+    trimmed.includes('\\') ||
+    hasAsciiControlChars(trimmed) ||
+    /^\/%5c/i.test(trimmed)
+  ) {
+    return defaultPath;
+  }
+  try {
+    const origin =
+      typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://app.local';
+    const parsed = new URL(trimmed, origin);
+    if (
+      parsed.origin !== origin ||
+      !parsed.pathname.startsWith('/') ||
+      parsed.pathname.startsWith('//') ||
+      parsed.pathname.includes('\\')
+    ) {
+      return defaultPath;
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return defaultPath;
+  }
 }
 
 export function consumeSilentSsoCallbackParam(
@@ -82,10 +126,7 @@ export function shouldAttemptSilentSso(clientId?: string | null): boolean {
   }
   if (typeof window !== 'undefined' && window.location) {
     const search = window.location.search || '';
-    if (
-      search.includes('account=missing') ||
-      search.includes('auth_error=')
-    ) {
+    if (search.includes('account=missing') || search.includes('auth_error=')) {
       return false;
     }
   }
@@ -145,17 +186,13 @@ export function getCurrentReturnToPath(defaultPath = '/'): string {
         (url.pathname || '/') +
         (url.search ? url.search : '') +
         (url.hash ? url.hash : '');
-      if (combined.startsWith('/') && !combined.startsWith('//')) {
-        return combined;
-      }
+      return sanitizeClientReturnToPath(combined, defaultPath);
     } catch {
       const combined =
         (window.location.pathname || '/') +
         (window.location.search || '') +
         (window.location.hash || '');
-      if (combined.startsWith('/') && !combined.startsWith('//')) {
-        return combined;
-      }
+      return sanitizeClientReturnToPath(combined, defaultPath);
     }
   }
   return defaultPath;
@@ -249,7 +286,9 @@ export async function checkUpstreamOidcStatus(
 @Injectable({
   providedIn: 'root',
 })
-export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
+export class KitAuthService<
+  TUser extends BaseUserProfile = BaseUserProfile,
+> implements OnDestroy {
   readonly currentUser = signal<TUser | null>(null);
   readonly authInitialized = signal<boolean>(false);
   readonly isAutoSigningIn = signal<boolean>(false);
@@ -271,15 +310,23 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
       this.currentUser()?.displayName || this.currentUser()?.username || null,
   );
   readonly bio = computed(() => this.currentUser()?.bio ?? null);
-  readonly isPublic = computed(() => this.currentUser()?.isPublic ?? true);
+  readonly isPublic = computed(() => this.currentUser()?.isPublic ?? false);
 
   private authLoadPromise: Promise<void> | null = null;
   private lastUpstreamCheckMs = 0;
   private sessionEpoch = 0;
+  private readonly cleanupCallbacks: Array<() => void> = [];
 
   constructor() {
     this.authLoadPromise = this.checkSession();
     this.registerUpstreamSessionLifecycleListeners();
+  }
+
+  ngOnDestroy(): void {
+    for (const fn of this.cleanupCallbacks) {
+      fn();
+    }
+    this.cleanupCallbacks.length = 0;
   }
 
   private registerUpstreamSessionLifecycleListeners(): void {
@@ -287,31 +334,45 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
       return;
     }
 
-    const triggerCheck = () => {
+    const triggerCheck = (force = false) => {
       const now = Date.now();
-      if (now - this.lastUpstreamCheckMs < 2000) return;
+      if (
+        !force &&
+        now - this.lastUpstreamCheckMs < DEFAULT_FOCUS_RECHECK_COOLDOWN_MS
+      ) {
+        return;
+      }
       void this.checkSession();
     };
 
     if (typeof document.addEventListener === 'function') {
-      document.addEventListener('visibilitychange', () => {
+      const onVisibilityChange = () => {
         if (document.visibilityState === 'hidden') {
           ssoCheckedInMemory.clear();
         } else if (document.visibilityState === 'visible') {
-          triggerCheck();
+          triggerCheck(false);
         }
-      });
+      };
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      this.cleanupCallbacks.push(() =>
+        document.removeEventListener('visibilitychange', onVisibilityChange),
+      );
     }
 
     if (typeof window.addEventListener === 'function') {
-      window.addEventListener('focus', () => {
-        triggerCheck();
-      });
-
-      window.addEventListener('pageshow', (event: PageTransitionEvent) => {
+      const onFocus = () => {
+        triggerCheck(false);
+      };
+      const onPageShow = (event: PageTransitionEvent) => {
         if (event.persisted) {
-          triggerCheck();
+          triggerCheck(true);
         }
+      };
+      window.addEventListener('focus', onFocus);
+      window.addEventListener('pageshow', onPageShow);
+      this.cleanupCallbacks.push(() => {
+        window.removeEventListener('focus', onFocus);
+        window.removeEventListener('pageshow', onPageShow);
       });
     }
   }
@@ -365,16 +426,14 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
         this.isAutoSigningIn.set(false);
         const u = data.user;
         const fallbackUsername =
-          u.username ||
-          (u.email ? u.email.split('@')[0] : 'trainer') ||
-          'trainer';
+          u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
         this.currentUser.set({
           ...u,
           id: typeof u.id === 'number' ? u.id : 1,
           email: u.email ?? null,
           username: fallbackUsername,
-          role: u.role === 'user' ? 'user' : 'admin',
-          isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : true,
+          role: u.role === 'admin' ? 'admin' : 'user',
+          isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : false,
           displayName: u.displayName ?? fallbackUsername,
           bio: u.bio ?? null,
         });
@@ -463,7 +522,7 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
 
     if (!status.authenticated || !status.user || !status.authorized) {
       await fetch('/api/auth/logout?silent=1', {
-        method: 'GET',
+        method: 'POST',
         credentials: 'same-origin',
         cache: 'no-store',
       }).catch(() => null);
@@ -487,7 +546,8 @@ export class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
     returnTo = '/',
     options?: { prompt?: 'none' | 'login' | 'select_account' },
   ): string {
-    const base = `/api/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+    const safeReturnTo = sanitizeClientReturnToPath(returnTo, '/');
+    const base = `/api/auth/login?return_to=${encodeURIComponent(safeReturnTo)}`;
     if (options?.prompt) {
       return `${base}&prompt=${encodeURIComponent(options.prompt)}`;
     }

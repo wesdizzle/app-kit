@@ -32,10 +32,13 @@ export declare class KitProfileModalComponent {
     readonly signOutClicked: import("@angular/core").OutputEmitterRef<void>;
     readonly closed: import("@angular/core").OutputEmitterRef<void>;
     readonly backToProfile: import("@angular/core").OutputEmitterRef<void>;
+    private readonly copiedInternal;
+    private copyTimer;
     private readonly sheetDrag;
     readonly dragOffsetY: import("@angular/core").WritableSignal<number>;
     readonly isDragging: import("@angular/core").WritableSignal<boolean>;
     readonly effectiveTransformY: import("@angular/core").Signal<number>;
+    readonly isCopied: import("@angular/core").Signal<boolean>;
     readonly publicRelativePath: import("@angular/core").Signal<string>;
     readonly publicUrl: import("@angular/core").Signal<string>;
     constructor();

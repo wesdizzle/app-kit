@@ -5,9 +5,10 @@ import {
   KitAuthService,
   checkUpstreamOidcStatus,
   clearSilentSsoAttempt,
-  markSilentSsoAttempt,
+  sanitizeClientReturnToPath,
   shouldAttemptSilentSso,
 } from './auth.service.js';
+import { KitThemeService } from './theme.service.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -18,7 +19,6 @@ describe('@wesdizzle/app-kit/angular', () => {
     const controller = new BottomSheetDragController(90);
     const onDismiss = vi.fn();
 
-    // 1. Touch starting on a close button inside .modal-header must be ignored
     const buttonTarget = {
       closest: (sel: string) =>
         sel.includes('button') ? ({} as Element) : null,
@@ -29,7 +29,6 @@ describe('@wesdizzle/app-kit/angular', () => {
     } as unknown as TouchEvent);
     expect(controller.isDragging()).toBe(false);
 
-    // 2. Touch starting on .modal-header (non-button) starts dragging and dismisses past threshold
     const headerTarget = {
       closest: (sel: string) =>
         sel.includes('.modal-header') ? ({} as Element) : null,
@@ -52,13 +51,22 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
+  it('sanitizes client return_to paths against backslash and protocol-relative redirects', () => {
+    expect(sanitizeClientReturnToPath('/account?tab=security')).toBe(
+      '/account?tab=security',
+    );
+    expect(sanitizeClientReturnToPath('/\\evil.example.com')).toBe('/');
+    expect(sanitizeClientReturnToPath('//evil.example.com')).toBe('/');
+    expect(sanitizeClientReturnToPath('https://evil.example.com')).toBe('/');
+  });
+
   it('queries upstream /api/auth/status with client_id and evaluates authorization', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           authenticated: true,
           authorized: true,
-          user: { id: 1, username: 'wesley', role: 'admin' },
+          user: { id: 1, username: 'alice', role: 'admin' },
         }),
         { status: 200 },
       ),
@@ -79,10 +87,9 @@ describe('@wesdizzle/app-kit/angular', () => {
       reachable: true,
       authenticated: true,
       authorized: true,
-      user: { id: 1, username: 'wesley', role: 'admin' },
+      user: { id: 1, username: 'alice', role: 'admin' },
     });
 
-    // Unauthorized client access
     fetchSpy.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -99,6 +106,37 @@ describe('@wesdizzle/app-kit/angular', () => {
     );
     expect(unauthStatus.authenticated).toBe(true);
     expect(unauthStatus.authorized).toBe(false);
+  });
+
+  it('defaults missing role to fail-closed user and missing isPublic to false', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          authenticated: true,
+          user: { id: 9 },
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const service = new KitAuthService();
+    await service.ensureAuthLoaded();
+    expect(service.currentUser()?.role).toBe('user');
+    expect(service.currentUser()?.isPublic).toBe(false);
+    expect(service.currentUser()?.username).toBe('user');
+    service.ngOnDestroy();
+  });
+
+  it('supports custom theme-color configuration in KitThemeService without requiring DI context', () => {
+    const themeService = new KitThemeService();
+    themeService.init('test-theme', [], 'dark', {
+      darkThemeColor: '#131114',
+      lightThemeColor: '#fff8f6',
+    });
+    expect(themeService.theme()).toBe('dark');
+    expect(themeService.resolvedTheme()).toBe('dark');
+    expect(themeService.toggleTheme()).toBe('auto');
+    themeService.ngOnDestroy();
   });
 
   it('automatically redirects to /api/auth/login when unauthenticated locally but authenticated and authorized upstream', async () => {
@@ -127,7 +165,7 @@ describe('@wesdizzle/app-kit/angular', () => {
           JSON.stringify({
             authenticated: true,
             authorized: true,
-            user: { id: 1, username: 'wesley', role: 'admin' },
+            user: { id: 1, username: 'alice', role: 'admin' },
           }),
           { status: 200 },
         );
@@ -151,6 +189,7 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(shouldAttemptSilentSso('living-dex')).toBe(false);
     clearSilentSsoAttempt('living-dex');
     expect(shouldAttemptSilentSso('living-dex')).toBe(true);
+    service.ngOnDestroy();
     vi.unstubAllGlobals();
   });
 });

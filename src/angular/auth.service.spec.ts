@@ -1,8 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  KitAuthService,
-  clearSilentSsoAttempt,
-} from './auth.service.js';
+import { KitAuthService, clearSilentSsoAttempt } from './auth.service.js';
 
 describe('@wesdizzle/app-kit/angular KitAuthService', () => {
   beforeEach(() => {
@@ -29,6 +26,7 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
 
     expect(service.authInitialized()).toBe(true);
     expect(service.isAuthenticated()).toBe(false);
+    service.ngOnDestroy();
   });
 
   it('populates unprovisionedEmail from either unprovisionedEmail or email when provisioned is false', async () => {
@@ -48,6 +46,7 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
     expect(service.authInitialized()).toBe(true);
     expect(service.isProvisioned()).toBe(false);
     expect(service.unprovisionedEmail()).toBe('uninvited@example.com');
+    service.ngOnDestroy();
   });
 
   it('initiates top-level prompt=none redirect when upstream status reports cookiePresent: false', async () => {
@@ -94,6 +93,53 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
     expect(redirectSpy).toHaveBeenCalledWith(
       '/api/auth/login?return_to=%2F&prompt=none',
     );
+    service.ngOnDestroy();
+  });
+
+  it('issues POST /api/auth/logout?silent=1 when upstream session was revoked', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async (input) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url === '/api/auth/me') {
+          return {
+            ok: true,
+            json: async () => ({
+              authenticated: true,
+              oidcIssuer: 'https://auth.example.com',
+              oidcClientId: 'living-dex',
+              user: {
+                id: 1,
+                username: 'alice',
+                role: 'admin',
+                isPublic: false,
+              },
+            }),
+          } as Response;
+        }
+        if (url.startsWith('https://auth.example.com/api/auth/status')) {
+          return {
+            ok: true,
+            json: async () => ({
+              authenticated: false,
+              authorized: false,
+              cookiePresent: true,
+              user: null,
+            }),
+          } as Response;
+        }
+        return { ok: true, json: async () => ({}) } as Response;
+      });
+
+    const service = new KitAuthService();
+    await service.ensureAuthLoaded();
+
+    expect(service.isAuthenticated()).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/auth/logout?silent=1',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    service.ngOnDestroy();
   });
 
   it('does not falsely log out locally when upstream status reports cookiePresent: false', async () => {
@@ -110,7 +156,7 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
               oidcClientId: 'living-dex',
               user: {
                 id: 1,
-                username: 'trainer',
+                username: 'alice',
                 role: 'admin',
                 isPublic: true,
               },
@@ -139,5 +185,6 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
       '/api/auth/logout?silent=1',
       expect.anything(),
     );
+    service.ngOnDestroy();
   });
 });

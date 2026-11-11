@@ -1,3 +1,4 @@
+import { OnDestroy } from '@angular/core';
 import * as i0 from "@angular/core";
 export interface BaseUserProfile {
     id: number;
@@ -32,6 +33,7 @@ export interface UpstreamOidcStatusResult {
         role?: 'admin' | 'user';
     } | null;
 }
+export declare function sanitizeClientReturnToPath(raw: string | null | undefined, defaultPath?: string): string;
 export declare function consumeSilentSsoCallbackParam(clientId?: string | null): boolean;
 export declare function shouldAttemptSilentSso(clientId?: string | null): boolean;
 export declare function markSilentSsoAttempt(clientId?: string | null): void;
@@ -42,7 +44,7 @@ export declare function getCurrentReturnToPath(defaultPath?: string): string;
  * to check if an upstream identity session is active and authorized for `oidcClientId`.
  */
 export declare function checkUpstreamOidcStatus(oidcIssuer: string, oidcClientId?: string | null): Promise<UpstreamOidcStatusResult>;
-export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> {
+export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProfile> implements OnDestroy {
     readonly currentUser: import("@angular/core").WritableSignal<TUser | null>;
     readonly authInitialized: import("@angular/core").WritableSignal<boolean>;
     readonly isAutoSigningIn: import("@angular/core").WritableSignal<boolean>;
@@ -62,7 +64,9 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     private authLoadPromise;
     private lastUpstreamCheckMs;
     private sessionEpoch;
+    private readonly cleanupCallbacks;
     constructor();
+    ngOnDestroy(): void;
     private registerUpstreamSessionLifecycleListeners;
     ensureAuthLoaded(): Promise<void>;
     checkSession(): Promise<void>;

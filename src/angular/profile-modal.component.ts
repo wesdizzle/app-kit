@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   ViewChild,
@@ -7,8 +8,8 @@ import {
   output,
   computed,
   effect,
+  signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseUserProfile } from './auth.service.js';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
@@ -22,8 +23,9 @@ export interface ProfileSavePayload {
 @Component({
   selector: 'kit-profile-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <dialog
       #dialogEl
@@ -34,9 +36,7 @@ export interface ProfileSavePayload {
           : null
       "
       [style.transition]="
-        isDragging()
-          ? 'none'
-          : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        isDragging() ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)'
       "
       (click)="onDialogClick($event)"
       (cancel)="onDialogCancel($event)"
@@ -87,6 +87,7 @@ export interface ProfileSavePayload {
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                aria-hidden="true"
               >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -99,14 +100,16 @@ export interface ProfileSavePayload {
               @if (user(); as u) {
                 <div class="identity-banner">
                   <div class="identity-avatar">
-                    {{ (u.displayName || u.username || 'T')[0].toUpperCase() }}
+                    {{ (u.displayName || u.username || 'U')[0].toUpperCase() }}
                   </div>
                   <div class="identity-details">
                     <div class="identity-primary">
                       <span class="username-tag">&#64;{{ u.username }}</span>
                       <span class="role-badge">{{ u.role }}</span>
                     </div>
-                    <span class="identity-email">{{ u.email }}</span>
+                    @if (u.email) {
+                      <span class="identity-email">{{ u.email }}</span>
+                    }
                   </div>
                 </div>
               }
@@ -126,7 +129,8 @@ export interface ProfileSavePayload {
                   class="text-input"
                 />
                 <span class="field-hint">
-                  Shown on your public collection banner when sharing is enabled.
+                  Shown on your public collection banner when sharing is
+                  enabled.
                 </span>
               </div>
 
@@ -160,7 +164,9 @@ export interface ProfileSavePayload {
                   <input
                     id="kit-profile-is-public"
                     type="checkbox"
+                    role="switch"
                     class="sr-only-checkbox"
+                    [attr.aria-checked]="isPublic()"
                     [ngModel]="isPublic()"
                     (ngModelChange)="isPublicChange.emit($event)"
                   />
@@ -181,7 +187,7 @@ export interface ProfileSavePayload {
                       (click)="copyLink()"
                       data-testid="copy-public-url-btn"
                     >
-                      {{ copied() ? 'Copied!' : 'Copy' }}
+                      {{ isCopied() ? 'Copied!' : 'Copy' }}
                     </button>
                   </div>
                   @if (publicRelativePath()) {
@@ -189,7 +195,7 @@ export interface ProfileSavePayload {
                       class="share-open-link"
                       [href]="publicRelativePath()"
                       target="_blank"
-                      rel="noopener"
+                      rel="noopener noreferrer"
                     >
                       Open public collection page &#8599;
                     </a>
@@ -197,14 +203,38 @@ export interface ProfileSavePayload {
                 </div>
               }
 
-              <a
-                class="nav-section-btn"
-                [href]="accountHubUrl()"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="profile-account-hub-link"
-              >
-                <div class="nav-section-left">
+              @if (accountHubUrl()) {
+                <a
+                  class="nav-section-btn"
+                  [href]="accountHubUrl()"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="profile-account-hub-link"
+                >
+                  <div class="nav-section-left">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      class="nav-section-icon"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <div class="nav-section-text">
+                      <span class="nav-section-title">
+                        Account &amp; Security Hub
+                      </span>
+                      <span class="nav-section-desc">
+                        Manage password, 2FA authenticator, passkeys, and active
+                        sessions
+                      </span>
+                    </div>
+                  </div>
                   <svg
                     viewBox="0 0 24 24"
                     width="18"
@@ -212,33 +242,13 @@ export interface ProfileSavePayload {
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
-                    class="nav-section-icon"
+                    class="nav-section-chevron"
+                    aria-hidden="true"
                   >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    <polyline points="9 18 15 12 9 6" />
                   </svg>
-                  <div class="nav-section-text">
-                    <span class="nav-section-title">
-                      Account &amp; Security Hub
-                    </span>
-                    <span class="nav-section-desc">
-                      Manage password, 2FA authenticator, passkeys, and active
-                      sessions
-                    </span>
-                  </div>
-                </div>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  class="nav-section-chevron"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </a>
+                </a>
+              }
             } @else {
               <div class="guest-card" data-testid="profile-guest-view">
                 <div class="guest-icon-circle">
@@ -249,6 +259,7 @@ export interface ProfileSavePayload {
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
+                    aria-hidden="true"
                   >
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -258,7 +269,7 @@ export interface ProfileSavePayload {
                 <p class="guest-desc">{{ guestDescription() }}</p>
                 <a
                   [href]="loginUrl()"
-                  class="signin-cta-btn"
+                  class="signin-cta-btn state-layer"
                   data-testid="profile-guest-signin-btn"
                 >
                   Sign In
@@ -269,7 +280,12 @@ export interface ProfileSavePayload {
             <ng-content select="[profileExtraNav]" />
 
             @if (statusMessage()) {
-              <p class="status-msg" [class.error]="isError()">
+              <p
+                class="status-msg"
+                [class.error]="isError()"
+                [attr.role]="isError() ? 'alert' : 'status'"
+                aria-live="polite"
+              >
                 {{ statusMessage() }}
               </p>
             }
@@ -290,6 +306,7 @@ export interface ProfileSavePayload {
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  aria-hidden="true"
                 >
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                   <polyline points="16 17 21 12 16 7" />
@@ -307,7 +324,7 @@ export interface ProfileSavePayload {
                 </button>
                 <button
                   type="button"
-                  class="save-btn"
+                  class="save-btn state-layer"
                   [disabled]="saving()"
                   (click)="saveClicked.emit()"
                   data-testid="profile-save-btn"
@@ -342,7 +359,7 @@ export class KitProfileModalComponent {
   readonly user = input<BaseUserProfile | null>(null);
   readonly displayName = input<string>('');
   readonly bio = input<string>('');
-  readonly isPublic = input<boolean>(true);
+  readonly isPublic = input<boolean>(false);
   readonly saving = input<boolean>(false);
   readonly statusMessage = input<string>('');
   readonly isError = input<boolean>(false);
@@ -365,10 +382,15 @@ export class KitProfileModalComponent {
   readonly closed = output<void>();
   readonly backToProfile = output<void>();
 
+  private readonly copiedInternal = signal(false);
+  private copyTimer: ReturnType<typeof setTimeout> | null = null;
+
   private readonly sheetDrag = new BottomSheetDragController(90);
   readonly dragOffsetY = this.sheetDrag.dragOffsetY;
   readonly isDragging = this.sheetDrag.isDragging;
   readonly effectiveTransformY = this.sheetDrag.effectiveTransformY;
+
+  readonly isCopied = computed(() => this.copied() || this.copiedInternal());
 
   readonly publicRelativePath = computed(() => {
     const username = this.user()?.username;
@@ -379,8 +401,7 @@ export class KitProfileModalComponent {
   readonly publicUrl = computed(() => {
     const rel = this.publicRelativePath();
     if (!rel) return '';
-    const origin =
-      typeof window !== 'undefined' ? window.location.origin : '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     return `${origin}${rel}`;
   });
 
@@ -402,15 +423,32 @@ export class KitProfileModalComponent {
   }
 
   copyLink(): void {
+    const url = this.publicUrl();
+    if (
+      url &&
+      typeof navigator !== 'undefined' &&
+      typeof navigator.clipboard?.writeText === 'function'
+    ) {
+      void navigator.clipboard.writeText(url).then(
+        () => {
+          this.copiedInternal.set(true);
+          if (this.copyTimer) clearTimeout(this.copyTimer);
+          this.copyTimer = setTimeout(() => {
+            this.copiedInternal.set(false);
+          }, 2000);
+        },
+        () => {
+          // Fallback handled by parent if needed
+        },
+      );
+    }
     this.copyClicked.emit();
   }
 
   requestClose(): void {
     this.sheetDrag.reset();
     const dialog = this.dialogEl?.nativeElement;
-    if (dialog?.open && typeof dialog.showModal === 'function') {
-      dialog.close();
-    } else if (dialog?.open && typeof dialog.close === 'function') {
+    if (dialog?.open && typeof dialog.close === 'function') {
       dialog.close();
     }
     this.closed.emit();

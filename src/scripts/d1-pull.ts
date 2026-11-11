@@ -1,13 +1,15 @@
 /**
  * ZERO-D1-READ R2 SNAPSHOT LOCAL HYDRATION UTILITY (@wesdizzle/app-kit/scripts)
  *
- * Pulls `snapshots/latest.json` from Cloudflare R2 (`0` D1 row reads) and hydrates
- * a local SQLite database (with atomic WAL-safe `.bak` backup via `await db.backup(...)`).
+ * Pulls `snapshots/latest.json` from Cloudflare R2 (`0` D1 row reads) into an isolated
+ * `os.tmpdir()` scratch file and hydrates a local SQLite database initialized from
+ * canonical `migrations/schema.sql` (with atomic WAL-safe `.bak` backup via `await db.backup(...)`).
  */
 
 import Database from 'better-sqlite3';
 import { spawnSync } from 'child_process';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 export interface R2SnapshotPayload {
@@ -21,9 +23,11 @@ export interface D1PullFromR2Config {
   r2BucketName: string;
   r2ObjectKey?: string;
   localDbPath: string;
-  schemaSqlPaths: string[];
+  schemaSqlPaths?: readonly string[];
   tableOrder: readonly string[];
 }
+
+const SAFE_IDENTIFIER_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 export function findWranglerSqliteFile(
   wranglerStateDir: string,
@@ -76,22 +80,25 @@ export async function hydrateSqliteFromSnapshot(
     db.pragma('foreign_keys = OFF');
     const tx = db.transaction(() => {
       for (const tableName of tableOrder) {
+        if (!SAFE_IDENTIFIER_REGEX.test(tableName)) {
+          throw new Error(`Invalid SQLite table identifier: ${tableName}`);
+        }
         const rows = tables[tableName];
         if (!Array.isArray(rows)) continue;
 
-        db.prepare(`DELETE FROM "${tableName.replace(/"/g, '""')}"`).run();
+        db.prepare(`DELETE FROM "${tableName}"`).run();
         if (rows.length === 0) {
           rowCounts[tableName] = 0;
           continue;
         }
 
-        const columns = Object.keys(rows[0]);
-        const colList = columns
-          .map((c) => `"${c.replace(/"/g, '""')}"`)
-          .join(', ');
+        const columns = Object.keys(rows[0]).filter((c) =>
+          SAFE_IDENTIFIER_REGEX.test(c),
+        );
+        const colList = columns.map((c) => `"${c}"`).join(', ');
         const placeholders = columns.map(() => '?').join(', ');
         const insertStmt = db.prepare(
-          `INSERT INTO "${tableName.replace(/"/g, '""')}" (${colList}) VALUES (${placeholders})`,
+          `INSERT INTO "${tableName}" (${colList}) VALUES (${placeholders})`,
         );
 
         for (const row of rows) {
@@ -113,7 +120,13 @@ export async function runD1PullFromR2(
   config: D1PullFromR2Config,
 ): Promise<Record<string, number>> {
   const objectKey = config.r2ObjectKey ?? 'snapshots/latest.json';
-  const tempSnapshotPath = path.join(config.rootDir, '.tmp-r2-latest.json');
+  const schemaPaths = config.schemaSqlPaths ?? [
+    path.join(config.rootDir, 'migrations', 'schema.sql'),
+  ];
+  const tempSnapshotPath = path.join(
+    os.tmpdir(),
+    `_r2_snapshot_${process.pid}_${Date.now()}_${Math.random().toString(36).slice(2)}.json`,
+  );
 
   try {
     const r2Res = spawnSync(
@@ -148,7 +161,7 @@ export async function runD1PullFromR2(
 
     return await hydrateSqliteFromSnapshot(
       config.localDbPath,
-      config.schemaSqlPaths,
+      schemaPaths,
       snapshot,
       config.tableOrder,
     );
