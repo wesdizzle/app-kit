@@ -261,6 +261,10 @@
 }
 
 /* Shared `<kit-profile-modal>` Styles */
+.kit-profile-dialog:not([open]) {
+  display: none;
+}
+
 .kit-profile-dialog {
   padding: 0;
   border: 1px solid var(--kit-outline-variant);

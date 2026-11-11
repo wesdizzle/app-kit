@@ -36,7 +36,7 @@ export class KitThemeService implements OnDestroy {
 
   private readonly mediaQueryListener = (): void => {
     if (this.theme() === 'auto') {
-      this.applyTheme('auto');
+      this.applyTheme('auto', { animate: false });
     }
   };
 
@@ -110,7 +110,7 @@ export class KitThemeService implements OnDestroy {
 
     const initial = saved ?? defaultMode;
     this.theme.set(initial);
-    this.applyTheme(initial);
+    this.applyTheme(initial, { animate: false });
   }
 
   ngOnDestroy(): void {
@@ -143,10 +143,11 @@ export class KitThemeService implements OnDestroy {
         // Ignore storage errors
       }
     }
-    this.applyTheme(mode);
+    this.applyTheme(mode, { animate: true });
   }
 
-  applyTheme(mode: KitThemeMode): void {
+  applyTheme(mode: KitThemeMode, options?: { animate?: boolean }): void {
+    const animate = options?.animate ?? false;
     const prefersDark = Boolean(
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
@@ -179,7 +180,7 @@ export class KitThemeService implements OnDestroy {
       startViewTransition?: (callback: () => void) => void;
     };
 
-    if (typeof doc.startViewTransition === 'function') {
+    if (animate && typeof doc.startViewTransition === 'function') {
       doc.startViewTransition(() => {
         updateDom();
       });

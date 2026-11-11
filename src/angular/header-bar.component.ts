@@ -271,12 +271,21 @@ export interface KitHeaderTab {
       .kit-header-bar.main-header {
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 500;
         width: 100%;
+        background: transparent;
+        border-bottom: 1px solid var(--kit-outline-variant);
+      }
+
+      .kit-header-bar.main-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
         background: var(--kit-glass-bg, var(--kit-surface));
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-        border-bottom: 1px solid var(--kit-outline-variant);
+        pointer-events: none;
       }
 
       .kit-header-bar .header-inner {

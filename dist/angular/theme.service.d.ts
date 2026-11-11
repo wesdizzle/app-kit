@@ -25,7 +25,9 @@ export declare class KitThemeService implements OnDestroy {
     ngOnDestroy(): void;
     toggleTheme(): KitThemeMode;
     setTheme(mode: KitThemeMode): void;
-    applyTheme(mode: KitThemeMode): void;
+    applyTheme(mode: KitThemeMode, options?: {
+        animate?: boolean;
+    }): void;
     private updateThemeColorMeta;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitThemeService, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<KitThemeService>;

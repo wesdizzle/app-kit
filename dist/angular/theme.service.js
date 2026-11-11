@@ -13,7 +13,7 @@ export class KitThemeService {
             : null;
         this.mediaQueryListener = () => {
             if (this.theme() === 'auto') {
-                this.applyTheme('auto');
+                this.applyTheme('auto', { animate: false });
             }
         };
         let injectedConfig;
@@ -70,7 +70,7 @@ export class KitThemeService {
         }
         const initial = saved ?? defaultMode;
         this.theme.set(initial);
-        this.applyTheme(initial);
+        this.applyTheme(initial, { animate: false });
     }
     ngOnDestroy() {
         if (this.mediaQuery) {
@@ -98,9 +98,10 @@ export class KitThemeService {
                 // Ignore storage errors
             }
         }
-        this.applyTheme(mode);
+        this.applyTheme(mode, { animate: true });
     }
-    applyTheme(mode) {
+    applyTheme(mode, options) {
+        const animate = options?.animate ?? false;
         const prefersDark = Boolean(typeof window !== 'undefined' &&
             typeof window.matchMedia === 'function' &&
             window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -122,7 +123,7 @@ export class KitThemeService {
             this.updateThemeColorMeta(mode, effective);
         };
         const doc = document;
-        if (typeof doc.startViewTransition === 'function') {
+        if (animate && typeof doc.startViewTransition === 'function') {
             doc.startViewTransition(() => {
                 updateDom();
             });

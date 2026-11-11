@@ -1,4 +1,7 @@
 import '@angular/compiler';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
 import {
@@ -190,6 +193,72 @@ describe('@wesdizzle/app-kit/angular', () => {
     clearSilentSsoAttempt('living-dex');
     expect(shouldAttemptSilentSso('living-dex')).toBe(true);
     service.ngOnDestroy();
+    vi.unstubAllGlobals();
+  });
+
+  it('isolates backdrop-filter onto .kit-header-bar.main-header::before so <header> never traps position:fixed mobile nav', () => {
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const headerSource = readFileSync(
+      join(specDir, 'header-bar.component.ts'),
+      'utf8',
+    );
+    const mainHeaderRuleMatch = headerSource.match(
+      /\.kit-header-bar\.main-header\s*\{([^}]*)\}/,
+    );
+    expect(mainHeaderRuleMatch).not.toBeNull();
+    const mainHeaderBody = mainHeaderRuleMatch![1]!;
+    expect(mainHeaderBody).not.toMatch(/backdrop-filter\s*:/);
+    expect(mainHeaderBody).not.toMatch(/(?:^|[\s;])filter\s*:/);
+    expect(mainHeaderBody).not.toMatch(/transform\s*:/);
+    expect(mainHeaderBody).not.toMatch(/contain\s*:/);
+
+    const pseudoRuleMatch = headerSource.match(
+      /\.kit-header-bar\.main-header::before\s*\{([^}]*)\}/,
+    );
+    expect(pseudoRuleMatch).not.toBeNull();
+    expect(pseudoRuleMatch![1]!).toMatch(/backdrop-filter:\s*blur\(18px\)/);
+  });
+
+  it('skips document.startViewTransition during KitThemeService.init() and animates interactive setTheme()/toggleTheme()', () => {
+    const startViewTransition = vi.fn((cb: () => void) => cb());
+    const rootClassList = new Set<string>();
+    const bodyClassList = new Set<string>();
+    const rootAttrs = new Map<string, string>();
+
+    vi.stubGlobal('document', {
+      documentElement: {
+        style: { colorScheme: '' },
+        setAttribute: (k: string, v: string) => rootAttrs.set(k, v),
+        classList: {
+          add: (...cls: string[]) => cls.forEach((c) => rootClassList.add(c)),
+          remove: (...cls: string[]) =>
+            cls.forEach((c) => rootClassList.delete(c)),
+        },
+      },
+      body: {
+        offsetHeight: 0,
+        classList: {
+          add: (...cls: string[]) => cls.forEach((c) => bodyClassList.add(c)),
+          remove: (...cls: string[]) =>
+            cls.forEach((c) => bodyClassList.delete(c)),
+        },
+      },
+      querySelectorAll: () => [],
+      startViewTransition,
+    });
+
+    const themeService = new KitThemeService();
+    themeService.init('test-theme', [], 'light');
+    expect(startViewTransition).not.toHaveBeenCalled();
+    expect(rootAttrs.get('data-theme')).toBe('light');
+    expect(bodyClassList.has('theme-light')).toBe(true);
+
+    themeService.toggleTheme();
+    expect(startViewTransition).toHaveBeenCalledTimes(1);
+    expect(rootAttrs.get('data-theme')).toBe('dark');
+    expect(bodyClassList.has('theme-dark')).toBe(true);
+
+    themeService.ngOnDestroy();
     vi.unstubAllGlobals();
   });
 });
