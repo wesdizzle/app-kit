@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { KitThemeService, normalizeKitUserPreferences, notifyActiveThemeService, } from './theme.service.js';
 import * as i0 from "@angular/core";
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
 const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
@@ -191,6 +192,33 @@ export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
                 ? Boolean(data.authorized)
                 : true
             : false;
+        const rawPrefs = data.user?.preferences ?? data.preferences;
+        const normalizedPrefs = normalizeKitUserPreferences(rawPrefs);
+        const hasPrefs = Object.keys(normalizedPrefs).length > 0;
+        if (authenticated && authorized) {
+            notifyActiveThemeService({
+                issuerUrl: base,
+                clientId: oidcClientId ?? null,
+                authenticated: true,
+                preferences: normalizedPrefs,
+            });
+        }
+        else {
+            notifyActiveThemeService({
+                issuerUrl: null,
+                authenticated: false,
+            });
+        }
+        let userObj = null;
+        if (authenticated && data.user) {
+            const { preferences: rawUserPrefs, ...restUser } = data.user;
+            userObj = {
+                ...restUser,
+                ...(rawUserPrefs !== undefined || hasPrefs
+                    ? { preferences: normalizedPrefs }
+                    : {}),
+            };
+        }
         return {
             reachable: true,
             authenticated,
@@ -198,7 +226,8 @@ export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
             cookiePresent: typeof data.cookiePresent === 'boolean'
                 ? data.cookiePresent
                 : undefined,
-            user: authenticated ? (data.user ?? null) : null,
+            ...(hasPrefs ? { preferences: normalizedPrefs } : {}),
+            user: userObj,
         };
     }
     catch {
@@ -232,6 +261,12 @@ export class KitAuthService {
         this.lastUpstreamCheckMs = 0;
         this.sessionEpoch = 0;
         this.cleanupCallbacks = [];
+        try {
+            inject(KitThemeService, { optional: true });
+        }
+        catch {
+            // Ignore when constructed outside an Angular DI context in unit tests
+        }
         this.authLoadPromise = this.checkSession();
         this.registerUpstreamSessionLifecycleListeners();
     }
@@ -487,6 +522,10 @@ export class KitAuthService {
             // Ignore network errors on logout
         }
         finally {
+            notifyActiveThemeService({
+                issuerUrl: null,
+                authenticated: false,
+            });
             this.currentUser.set(null);
         }
     }

@@ -1,4 +1,5 @@
 import { OnDestroy } from '@angular/core';
+import { KitUserPreferences } from './theme.service.js';
 import * as i0 from "@angular/core";
 export interface BaseUserProfile {
     id: number;
@@ -26,11 +27,13 @@ export interface UpstreamOidcStatusResult {
     authenticated: boolean;
     authorized: boolean;
     cookiePresent?: boolean;
+    preferences?: KitUserPreferences;
     user: {
         id?: number;
         username?: string;
         displayName?: string | null;
         role?: 'admin' | 'user';
+        preferences?: KitUserPreferences;
     } | null;
 }
 export declare function sanitizeClientReturnToPath(raw: string | null | undefined, defaultPath?: string): string;

@@ -261,4 +261,165 @@ describe('@wesdizzle/app-kit/angular', () => {
     themeService.ngOnDestroy();
     vi.unstubAllGlobals();
   });
+
+  it('hydrates KitThemeService from checkUpstreamOidcStatus without echo PATCH or animation and preserves local theme when preferences are empty', async () => {
+    const storage = new Map<string, string>([['app-theme', 'light']]);
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => storage.get(k) ?? null,
+      setItem: (k: string, v: string) => storage.set(k, v),
+      removeItem: (k: string) => storage.delete(k),
+    });
+    const startViewTransition = vi.fn((cb: () => void) => cb());
+    vi.stubGlobal('document', {
+      documentElement: {
+        style: { colorScheme: '' },
+        setAttribute: () => {},
+        classList: { add: () => {}, remove: () => {} },
+      },
+      body: {
+        offsetHeight: 0,
+        classList: { add: () => {}, remove: () => {} },
+      },
+      querySelectorAll: () => [],
+      startViewTransition,
+    });
+
+    const themeService = new KitThemeService();
+    expect(themeService.theme()).toBe('light');
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      // 1. Empty preferences ({}) leaves existing local 'light' untouched
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            authenticated: true,
+            authorized: true,
+            user: {
+              id: 1,
+              username: 'alice',
+              role: 'admin',
+              preferences: {},
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      // 2. Explicit 'dark' preference updates local theme & localStorage without echo PATCH
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            authenticated: true,
+            authorized: true,
+            user: {
+              id: 1,
+              username: 'alice',
+              role: 'admin',
+              preferences: { theme: 'dark' },
+            },
+          }),
+          { status: 200 },
+        ),
+      );
+
+    await checkUpstreamOidcStatus(
+      'https://account.example.com',
+      'collection-tracker',
+    );
+    expect(themeService.theme()).toBe('light');
+    expect(storage.get('app-theme')).toBe('light');
+
+    const statusWithDark = await checkUpstreamOidcStatus(
+      'https://account.example.com',
+      'collection-tracker',
+    );
+    expect(statusWithDark.preferences).toEqual({ theme: 'dark' });
+    expect(statusWithDark.user?.preferences).toEqual({ theme: 'dark' });
+    expect(themeService.theme()).toBe('dark');
+    expect(storage.get('app-theme')).toBe('dark');
+    expect(startViewTransition).not.toHaveBeenCalled();
+    // Only the two GET /api/auth/status calls were made (zero echo PATCH)
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+
+    // Late init() on a custom storageKey preserves the synced upstream theme
+    themeService.init('living-dex_theme', [], 'auto');
+    expect(themeService.theme()).toBe('dark');
+    expect(storage.get('living-dex_theme')).toBe('dark');
+
+    themeService.ngOnDestroy();
+    vi.unstubAllGlobals();
+  });
+
+  it('coalesces rapid toggleTheme() calls into one debounced PATCH, ignores stale status snapshots while debouncing, and unbinds on 401', async () => {
+    vi.useFakeTimers();
+    try {
+      const storage = new Map<string, string>();
+      vi.stubGlobal('localStorage', {
+        getItem: (k: string) => storage.get(k) ?? null,
+        setItem: (k: string, v: string) => storage.set(k, v),
+        removeItem: (k: string) => storage.delete(k),
+      });
+
+      const themeService = new KitThemeService();
+      themeService.syncUpstreamState({
+        issuerUrl: 'https://account.example.com/',
+        clientId: 'living-dex',
+        authenticated: true,
+        preferences: { theme: 'light' },
+      });
+      expect(themeService.theme()).toBe('light');
+
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ preferences: { theme: 'auto' } }), {
+            status: 200,
+          }),
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+          }),
+        );
+
+      // Rapidly click twice: light -> dark -> auto
+      expect(themeService.toggleTheme()).toBe('dark');
+      expect(themeService.toggleTheme()).toBe('auto');
+
+      // While debounce timer is pending, a stale status snapshot ('light') must not overwrite 'auto'
+      themeService.syncUpstreamState({
+        issuerUrl: 'https://account.example.com',
+        clientId: 'living-dex',
+        authenticated: true,
+        preferences: { theme: 'light' },
+      });
+      expect(themeService.theme()).toBe('auto');
+      expect(fetchSpy).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(400);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://account.example.com/api/auth/preferences?client_id=living-dex',
+        expect.objectContaining({
+          method: 'PATCH',
+          credentials: 'include',
+          body: JSON.stringify({ theme: 'auto' }),
+        }),
+      );
+
+      // Next toggle receives 401 -> unbinds upstream sync so further toggles stay local-only
+      themeService.setTheme('dark');
+      await vi.advanceTimersByTimeAsync(400);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+
+      themeService.setTheme('light');
+      await vi.advanceTimersByTimeAsync(400);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+
+      themeService.ngOnDestroy();
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
 });

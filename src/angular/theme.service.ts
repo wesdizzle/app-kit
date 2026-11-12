@@ -8,17 +8,102 @@ import {
 
 export type KitThemeMode = 'light' | 'dark' | 'auto';
 
+export interface KitUserPreferences {
+  theme?: KitThemeMode;
+}
+
+export interface KitUpstreamThemeSyncState {
+  issuerUrl: string | null;
+  clientId?: string | null;
+  authenticated: boolean;
+  preferences?: KitUserPreferences | null;
+}
+
 export interface KitThemeConfig {
   storageKey?: string;
   legacyKeys?: string[];
   defaultMode?: KitThemeMode;
   darkThemeColor?: string;
   lightThemeColor?: string;
+  syncDebounceMs?: number;
 }
 
 export const KIT_THEME_CONFIG = new InjectionToken<KitThemeConfig>(
   'KIT_THEME_CONFIG',
 );
+
+export function isKitThemeMode(value: unknown): value is KitThemeMode {
+  return value === 'light' || value === 'dark' || value === 'auto';
+}
+
+export function normalizeKitUserPreferences(raw: unknown): KitUserPreferences {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return {};
+  }
+  const record = raw as Record<string, unknown>;
+  const out: KitUserPreferences = {};
+  if (isKitThemeMode(record['theme'])) {
+    out.theme = record['theme'];
+  }
+  return out;
+}
+
+export async function updateUpstreamPreferences(
+  oidcIssuer: string,
+  patch: KitUserPreferences,
+  clientId?: string | null,
+): Promise<{
+  ok: boolean;
+  status: number;
+  preferences: KitUserPreferences | null;
+}> {
+  if (typeof fetch !== 'function') {
+    return { ok: false, status: 0, preferences: null };
+  }
+  const normalizedPatch = normalizeKitUserPreferences(patch);
+  if (Object.keys(normalizedPatch).length === 0) {
+    return { ok: false, status: 400, preferences: null };
+  }
+  try {
+    const base = oidcIssuer.replace(/\/+$/, '');
+    const url = clientId
+      ? `${base}/api/auth/preferences?client_id=${encodeURIComponent(clientId)}`
+      : `${base}/api/auth/preferences`;
+    const res = await fetch(url, {
+      method: 'PATCH',
+      credentials: base ? 'include' : 'same-origin',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(normalizedPatch),
+    });
+    if (!res.ok) {
+      return { ok: false, status: res.status, preferences: null };
+    }
+    const data = (await res.json().catch(() => null)) as {
+      preferences?: unknown;
+    } | null;
+    return {
+      ok: true,
+      status: res.status,
+      preferences: data
+        ? normalizeKitUserPreferences(data.preferences ?? data)
+        : normalizedPatch,
+    };
+  } catch {
+    return { ok: false, status: 0, preferences: null };
+  }
+}
+
+let activeThemeService: KitThemeService | null = null;
+
+export function notifyActiveThemeService(
+  state: KitUpstreamThemeSyncState,
+): void {
+  activeThemeService?.syncUpstreamState(state);
+}
 
 @Injectable({ providedIn: 'root' })
 export class KitThemeService implements OnDestroy {
@@ -28,6 +113,14 @@ export class KitThemeService implements OnDestroy {
   private storageKey = 'app-theme';
   private darkThemeColor = '#121214';
   private lightThemeColor = '#f8fafc';
+  private syncDebounceMs = 400;
+
+  private upstreamIssuer: string | null = null;
+  private upstreamClientId: string | null = null;
+  private upstreamAuthenticated = false;
+  private lastSyncedUpstreamTheme: KitThemeMode | null = null;
+  private syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private inflightSyncCount = 0;
 
   private mediaQuery: MediaQueryList | null =
     typeof window !== 'undefined' && typeof window.matchMedia === 'function'
@@ -41,11 +134,16 @@ export class KitThemeService implements OnDestroy {
   };
 
   constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    activeThemeService = this;
     let injectedConfig: KitThemeConfig | null;
     try {
       injectedConfig = inject(KIT_THEME_CONFIG, { optional: true });
     } catch {
       injectedConfig = null;
+    }
+    if (typeof injectedConfig?.syncDebounceMs === 'number') {
+      this.syncDebounceMs = Math.max(0, injectedConfig.syncDebounceMs);
     }
     if (this.mediaQuery) {
       if (typeof this.mediaQuery.addEventListener === 'function') {
@@ -83,6 +181,13 @@ export class KitThemeService implements OnDestroy {
       this.lightThemeColor = colors.lightThemeColor;
     }
 
+    if (this.upstreamAuthenticated && this.lastSyncedUpstreamTheme) {
+      this.persistThemeToStorage(this.lastSyncedUpstreamTheme);
+      this.theme.set(this.lastSyncedUpstreamTheme);
+      this.applyTheme(this.lastSyncedUpstreamTheme, { animate: false });
+      return;
+    }
+
     let saved: KitThemeMode | null = null;
     if (typeof localStorage !== 'undefined') {
       try {
@@ -114,6 +219,10 @@ export class KitThemeService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (activeThemeService === this) {
+      activeThemeService = null;
+    }
+    this.clearPendingSyncTimer();
     if (this.mediaQuery) {
       if (typeof this.mediaQuery.removeEventListener === 'function') {
         this.mediaQuery.removeEventListener('change', this.mediaQueryListener);
@@ -127,6 +236,44 @@ export class KitThemeService implements OnDestroy {
     }
   }
 
+  /**
+   * Synchronizes the local theme service with upstream OIDC Account Server state.
+   * - Does not trigger an echo `PATCH` back to the server.
+   * - Leaves existing `localStorage` untouched when upstream `preferences.theme` is unset (`{}`).
+   * - Skips applying stale server state while a local user toggle is debouncing or in flight.
+   */
+  syncUpstreamState(state: KitUpstreamThemeSyncState): void {
+    if (!state.authenticated || state.issuerUrl === null) {
+      this.upstreamAuthenticated = false;
+      this.upstreamIssuer = null;
+      this.upstreamClientId = null;
+      this.lastSyncedUpstreamTheme = null;
+      this.clearPendingSyncTimer();
+      return;
+    }
+
+    this.upstreamAuthenticated = true;
+    this.upstreamIssuer = state.issuerUrl.replace(/\/+$/, '');
+    this.upstreamClientId = state.clientId ?? null;
+
+    // Never clobber an active local toggle that is still debouncing or in flight
+    if (this.syncDebounceTimer !== null || this.inflightSyncCount > 0) {
+      return;
+    }
+
+    const upstreamTheme = state.preferences?.theme;
+    if (!isKitThemeMode(upstreamTheme)) {
+      return;
+    }
+
+    this.lastSyncedUpstreamTheme = upstreamTheme;
+    this.persistThemeToStorage(upstreamTheme);
+    if (this.theme() !== upstreamTheme) {
+      this.theme.set(upstreamTheme);
+      this.applyTheme(upstreamTheme, { animate: false });
+    }
+  }
+
   toggleTheme(): KitThemeMode {
     const modes: KitThemeMode[] = ['light', 'dark', 'auto'];
     const next = modes[(modes.indexOf(this.theme()) + 1) % modes.length]!;
@@ -136,6 +283,12 @@ export class KitThemeService implements OnDestroy {
 
   setTheme(mode: KitThemeMode): void {
     this.theme.set(mode);
+    this.persistThemeToStorage(mode);
+    this.applyTheme(mode, { animate: true });
+    this.scheduleUpstreamThemeSync(mode);
+  }
+
+  private persistThemeToStorage(mode: KitThemeMode): void {
     if (typeof localStorage !== 'undefined') {
       try {
         localStorage.setItem(this.storageKey, mode);
@@ -143,7 +296,53 @@ export class KitThemeService implements OnDestroy {
         // Ignore storage errors
       }
     }
-    this.applyTheme(mode, { animate: true });
+  }
+
+  private clearPendingSyncTimer(): void {
+    if (this.syncDebounceTimer !== null) {
+      clearTimeout(this.syncDebounceTimer);
+      this.syncDebounceTimer = null;
+    }
+  }
+
+  private scheduleUpstreamThemeSync(mode: KitThemeMode): void {
+    if (!this.upstreamAuthenticated || this.upstreamIssuer === null) {
+      return;
+    }
+    this.lastSyncedUpstreamTheme = mode;
+    this.clearPendingSyncTimer();
+    const issuer = this.upstreamIssuer;
+    const clientId = this.upstreamClientId;
+
+    const executeSync = async (): Promise<void> => {
+      this.syncDebounceTimer = null;
+      if (!this.upstreamAuthenticated || this.upstreamIssuer === null) {
+        return;
+      }
+      this.inflightSyncCount++;
+      try {
+        const result = await updateUpstreamPreferences(
+          issuer,
+          { theme: mode },
+          clientId,
+        );
+        if (result.status === 401 || result.status === 403) {
+          this.upstreamAuthenticated = false;
+          this.upstreamIssuer = null;
+          this.upstreamClientId = null;
+        }
+      } finally {
+        this.inflightSyncCount = Math.max(0, this.inflightSyncCount - 1);
+      }
+    };
+
+    if (this.syncDebounceMs <= 0) {
+      void executeSync();
+    } else {
+      this.syncDebounceTimer = setTimeout(() => {
+        void executeSync();
+      }, this.syncDebounceMs);
+    }
   }
 
   applyTheme(mode: KitThemeMode, options?: { animate?: boolean }): void {

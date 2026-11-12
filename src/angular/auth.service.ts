@@ -1,4 +1,10 @@
-import { Injectable, OnDestroy, signal, computed } from '@angular/core';
+import { Injectable, OnDestroy, inject, signal, computed } from '@angular/core';
+import {
+  KitThemeService,
+  KitUserPreferences,
+  normalizeKitUserPreferences,
+  notifyActiveThemeService,
+} from './theme.service.js';
 
 export interface BaseUserProfile {
   id: number;
@@ -30,11 +36,13 @@ export interface UpstreamOidcStatusResult {
   authenticated: boolean;
   authorized: boolean;
   cookiePresent?: boolean;
+  preferences?: KitUserPreferences;
   user: {
     id?: number;
     username?: string;
     displayName?: string | null;
     role?: 'admin' | 'user';
+    preferences?: KitUserPreferences;
   } | null;
 }
 
@@ -239,11 +247,13 @@ export async function checkUpstreamOidcStatus(
       authenticated?: boolean;
       authorized?: boolean;
       cookiePresent?: boolean;
+      preferences?: unknown;
       user?: {
         id?: number;
         username?: string;
         displayName?: string | null;
         role?: 'admin' | 'user';
+        preferences?: unknown;
       } | null;
     } | null;
 
@@ -263,6 +273,35 @@ export async function checkUpstreamOidcStatus(
         : true
       : false;
 
+    const rawPrefs = data.user?.preferences ?? data.preferences;
+    const normalizedPrefs = normalizeKitUserPreferences(rawPrefs);
+    const hasPrefs = Object.keys(normalizedPrefs).length > 0;
+
+    if (authenticated && authorized) {
+      notifyActiveThemeService({
+        issuerUrl: base,
+        clientId: oidcClientId ?? null,
+        authenticated: true,
+        preferences: normalizedPrefs,
+      });
+    } else {
+      notifyActiveThemeService({
+        issuerUrl: null,
+        authenticated: false,
+      });
+    }
+
+    let userObj: UpstreamOidcStatusResult['user'] = null;
+    if (authenticated && data.user) {
+      const { preferences: rawUserPrefs, ...restUser } = data.user;
+      userObj = {
+        ...restUser,
+        ...(rawUserPrefs !== undefined || hasPrefs
+          ? { preferences: normalizedPrefs }
+          : {}),
+      };
+    }
+
     return {
       reachable: true,
       authenticated,
@@ -271,7 +310,8 @@ export async function checkUpstreamOidcStatus(
         typeof data.cookiePresent === 'boolean'
           ? data.cookiePresent
           : undefined,
-      user: authenticated ? (data.user ?? null) : null,
+      ...(hasPrefs ? { preferences: normalizedPrefs } : {}),
+      user: userObj,
     };
   } catch {
     return {
@@ -318,6 +358,11 @@ export class KitAuthService<
   private readonly cleanupCallbacks: Array<() => void> = [];
 
   constructor() {
+    try {
+      inject(KitThemeService, { optional: true });
+    } catch {
+      // Ignore when constructed outside an Angular DI context in unit tests
+    }
     this.authLoadPromise = this.checkSession();
     this.registerUpstreamSessionLifecycleListeners();
   }
@@ -604,6 +649,10 @@ export class KitAuthService<
     } catch {
       // Ignore network errors on logout
     } finally {
+      notifyActiveThemeService({
+        issuerUrl: null,
+        authenticated: false,
+      });
       this.currentUser.set(null);
     }
   }

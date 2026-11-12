@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v1.1.0`)
+# `@wesdizzle/app-kit` (`v1.2.0`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
 
@@ -19,7 +19,7 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - **Operational Scripts**: `runWranglerDeploy` (UUID validation, early `--put-secrets` exit, single-build coordination), `runD1PullFromR2`, `hydrateSqliteFromSnapshot`, `runHybridDev` (`taskkill /T /F` on Windows)
 - **`@wesdizzle/app-kit/angular`**:
   - `KitAuthService`, `sanitizeClientReturnToPath`, `checkUpstreamOidcStatus`
-  - `KitThemeService`, `KIT_THEME_CONFIG` (`light` / `dark` / `auto` mode with custom `theme-color` sync)
+  - `KitThemeService`, `KIT_THEME_CONFIG`, `KitUserPreferences`, `normalizeKitUserPreferences`, `updateUpstreamPreferences` (`light` / `dark` / `auto` mode with custom `theme-color` & cross-app OIDC Account Server preference sync)
   - `BottomSheetDragController`
   - `KitHeaderBarComponent` (`<kit-header-bar>`)
   - `KitProfileModalComponent` (`<kit-profile-modal>`)
