@@ -1,4 +1,5 @@
 import '@angular/compiler';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,19 @@ import {
   shouldAttemptSilentSso,
 } from './auth.service.js';
 import { KitThemeService } from './theme.service.js';
+import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
+import {
+  KitSelectComponent,
+  KitComboboxComponent,
+  KitMultiSelectComponent,
+  closeAllKitDropdowns,
+} from './filter-primitives.component.js';
+import {
+  KitFilterBarComponent,
+  DEFAULT_KIT_VIEW_MODES,
+} from './filter-bar.component.js';
+import { KitConfirmationDialogComponent } from './confirmation-dialog.component.js';
+import { KitOfflineStore, getScopedStorageKey } from './offline-store.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -421,5 +435,134 @@ describe('@wesdizzle/app-kit/angular', () => {
       vi.useRealTimers();
       vi.unstubAllGlobals();
     }
+  });
+
+  it('exports ICON_CATALOG with shared SVG definitions including view-grid, view-list, tune, search, and sort', () => {
+    expect(ICON_CATALOG['view-grid']).toBeDefined();
+    expect(ICON_CATALOG['view-list']).toBeDefined();
+    expect(ICON_CATALOG.tune).toBeDefined();
+    expect(ICON_CATALOG.search).toBeDefined();
+    expect(ICON_CATALOG.sort).toBeDefined();
+    expect(ICON_CATALOG['chevron-down']).toBeDefined();
+    expect(KitIconComponent).toBeDefined();
+  });
+
+  it('coordinates single-open dropdowns and selection logic across KitSelect, KitCombobox, and KitMultiSelect', () => {
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const select = runInInjectionContext(
+      injector,
+      () => new KitSelectComponent(),
+    );
+    expect(select.selectedLabel()).toBe('All');
+
+    select.toggle();
+    expect(select.isOpen()).toBe(true);
+
+    const combobox = runInInjectionContext(
+      injector,
+      () => new KitComboboxComponent(),
+    );
+    combobox.open();
+    expect(combobox.isOpen()).toBe(true);
+    // Opening combobox closes the select dropdown via shared activeKitDropdownId signal
+    expect(select.isOpen()).toBe(false);
+
+    const multi = runInInjectionContext(
+      injector,
+      () => new KitMultiSelectComponent(),
+    );
+    const emitted: string[][] = [];
+    multi.selectedChange.subscribe((v: string[]) => emitted.push(v));
+    multi.toggleItem('RPG');
+    expect(emitted[0]).toEqual(['RPG']);
+    multi.clearAll();
+    expect(emitted[1]).toEqual([]);
+
+    closeAllKitDropdowns();
+    expect(combobox.isOpen()).toBe(false);
+  });
+
+  it('manages search debounce, drawer toggle, quick pills, and view mode switching in KitFilterBarComponent', () => {
+    vi.useFakeTimers();
+    try {
+      const injector = {
+        get: () => ({ onDestroy: () => () => {} }),
+      } as unknown as Injector;
+      const bar = runInInjectionContext(
+        injector,
+        () => new KitFilterBarComponent(),
+      );
+      expect(bar.viewModes()).toEqual(DEFAULT_KIT_VIEW_MODES);
+
+      const searchEmitted: string[] = [];
+      bar.searchChange.subscribe((q: string) => searchEmitted.push(q));
+
+      bar.onQuickSearchInput('Pikachu');
+      expect(searchEmitted).toEqual([]);
+      vi.advanceTimersByTime(150);
+      expect(searchEmitted).toEqual(['Pikachu']);
+
+      bar.clearQuickSearch();
+      expect(bar.searchInput()).toBe('');
+      expect(searchEmitted).toEqual(['Pikachu', '']);
+
+      expect(bar.showDrawer()).toBe(false);
+      bar.showDrawer.set(true);
+      expect(bar.showDrawer()).toBe(true);
+
+      bar.ngOnDestroy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('emits confirm, confirmWithInput, and cancel events in KitConfirmationDialogComponent', () => {
+    const dialog = new KitConfirmationDialogComponent();
+    let confirmed = false;
+    let cancelled = false;
+    const inputs: (string | number)[] = [];
+
+    dialog.confirm.subscribe(() => {
+      confirmed = true;
+    });
+    dialog.cancel.subscribe(() => {
+      cancelled = true;
+    });
+    dialog.confirmWithInput.subscribe((v) => inputs.push(v));
+
+    dialog.onConfirm();
+    expect(confirmed).toBe(true);
+
+    dialog.type = 'input';
+    dialog.inputValue = 42;
+    dialog.onConfirm();
+    expect(inputs).toEqual([42]);
+
+    dialog.onOptionSelect('keep');
+    expect(inputs).toEqual([42, 'keep']);
+
+    dialog.onCancel();
+    expect(cancelled).toBe(true);
+  });
+
+  it('scopes offline storage keys by userId and falls back gracefully when IndexedDB is unavailable', async () => {
+    expect(getScopedStorageKey('user_dex_state', 7)).toBe('user_dex_state:7');
+    expect(getScopedStorageKey('user_dex_state', null)).toBe(
+      'user_dex_state:anon',
+    );
+    expect(getScopedStorageKey('user_dex_state', 0)).toBe(
+      'user_dex_state:anon',
+    );
+
+    const store = new KitOfflineStore<{ count: number }>({
+      dbName: 'test_db',
+      storeName: 'test_store',
+      keyPrefix: 'test_key',
+      requestPersistenceOnInit: false,
+    });
+    expect(store.getStorageKey(12)).toBe('test_key:12');
+    expect(await store.getStoredState(12)).toBeNull();
   });
 });

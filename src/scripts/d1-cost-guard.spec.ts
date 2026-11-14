@@ -12,6 +12,10 @@ import {
   runStaticSchemaCostGuard,
   splitSqlStatements,
 } from './d1-cost-guard.js';
+import {
+  detectWranglerDatabaseName,
+  runD1SchemaDriftCheck,
+} from './d1-schema-drift.js';
 
 describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
   const tempFiles: string[] = [];
@@ -275,5 +279,51 @@ describe('@wesdizzle/app-kit/scripts d1-cost-guard', () => {
     });
     expect(failRes.passed).toBe(false);
     expect(failRes.errors[0]).toContain('Unindexed table SCAN');
+  });
+
+  it('detects wrangler database_name and compares expected schema.sql objects against remote objects in runD1SchemaDriftCheck', () => {
+    expect(
+      detectWranglerDatabaseName(
+        `name = "living-dex"\n[[d1_databases]]\nbinding = "DB"\ndatabase_name = "living-dex-db"\ndatabase_id = "local-dev-db"`,
+      ),
+    ).toBe('living-dex-db');
+
+    const schemaPath = createTempPath('drift_schema', '.sql');
+    fs.writeFileSync(
+      schemaPath,
+      `
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL
+      );
+      CREATE INDEX idx_users_username ON users (username);
+    `,
+      'utf8',
+    );
+
+    const inSyncReport = runD1SchemaDriftCheck({
+      schemaSqlPath: schemaPath,
+      reportOnly: true,
+      fetchRemoteObjects: () => [
+        { type: 'table', name: 'users', tbl_name: 'users' },
+        { type: 'index', name: 'idx_users_username', tbl_name: 'users' },
+        { type: 'table', name: 'd1_migrations', tbl_name: 'd1_migrations' },
+      ],
+    });
+    expect(inSyncReport.inSync).toBe(true);
+    expect(inSyncReport.missing).toEqual([]);
+    expect(inSyncReport.extra).toEqual([]);
+
+    const driftReport = runD1SchemaDriftCheck({
+      schemaSqlPath: schemaPath,
+      reportOnly: true,
+      fetchRemoteObjects: () => [
+        { type: 'table', name: 'users', tbl_name: 'users' },
+      ],
+    });
+    expect(driftReport.inSync).toBe(false);
+    expect(driftReport.missing).toEqual([
+      { type: 'index', name: 'idx_users_username', tbl_name: 'users' },
+    ]);
   });
 });
