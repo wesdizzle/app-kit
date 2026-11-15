@@ -192,36 +192,40 @@ export const DEFAULT_KIT_VIEW_MODES: readonly KitFilterViewModeOption[] = [
           class="secondary-filters-drawer"
           [class.drawer-collapsed]="!showDrawer()"
         >
-          <div class="drawer-header flex items-center justify-between">
-            <div class="drawer-title flex items-center gap-xs">
-              <span class="drawer-heading">Advanced Filters</span>
-              @if (activeFilterCount() > 0) {
-                <span class="active-tag">{{ activeFilterCount() }} active</span>
-              }
+          <div class="secondary-filters-drawer-inner">
+            <div class="drawer-header flex items-center justify-between">
+              <div class="drawer-title flex items-center gap-xs">
+                <span class="drawer-heading">Advanced Filters</span>
+                @if (activeFilterCount() > 0) {
+                  <span class="active-tag"
+                    >{{ activeFilterCount() }} active</span
+                  >
+                }
+              </div>
+              <div class="drawer-actions flex items-center gap-sm">
+                <button
+                  type="button"
+                  class="m3-button m3-button-text reset-filters-btn"
+                  (click)="onResetClick()"
+                  [attr.title]="resetTitle()"
+                >
+                  <kit-icon name="refresh" [size]="14" />
+                  <span>Reset All</span>
+                </button>
+                <button
+                  type="button"
+                  class="drawer-close-btn"
+                  (click)="showDrawer.set(false)"
+                  aria-label="Close filters drawer"
+                >
+                  <kit-icon name="close" [size]="16" />
+                </button>
+              </div>
             </div>
-            <div class="drawer-actions flex items-center gap-sm">
-              <button
-                type="button"
-                class="m3-button m3-button-text reset-filters-btn"
-                (click)="onResetClick()"
-                [attr.title]="resetTitle()"
-              >
-                <kit-icon name="refresh" [size]="14" />
-                <span>Reset All</span>
-              </button>
-              <button
-                type="button"
-                class="drawer-close-btn"
-                (click)="showDrawer.set(false)"
-                aria-label="Close filters drawer"
-              >
-                <kit-icon name="close" [size]="16" />
-              </button>
-            </div>
-          </div>
 
-          <div class="secondary-filters-grid">
-            <ng-content />
+            <div class="secondary-filters-grid">
+              <ng-content />
+            </div>
           </div>
         </div>
       </div>

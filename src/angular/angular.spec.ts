@@ -596,6 +596,16 @@ describe('@wesdizzle/app-kit/angular', () => {
       bar.showDrawer.set(true);
       expect(bar.showDrawer()).toBe(true);
 
+      const specDir = dirname(fileURLToPath(import.meta.url));
+      const tokensSource = readFileSync(
+        join(specDir, '..', '..', 'styles', 'tokens.css'),
+        'utf8',
+      );
+      expect(tokensSource).toContain('grid-template-rows: 0fr');
+      expect(tokensSource).not.toMatch(
+        /\.secondary-filters-drawer\.drawer-collapsed\s*\{[^}]*display:\s*none/,
+      );
+
       bar.ngOnDestroy();
     } finally {
       vi.useRealTimers();
