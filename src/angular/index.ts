@@ -2,6 +2,7 @@ export * from './auth.service.js';
 export * from './bottom-sheet-drag.js';
 export * from './dialog-sheet.component.js';
 export * from './theme.service.js';
+export * from './theme-toggle.component.js';
 export * from './profile-modal.component.js';
 export * from './public-banner.component.js';
 export * from './header-bar.component.js';

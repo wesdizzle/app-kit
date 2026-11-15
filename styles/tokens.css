@@ -243,6 +243,23 @@
   animation-timing-function: var(--kit-ease-emphasized);
 }
 
+@keyframes kitThemeIconMorph {
+  from {
+    opacity: 0;
+    transform: rotate(-65deg) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.kit-theme-icon {
+  display: block;
+  transform-origin: center;
+  animation: kitThemeIconMorph 260ms var(--kit-ease-spring) both;
+}
+
 /* Accessible Focus Rings Across Shared Kit Components */
 :where(
   .kit-header-bar a,

@@ -17,6 +17,7 @@ import {
   shouldAttemptSilentSso,
 } from './auth.service.js';
 import { KitThemeService, runKitViewTransition } from './theme.service.js';
+import { KitThemeToggleComponent } from './theme-toggle.component.js';
 import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
 import {
   KitSelectComponent,
@@ -658,5 +659,22 @@ describe('@wesdizzle/app-kit/angular', () => {
     });
     expect(store.getStorageKey(12)).toBe('test_key:12');
     expect(await store.getStoredState(12)).toBeNull();
+  });
+
+  it('cycles themes in KitThemeToggleComponent with controlled inputs and emits next theme', () => {
+    const injector = {
+      get: (token: unknown) =>
+        token === KitThemeService ? null : { onDestroy: () => () => {} },
+    } as unknown as Injector;
+    const toggle = runInInjectionContext(
+      injector,
+      () => new KitThemeToggleComponent(),
+    );
+    const emitted: string[] = [];
+    toggle.toggled.subscribe((mode) => emitted.push(mode));
+
+    expect(toggle.effectiveTheme()).toBe('auto');
+    toggle.onToggle();
+    expect(emitted).toEqual(['light']);
   });
 });

@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { BaseUserProfile } from './auth.service.js';
 import { KitThemeMode } from './theme.service.js';
+import { KitThemeToggleComponent } from './theme-toggle.component.js';
 
 export interface KitHeaderTab {
   id: string;
@@ -19,6 +20,7 @@ export interface KitHeaderTab {
 @Component({
   selector: 'kit-header-bar',
   standalone: true,
+  imports: [KitThemeToggleComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -126,141 +128,11 @@ export interface KitHeaderTab {
             </button>
           }
 
-          <button
-            type="button"
-            class="m3-button-icon state-layer"
-            (click)="themeToggled.emit()"
-            [title]="'Theme: ' + theme()"
-            [attr.aria-label]="'Toggle color theme (current: ' + theme() + ')'"
-            [attr.data-testid]="themeTestId()"
-          >
-            @switch (theme()) {
-              @case ('light') {
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                  <line
-                    x1="12"
-                    y1="1"
-                    x2="12"
-                    y2="3"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="12"
-                    y1="21"
-                    x2="12"
-                    y2="23"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="4.22"
-                    y1="4.22"
-                    x2="5.64"
-                    y2="5.64"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="18.36"
-                    y1="18.36"
-                    x2="19.78"
-                    y2="19.78"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="1"
-                    y1="12"
-                    x2="3"
-                    y2="12"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="21"
-                    y1="12"
-                    x2="23"
-                    y2="12"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="4.22"
-                    y1="19.78"
-                    x2="5.64"
-                    y2="18.36"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="18.36"
-                    y1="5.64"
-                    x2="19.78"
-                    y2="4.22"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              }
-              @case ('dark') {
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              }
-              @default {
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                  <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
-                </svg>
-              }
-            }
-          </button>
+          <kit-theme-toggle
+            [theme]="theme()"
+            [testId]="themeTestId()"
+            (toggled)="themeToggled.emit()"
+          />
           <ng-content select="[headerRightEnd]" />
         </div>
       </div>
@@ -404,8 +276,12 @@ export interface KitHeaderTab {
         background: var(--kit-primary);
         border-radius: 3px 3px 0 0;
         opacity: 0;
-        transform: scaleX(0.5);
-        transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        transform: scaleX(0.35);
+        transform-origin: center bottom;
+        transition:
+          opacity 200ms var(--kit-ease-standard, ease),
+          transform 320ms
+            var(--kit-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
       }
 
       .kit-header-bar .nav-item.active {
@@ -477,8 +353,11 @@ export interface KitHeaderTab {
           padding: 6px 14px;
           border-radius: 9999px;
           transition:
-            background-color 0.25s cubic-bezier(0.2, 0, 0, 1),
-            color 0.2s ease;
+            background-color 260ms
+              var(--kit-ease-emphasized, cubic-bezier(0.2, 0, 0, 1)),
+            color 200ms ease,
+            transform 240ms
+              var(--kit-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
           white-space: nowrap;
         }
 
@@ -491,6 +370,7 @@ export interface KitHeaderTab {
             --m3-on-secondary-container,
             var(--kit-on-primary-container)
           );
+          transform: scale(1.03);
         }
       }
     `,
