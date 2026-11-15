@@ -18,6 +18,12 @@ import {
 } from './auth.service.js';
 import { KitThemeService, runKitViewTransition } from './theme.service.js';
 import { KitThemeToggleComponent } from './theme-toggle.component.js';
+import { interpolateNumber } from './animated-number.js';
+import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
+import {
+  KitStatusBannerComponent,
+  KitSyncIndicatorComponent,
+} from './status-feedback.component.js';
 import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
 import {
   KitSelectComponent,
@@ -676,5 +682,40 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(toggle.effectiveTheme()).toBe('auto');
     toggle.onToggle();
     expect(emitted).toEqual(['light']);
+  });
+
+  it('interpolates numbers cleanly and tracks KitSyncIndicatorComponent idle -> saving -> saved -> idle transitions', async () => {
+    expect(interpolateNumber(0, 100, 0)).toBe(0);
+    expect(interpolateNumber(0, 100, 1)).toBe(100);
+    expect(interpolateNumber(0, 100, 0.5)).toBe(88);
+
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const meter = runInInjectionContext(
+      injector,
+      () => new KitSegmentedMeterComponent(),
+    );
+    expect(meter.clampPct(-10)).toBe(0);
+    expect(meter.clampPct(150)).toBe(100);
+    expect(KitStatusBannerComponent).toBeDefined();
+
+    vi.useFakeTimers();
+    try {
+      const syncComp = runInInjectionContext(
+        injector,
+        () => new KitSyncIndicatorComponent(),
+      );
+      expect(syncComp.phase()).toBe('idle');
+      syncComp.updateSavingState(true);
+      expect(syncComp.phase()).toBe('saving');
+      syncComp.updateSavingState(false);
+      expect(syncComp.phase()).toBe('saved');
+      vi.advanceTimersByTime(1500);
+      expect(syncComp.phase()).toBe('idle');
+      syncComp.ngOnDestroy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
