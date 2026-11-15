@@ -4,22 +4,33 @@ const INTERACTIVE_SELECTOR =
   'button, a, input, select, textarea, [role="button"]';
 const DRAG_ZONE_SELECTOR = '.sheet-drag-area, .sheet-handle, .modal-header';
 
+function getTimestamp(): number {
+  return typeof performance !== 'undefined' &&
+    typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+}
+
 /**
  * Reusable touch-drag controller for mobile bottom-sheet modals.
- * Allows dragging down from anywhere on the full top bar (`.sheet-drag-area`,
- * `.sheet-handle`, or `.modal-header`, including embedded subview headers),
- * while ignoring touches that start on interactive controls like Close or Back buttons.
+ * Supports distance and downward flick-velocity dismissal as well as
+ * damped upward rubber-banding, while ignoring interactive header controls.
  */
 export class BottomSheetDragController {
   private touchStartY = 0;
+  private touchStartTime = 0;
+  private lastTouchY = 0;
+  private lastTouchTime = 0;
+  private velocityY = 0;
 
   readonly dragOffsetY = signal(0);
   readonly isDragging = signal(false);
-  readonly effectiveTransformY = computed(() =>
-    Math.max(0, this.dragOffsetY()),
-  );
+  readonly effectiveTransformY = computed(() => this.dragOffsetY());
 
-  constructor(private readonly dismissThresholdPx = 90) {}
+  constructor(
+    private readonly dismissThresholdPx = 90,
+    private readonly velocityThresholdPxPerMs = 0.55,
+  ) {}
 
   onTouchStart(event: TouchEvent): void {
     if (!event.touches || event.touches.length !== 1) return;
@@ -34,7 +45,13 @@ export class BottomSheetDragController {
       }
     }
 
-    this.touchStartY = event.touches[0].clientY;
+    const now = getTimestamp();
+    const y = event.touches[0].clientY;
+    this.touchStartY = y;
+    this.lastTouchY = y;
+    this.touchStartTime = now;
+    this.lastTouchTime = now;
+    this.velocityY = 0;
     this.isDragging.set(true);
   }
 
@@ -42,9 +59,22 @@ export class BottomSheetDragController {
     if (!this.isDragging() || !event.touches || event.touches.length !== 1) {
       return;
     }
-    const deltaY = event.touches[0].clientY - this.touchStartY;
+    const now = getTimestamp();
+    const currentY = event.touches[0].clientY;
+    const dt = Math.max(1, now - this.lastTouchTime);
+    this.velocityY = (currentY - this.lastTouchY) / dt;
+    this.lastTouchY = currentY;
+    this.lastTouchTime = now;
+
+    const deltaY = currentY - this.touchStartY;
     if (deltaY > 0) {
       this.dragOffsetY.set(deltaY);
+    } else if (deltaY < 0) {
+      const damped = -Math.min(
+        28,
+        Math.round(Math.sqrt(Math.abs(deltaY)) * 3.5),
+      );
+      this.dragOffsetY.set(damped);
     } else {
       this.dragOffsetY.set(0);
     }
@@ -53,17 +83,25 @@ export class BottomSheetDragController {
   onTouchEnd(onDismiss: () => void): void {
     if (!this.isDragging()) return;
     const finalOffset = this.dragOffsetY();
+    const totalDt = Math.max(1, getTimestamp() - this.touchStartTime);
+    const averageVelocity = finalOffset / totalDt;
+    const flickVelocity = Math.max(this.velocityY, averageVelocity);
+    const shouldDismiss =
+      finalOffset > this.dismissThresholdPx ||
+      (finalOffset > 24 && flickVelocity >= this.velocityThresholdPxPerMs);
+
     this.isDragging.set(false);
-    if (finalOffset > this.dismissThresholdPx) {
-      this.dragOffsetY.set(0);
+    this.dragOffsetY.set(0);
+    this.velocityY = 0;
+
+    if (shouldDismiss) {
       onDismiss();
-    } else {
-      this.dragOffsetY.set(0);
     }
   }
 
   reset(): void {
     this.dragOffsetY.set(0);
     this.isDragging.set(false);
+    this.velocityY = 0;
   }
 }

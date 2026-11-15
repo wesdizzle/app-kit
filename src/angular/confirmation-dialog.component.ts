@@ -12,10 +12,13 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
   ViewChild,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { canAnimateKitDialogExit } from './dialog-sheet.component.js';
 
 export interface KitConfirmationOption {
   label: string;
@@ -31,6 +34,7 @@ export interface KitConfirmationOption {
     <dialog
       #dialogEl
       class="dialog-overlay"
+      [class.closing]="isClosing()"
       aria-modal="true"
       aria-labelledby="confirmation-dialog-title"
       (click)="onBackdropClick($event)"
@@ -133,6 +137,45 @@ export interface KitConfirmationOption {
         overscroll-behavior: contain;
         transform: translateZ(0);
         will-change: transform, backdrop-filter;
+        animation: kitOverlayFadeIn 0.2s ease both;
+      }
+
+      .dialog-overlay.closing {
+        animation: kitOverlayFadeOut 0.16s var(--kit-ease-exit, ease) forwards;
+        pointer-events: none;
+      }
+
+      .dialog-overlay.closing .dialog-container {
+        animation: kitDialogPopOut 0.16s var(--kit-ease-exit, ease) forwards;
+      }
+
+      @keyframes kitOverlayFadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes kitOverlayFadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+
+      @keyframes kitDialogPopOut {
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(8px) scale(0.96);
+        }
       }
 
       .dialog-overlay::backdrop {
@@ -277,7 +320,9 @@ export interface KitConfirmationOption {
     `,
   ],
 })
-export class KitConfirmationDialogComponent implements AfterViewInit {
+export class KitConfirmationDialogComponent
+  implements AfterViewInit, OnDestroy
+{
   @Input() title = 'Confirm Action';
   @Input() message = 'Are you sure you want to proceed?';
   @Input() type: 'confirm' | 'input' | 'options' = 'confirm';
@@ -290,6 +335,16 @@ export class KitConfirmationDialogComponent implements AfterViewInit {
 
   @ViewChild('dialogEl') dialogEl?: ElementRef<HTMLDialogElement>;
   @ViewChild('numberInput') numberInput?: ElementRef<HTMLInputElement>;
+
+  readonly isClosing = signal(false);
+  private closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  ngOnDestroy(): void {
+    if (this.closeTimer) {
+      clearTimeout(this.closeTimer);
+      this.closeTimer = null;
+    }
+  }
 
   ngAfterViewInit() {
     const dialog = this.dialogEl?.nativeElement;
@@ -331,6 +386,18 @@ export class KitConfirmationDialogComponent implements AfterViewInit {
   }
 
   onCancel() {
+    if (this.isClosing()) return;
+    const dialog = this.dialogEl?.nativeElement;
+    if (canAnimateKitDialogExit(dialog)) {
+      this.isClosing.set(true);
+      if (this.closeTimer) clearTimeout(this.closeTimer);
+      this.closeTimer = setTimeout(() => {
+        this.closeTimer = null;
+        this.isClosing.set(false);
+        this.cancel.emit();
+      }, 160);
+      return;
+    }
     this.cancel.emit();
   }
 }

@@ -6,6 +6,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
 import {
+  KitDialogSheetComponent,
+  canAnimateKitDialogExit,
+} from './dialog-sheet.component.js';
+import {
   KitAuthService,
   checkUpstreamOidcStatus,
   clearSilentSsoAttempt,
@@ -66,6 +70,42 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(controller.isDragging()).toBe(false);
     expect(controller.dragOffsetY()).toBe(0);
     expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports damped upward rubber-banding, flick velocity dismissal, and KitDialogSheetComponent lifecycle', () => {
+    vi.useFakeTimers();
+    try {
+      const controller = new BottomSheetDragController(90, 0.55);
+      const onDismiss = vi.fn();
+      const handleTarget = {
+        closest: (sel: string) =>
+          sel.includes('.sheet-handle') ? ({} as Element) : null,
+      };
+
+      // Upward pull produces damped negative transform rather than hard 0 clamp
+      controller.onTouchStart({
+        touches: [{ clientY: 200 }],
+        target: handleTarget,
+      } as unknown as TouchEvent);
+      controller.onTouchMove({
+        touches: [{ clientY: 164 }],
+      } as unknown as TouchEvent);
+      expect(controller.dragOffsetY()).toBeLessThan(0);
+      expect(controller.effectiveTransformY()).toBeLessThan(0);
+
+      // Fast downward flick below 90px distance still dismisses via velocity
+      vi.advanceTimersByTime(10);
+      controller.onTouchMove({
+        touches: [{ clientY: 245 }],
+      } as unknown as TouchEvent);
+      controller.onTouchEnd(onDismiss);
+      expect(onDismiss).toHaveBeenCalledTimes(1);
+
+      expect(canAnimateKitDialogExit(null)).toBe(false);
+      expect(KitDialogSheetComponent).toBeDefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('sanitizes client return_to paths against backslash and protocol-relative redirects', () => {
