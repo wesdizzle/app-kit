@@ -1,4 +1,4 @@
-import { ElementRef } from '@angular/core';
+import { ElementRef, OnDestroy } from '@angular/core';
 import { BaseUserProfile } from './auth.service.js';
 import * as i0 from "@angular/core";
 export interface ProfileSavePayload {
@@ -6,7 +6,7 @@ export interface ProfileSavePayload {
     bio: string;
     isPublic: boolean;
 }
-export declare class KitProfileModalComponent {
+export declare class KitProfileModalComponent implements OnDestroy {
     dialogEl?: ElementRef<HTMLDialogElement>;
     readonly isOpen: import("@angular/core").InputSignal<boolean>;
     readonly activeView: import("@angular/core").InputSignal<string>;
@@ -32,8 +32,10 @@ export declare class KitProfileModalComponent {
     readonly signOutClicked: import("@angular/core").OutputEmitterRef<void>;
     readonly closed: import("@angular/core").OutputEmitterRef<void>;
     readonly backToProfile: import("@angular/core").OutputEmitterRef<void>;
+    readonly isClosing: import("@angular/core").WritableSignal<boolean>;
     private readonly copiedInternal;
     private copyTimer;
+    private closeTimer;
     private readonly sheetDrag;
     readonly dragOffsetY: import("@angular/core").WritableSignal<number>;
     readonly isDragging: import("@angular/core").WritableSignal<boolean>;
@@ -42,6 +44,7 @@ export declare class KitProfileModalComponent {
     readonly publicRelativePath: import("@angular/core").Signal<string>;
     readonly publicUrl: import("@angular/core").Signal<string>;
     constructor();
+    ngOnDestroy(): void;
     copyLink(): void;
     requestClose(): void;
     onDialogClick(event: MouseEvent): void;

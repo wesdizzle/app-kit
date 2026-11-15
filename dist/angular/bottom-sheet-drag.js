@@ -1,19 +1,29 @@
 import { computed, signal } from '@angular/core';
 const INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, [role="button"]';
 const DRAG_ZONE_SELECTOR = '.sheet-drag-area, .sheet-handle, .modal-header';
+function getTimestamp() {
+    return typeof performance !== 'undefined' &&
+        typeof performance.now === 'function'
+        ? performance.now()
+        : Date.now();
+}
 /**
  * Reusable touch-drag controller for mobile bottom-sheet modals.
- * Allows dragging down from anywhere on the full top bar (`.sheet-drag-area`,
- * `.sheet-handle`, or `.modal-header`, including embedded subview headers),
- * while ignoring touches that start on interactive controls like Close or Back buttons.
+ * Supports distance and downward flick-velocity dismissal as well as
+ * damped upward rubber-banding, while ignoring interactive header controls.
  */
 export class BottomSheetDragController {
-    constructor(dismissThresholdPx = 90) {
+    constructor(dismissThresholdPx = 90, velocityThresholdPxPerMs = 0.55) {
         this.dismissThresholdPx = dismissThresholdPx;
+        this.velocityThresholdPxPerMs = velocityThresholdPxPerMs;
         this.touchStartY = 0;
+        this.touchStartTime = 0;
+        this.lastTouchY = 0;
+        this.lastTouchTime = 0;
+        this.velocityY = 0;
         this.dragOffsetY = signal(0, ...(ngDevMode ? [{ debugName: "dragOffsetY" }] : /* istanbul ignore next */ []));
         this.isDragging = signal(false, ...(ngDevMode ? [{ debugName: "isDragging" }] : /* istanbul ignore next */ []));
-        this.effectiveTransformY = computed(() => Math.max(0, this.dragOffsetY()), ...(ngDevMode ? [{ debugName: "effectiveTransformY" }] : /* istanbul ignore next */ []));
+        this.effectiveTransformY = computed(() => this.dragOffsetY(), ...(ngDevMode ? [{ debugName: "effectiveTransformY" }] : /* istanbul ignore next */ []));
     }
     onTouchStart(event) {
         if (!event.touches || event.touches.length !== 1)
@@ -27,16 +37,32 @@ export class BottomSheetDragController {
                 return;
             }
         }
-        this.touchStartY = event.touches[0].clientY;
+        const now = getTimestamp();
+        const y = event.touches[0].clientY;
+        this.touchStartY = y;
+        this.lastTouchY = y;
+        this.touchStartTime = now;
+        this.lastTouchTime = now;
+        this.velocityY = 0;
         this.isDragging.set(true);
     }
     onTouchMove(event) {
         if (!this.isDragging() || !event.touches || event.touches.length !== 1) {
             return;
         }
-        const deltaY = event.touches[0].clientY - this.touchStartY;
+        const now = getTimestamp();
+        const currentY = event.touches[0].clientY;
+        const dt = Math.max(1, now - this.lastTouchTime);
+        this.velocityY = (currentY - this.lastTouchY) / dt;
+        this.lastTouchY = currentY;
+        this.lastTouchTime = now;
+        const deltaY = currentY - this.touchStartY;
         if (deltaY > 0) {
             this.dragOffsetY.set(deltaY);
+        }
+        else if (deltaY < 0) {
+            const damped = -Math.min(28, Math.round(Math.sqrt(Math.abs(deltaY)) * 3.5));
+            this.dragOffsetY.set(damped);
         }
         else {
             this.dragOffsetY.set(0);
@@ -46,17 +72,21 @@ export class BottomSheetDragController {
         if (!this.isDragging())
             return;
         const finalOffset = this.dragOffsetY();
+        const totalDt = Math.max(1, getTimestamp() - this.touchStartTime);
+        const averageVelocity = finalOffset / totalDt;
+        const flickVelocity = Math.max(this.velocityY, averageVelocity);
+        const shouldDismiss = finalOffset > this.dismissThresholdPx ||
+            (finalOffset > 24 && flickVelocity >= this.velocityThresholdPxPerMs);
         this.isDragging.set(false);
-        if (finalOffset > this.dismissThresholdPx) {
-            this.dragOffsetY.set(0);
+        this.dragOffsetY.set(0);
+        this.velocityY = 0;
+        if (shouldDismiss) {
             onDismiss();
-        }
-        else {
-            this.dragOffsetY.set(0);
         }
     }
     reset() {
         this.dragOffsetY.set(0);
         this.isDragging.set(false);
+        this.velocityY = 0;
     }
 }

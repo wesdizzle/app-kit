@@ -4,13 +4,13 @@
  * A Material 3 Expressive dialog for critical user confirmations, numeric input prompts,
  * or multi-option choices. Uses a native <dialog> element for proper modal semantics and Escape handling.
  */
-import { AfterViewInit, ElementRef, EventEmitter } from '@angular/core';
+import { AfterViewInit, ElementRef, EventEmitter, OnDestroy } from '@angular/core';
 import * as i0 from "@angular/core";
 export interface KitConfirmationOption {
     label: string;
     value: string | number;
 }
-export declare class KitConfirmationDialogComponent implements AfterViewInit {
+export declare class KitConfirmationDialogComponent implements AfterViewInit, OnDestroy {
     title: string;
     message: string;
     type: 'confirm' | 'input' | 'options';
@@ -21,6 +21,9 @@ export declare class KitConfirmationDialogComponent implements AfterViewInit {
     cancel: EventEmitter<void>;
     dialogEl?: ElementRef<HTMLDialogElement>;
     numberInput?: ElementRef<HTMLInputElement>;
+    readonly isClosing: import("@angular/core").WritableSignal<boolean>;
+    private closeTimer;
+    ngOnDestroy(): void;
     ngAfterViewInit(): void;
     onBackdropClick(event: MouseEvent): void;
     onConfirm(): void;

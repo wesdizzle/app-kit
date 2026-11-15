@@ -19,6 +19,8 @@ export interface KitThemeConfig {
     syncDebounceMs?: number;
 }
 export declare const KIT_THEME_CONFIG: InjectionToken<KitThemeConfig>;
+export declare function isKitReducedMotionPreferred(): boolean;
+export declare function runKitViewTransition(updateFn: () => void): void;
 export declare function isKitThemeMode(value: unknown): value is KitThemeMode;
 export declare function normalizeKitUserPreferences(raw: unknown): KitUserPreferences;
 export declare function updateUpstreamPreferences(oidcIssuer: string, patch: KitUserPreferences, clientId?: string | null): Promise<{
@@ -63,6 +65,7 @@ export declare class KitThemeService implements OnDestroy {
     applyTheme(mode: KitThemeMode, options?: {
         animate?: boolean;
     }): void;
+    runViewTransition(updateFn: () => void): void;
     private updateThemeColorMeta;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitThemeService, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<KitThemeService>;

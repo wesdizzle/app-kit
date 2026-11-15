@@ -1,6 +1,25 @@
 import { Injectable, InjectionToken, inject, signal, } from '@angular/core';
 import * as i0 from "@angular/core";
 export const KIT_THEME_CONFIG = new InjectionToken('KIT_THEME_CONFIG');
+export function isKitReducedMotionPreferred() {
+    return Boolean(typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+export function runKitViewTransition(updateFn) {
+    if (typeof document === 'undefined' || isKitReducedMotionPreferred()) {
+        updateFn();
+        return;
+    }
+    const doc = document;
+    if (typeof doc.startViewTransition === 'function') {
+        doc.startViewTransition(() => {
+            updateFn();
+        });
+        return;
+    }
+    updateFn();
+}
 export function isKitThemeMode(value) {
     return value === 'light' || value === 'dark' || value === 'auto';
 }
@@ -264,7 +283,7 @@ export class KitThemeService {
             window.matchMedia('(prefers-color-scheme: dark)').matches);
         const effective = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
         this.resolvedTheme.set(effective);
-        if (typeof document === 'undefined')
+        if (typeof document === 'undefined' || !document.documentElement)
             return;
         const updateDom = () => {
             const root = document.documentElement;
@@ -279,29 +298,33 @@ export class KitThemeService {
             }
             this.updateThemeColorMeta(mode, effective);
         };
-        const doc = document;
-        if (animate && typeof doc.startViewTransition === 'function') {
-            doc.startViewTransition(() => {
-                updateDom();
+        if (animate && !isKitReducedMotionPreferred()) {
+            const doc = document;
+            if (typeof doc.startViewTransition === 'function') {
+                doc.startViewTransition(() => {
+                    updateDom();
+                });
+                return;
+            }
+        }
+        document.documentElement.classList.add('disable-theme-transitions');
+        updateDom();
+        if (typeof window !== 'undefined' &&
+            typeof requestAnimationFrame === 'function') {
+            void document.body?.offsetHeight;
+            requestAnimationFrame(() => {
+                document.documentElement.classList.remove('disable-theme-transitions');
             });
         }
         else {
-            document.documentElement.classList.add('disable-theme-transitions');
-            updateDom();
-            if (typeof window !== 'undefined' &&
-                typeof requestAnimationFrame === 'function') {
-                void document.body?.offsetHeight;
-                requestAnimationFrame(() => {
-                    document.documentElement.classList.remove('disable-theme-transitions');
-                });
-            }
-            else {
-                document.documentElement.classList.remove('disable-theme-transitions');
-            }
+            document.documentElement.classList.remove('disable-theme-transitions');
         }
     }
+    runViewTransition(updateFn) {
+        runKitViewTransition(updateFn);
+    }
     updateThemeColorMeta(mode, effective) {
-        if (typeof document === 'undefined')
+        if (typeof document === 'undefined' || !document.documentElement)
             return;
         const darkColor = this.darkThemeColor;
         const lightColor = this.lightThemeColor;

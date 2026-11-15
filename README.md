@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v1.3.0`)
+# `@wesdizzle/app-kit` (`v1.4.0`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
 
@@ -20,8 +20,10 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - **Operational Scripts**: `runWranglerDeploy` (UUID validation, early `--put-secrets` exit, single-build coordination), `runD1PullFromR2`, `hydrateSqliteFromSnapshot`, `runHybridDev` (`taskkill /T /F` on Windows)
 - **`@wesdizzle/app-kit/angular`**:
   - `KitAuthService`, `sanitizeClientReturnToPath`, `checkUpstreamOidcStatus`
-  - `KitThemeService`, `KIT_THEME_CONFIG`, `KitUserPreferences`, `normalizeKitUserPreferences`, `updateUpstreamPreferences` (`light` / `dark` / `auto` mode with custom `theme-color` & cross-app OIDC Account Server preference sync)
-  - `BottomSheetDragController`
+  - `KitThemeService`, `KIT_THEME_CONFIG`, `KitUserPreferences`, `normalizeKitUserPreferences`, `updateUpstreamPreferences`, `runKitViewTransition`, `isKitReducedMotionPreferred` (`light` / `dark` / `auto` mode with custom `theme-color`, View Transitions API helpers, & cross-app OIDC Account Server preference sync)
+  - `KitThemeToggleComponent` (`<kit-theme-toggle>`)
+  - `BottomSheetDragController`, `KitDialogSheetComponent` (`<kit-dialog-sheet>`), `canAnimateKitDialogExit`
+  - `KitCommandPaletteComponent` (`<kit-command-palette>`), `tokenizeKitCommandQuery`, `matchesKitCommandTokens`, `filterAndGroupKitCommands`
   - `KitHeaderBarComponent` (`<kit-header-bar>`)
   - `KitProfileModalComponent` (`<kit-profile-modal>`)
   - `KitPublicBannerComponent` (`<kit-public-banner>`)
@@ -30,6 +32,9 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - `KitSelectComponent` (`<kit-select>`), `KitComboboxComponent` (`<kit-combobox>`), `KitMultiSelectComponent` (`<kit-multiselect>`)
   - `KitIconComponent` / `IconComponent` (`<kit-icon>`, `<app-icon>`) & `ICON_CATALOG`
   - `KitConfirmationDialogComponent` / `ConfirmationDialogComponent` (`<kit-confirmation-dialog>`, `<app-confirmation-dialog>`)
+  - `KitSegmentedMeterComponent` (`<kit-segmented-meter>`)
+  - `KitSyncIndicatorComponent` (`<kit-sync-indicator>`), `KitStatusBannerComponent` (`<kit-status-banner>`)
+  - `createAnimatedNumber`, `interpolateNumber`
   - `KitOfflineStore<T>`, `getScopedStorageKey`
 - **`@wesdizzle/app-kit/styles/tokens.css`**:
-  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), `<kit-public-banner>`, `<kit-filter-bar>`, `:focus-visible`, and `prefers-reduced-motion` rules.
+  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-motion-*`), interactive state-layer & stagger/shake/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared component styles (`<kit-public-banner>`, `<kit-filter-bar>`, `<kit-dialog-sheet>`, `<kit-command-palette>`, `<kit-segmented-meter>`, `<kit-sync-indicator>`, `<kit-status-banner>`), `:focus-visible`, and `prefers-reduced-motion` rules.
