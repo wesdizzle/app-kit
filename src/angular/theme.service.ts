@@ -32,6 +32,31 @@ export const KIT_THEME_CONFIG = new InjectionToken<KitThemeConfig>(
   'KIT_THEME_CONFIG',
 );
 
+export function isKitReducedMotionPreferred(): boolean {
+  return Boolean(
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+}
+
+export function runKitViewTransition(updateFn: () => void): void {
+  if (typeof document === 'undefined' || isKitReducedMotionPreferred()) {
+    updateFn();
+    return;
+  }
+  const doc = document as unknown as {
+    startViewTransition?: (callback: () => void) => void;
+  };
+  if (typeof doc.startViewTransition === 'function') {
+    doc.startViewTransition(() => {
+      updateFn();
+    });
+    return;
+  }
+  updateFn();
+}
+
 export function isKitThemeMode(value: unknown): value is KitThemeMode {
   return value === 'light' || value === 'dark' || value === 'auto';
 }
@@ -356,7 +381,7 @@ export class KitThemeService implements OnDestroy {
       mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
     this.resolvedTheme.set(effective);
 
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined' || !document.documentElement) return;
 
     const updateDom = (): void => {
       const root = document.documentElement;
@@ -375,38 +400,41 @@ export class KitThemeService implements OnDestroy {
       this.updateThemeColorMeta(mode, effective);
     };
 
-    const doc = document as unknown as {
-      startViewTransition?: (callback: () => void) => void;
-    };
-
-    if (animate && typeof doc.startViewTransition === 'function') {
-      doc.startViewTransition(() => {
-        updateDom();
-      });
-    } else {
-      document.documentElement.classList.add('disable-theme-transitions');
-      updateDom();
-      if (
-        typeof window !== 'undefined' &&
-        typeof requestAnimationFrame === 'function'
-      ) {
-        void document.body?.offsetHeight;
-        requestAnimationFrame(() => {
-          document.documentElement.classList.remove(
-            'disable-theme-transitions',
-          );
+    if (animate && !isKitReducedMotionPreferred()) {
+      const doc = document as unknown as {
+        startViewTransition?: (callback: () => void) => void;
+      };
+      if (typeof doc.startViewTransition === 'function') {
+        doc.startViewTransition(() => {
+          updateDom();
         });
-      } else {
-        document.documentElement.classList.remove('disable-theme-transitions');
+        return;
       }
     }
+    document.documentElement.classList.add('disable-theme-transitions');
+    updateDom();
+    if (
+      typeof window !== 'undefined' &&
+      typeof requestAnimationFrame === 'function'
+    ) {
+      void document.body?.offsetHeight;
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('disable-theme-transitions');
+      });
+    } else {
+      document.documentElement.classList.remove('disable-theme-transitions');
+    }
+  }
+
+  runViewTransition(updateFn: () => void): void {
+    runKitViewTransition(updateFn);
   }
 
   private updateThemeColorMeta(
     mode: KitThemeMode,
     effective: 'light' | 'dark',
   ): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined' || !document.documentElement) return;
     const darkColor = this.darkThemeColor;
     const lightColor = this.lightThemeColor;
 

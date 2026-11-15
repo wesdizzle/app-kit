@@ -12,7 +12,7 @@ import {
   sanitizeClientReturnToPath,
   shouldAttemptSilentSso,
 } from './auth.service.js';
-import { KitThemeService } from './theme.service.js';
+import { KitThemeService, runKitViewTransition } from './theme.service.js';
 import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
 import {
   KitSelectComponent,
@@ -271,6 +271,50 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(startViewTransition).toHaveBeenCalledTimes(1);
     expect(rootAttrs.get('data-theme')).toBe('dark');
     expect(bodyClassList.has('theme-dark')).toBe(true);
+
+    themeService.ngOnDestroy();
+    vi.unstubAllGlobals();
+  });
+
+  it('honors prefers-reduced-motion in runKitViewTransition and KitThemeService.runViewTransition()', () => {
+    const startViewTransition = vi.fn((cb: () => void) => cb());
+    vi.stubGlobal('document', {
+      documentElement: {
+        style: { colorScheme: '' },
+        setAttribute: () => {},
+        classList: { add: () => {}, remove: () => {} },
+      },
+      body: {
+        offsetHeight: 0,
+        classList: { add: () => {}, remove: () => {} },
+      },
+      querySelectorAll: () => [],
+      startViewTransition,
+    });
+
+    let reduced = false;
+    vi.stubGlobal('window', {
+      matchMedia: vi.fn((query: string) => ({
+        matches: query.includes('prefers-reduced-motion: reduce')
+          ? reduced
+          : false,
+      })),
+    });
+
+    const themeService = new KitThemeService();
+    let count = 0;
+    themeService.runViewTransition(() => {
+      count += 1;
+    });
+    expect(count).toBe(1);
+    expect(startViewTransition).toHaveBeenCalledTimes(1);
+
+    reduced = true;
+    runKitViewTransition(() => {
+      count += 1;
+    });
+    expect(count).toBe(2);
+    expect(startViewTransition).toHaveBeenCalledTimes(1);
 
     themeService.ngOnDestroy();
     vi.unstubAllGlobals();
