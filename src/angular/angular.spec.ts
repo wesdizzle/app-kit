@@ -1,10 +1,17 @@
 import '@angular/compiler';
-import { Injector, runInInjectionContext } from '@angular/core';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
+import {
+  KitCommandPaletteComponent,
+  type KitCommandPaletteItem,
+  filterAndGroupKitCommands,
+  matchesKitCommandTokens,
+  tokenizeKitCommandQuery,
+} from './command-palette.component.js';
 import {
   KitDialogSheetComponent,
   canAnimateKitDialogExit,
@@ -717,5 +724,132 @@ describe('@wesdizzle/app-kit/angular', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('tokenizes overlapping query highlights, groups filtered commands sequentially, and handles KitCommandPaletteComponent keyboard navigation', () => {
+    expect(tokenizeKitCommandQuery('Super Mario Galaxy', 'gal mar')).toEqual([
+      { text: 'Super ', match: false },
+      { text: 'Mar', match: true },
+      { text: 'io ', match: false },
+      { text: 'Gal', match: true },
+      { text: 'axy', match: false },
+    ]);
+    // Overlapping intervals merge cleanly ("sup" + "uper" => "Super")
+    expect(tokenizeKitCommandQuery('Super', 'sup uper')).toEqual([
+      { text: 'Super', match: true },
+    ]);
+    expect(matchesKitCommandTokens('Nintendo 64 N64', 'n64 nin')).toBe(true);
+    expect(matchesKitCommandTokens('Nintendo 64', 'snes')).toBe(false);
+
+    const sampleItems: KitCommandPaletteItem[] = [
+      { id: 'box-2', title: 'Box 02', category: 'Boxes', glyph: '📦' },
+      {
+        id: 'nav-stats',
+        title: 'Insights',
+        category: 'Navigation',
+        icon: 'chart',
+      },
+      {
+        id: 'mon-1',
+        title: 'Bulbasaur',
+        subtitle: '#0001 • Kanto',
+        category: 'Pokémon',
+        keywords: ['grass', '0001'],
+      },
+      {
+        id: 'mon-4',
+        title: 'Charmander',
+        subtitle: '#0004 • Kanto',
+        category: 'Pokémon',
+        keywords: ['fire', '0004'],
+      },
+    ];
+
+    const grouped = filterAndGroupKitCommands(sampleItems, '', {
+      categoryOrder: ['Navigation', 'Boxes', 'Pokémon'],
+    });
+    expect(grouped.groups.map((g) => g.category)).toEqual([
+      'Navigation',
+      'Boxes',
+      'Pokémon',
+    ]);
+    expect(grouped.flatItems.map((i) => i.id)).toEqual([
+      'nav-stats',
+      'box-2',
+      'mon-1',
+      'mon-4',
+    ]);
+    expect(grouped.groups[2].entries.map((e) => e.flatIndex)).toEqual([2, 3]);
+
+    const filtered = filterAndGroupKitCommands(sampleItems, 'fire', {
+      categoryOrder: ['Navigation', 'Boxes', 'Pokémon'],
+    });
+    expect(filtered.flatItems.map((i) => i.id)).toEqual(['mon-4']);
+
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const palette = runInInjectionContext(
+      injector,
+      () => new KitCommandPaletteComponent(),
+    );
+
+    const openState = signal(false);
+    const itemsSignal = signal<readonly KitCommandPaletteItem[]>(sampleItems);
+    const orderSignal = signal<readonly string[]>([
+      'Navigation',
+      'Boxes',
+      'Pokémon',
+    ]);
+    Object.defineProperty(palette, 'isOpen', { value: openState });
+    Object.defineProperty(palette, 'items', { value: itemsSignal });
+    Object.defineProperty(palette, 'categoryOrder', { value: orderSignal });
+
+    const openCalls: number[] = [];
+    const toggleCalls: number[] = [];
+    const closeCalls: number[] = [];
+    const selectedIds: string[] = [];
+    palette.openRequested.subscribe(() => openCalls.push(1));
+    palette.toggleRequested.subscribe(() => toggleCalls.push(1));
+    palette.closed.subscribe(() => closeCalls.push(1));
+    palette.itemSelected.subscribe((item) => selectedIds.push(item.id));
+
+    const makeKeyEvent = (key: string, ctrlKey = false) =>
+      ({
+        key,
+        ctrlKey,
+        metaKey: false,
+        preventDefault: vi.fn(),
+      }) as unknown as KeyboardEvent;
+
+    palette.onGlobalKeydown(makeKeyEvent('k', true));
+    expect(openCalls.length).toBe(1);
+    expect(toggleCalls.length).toBe(1);
+
+    openState.set(true);
+    palette.syncOpenState(true);
+    expect(palette.selectedIndex()).toBe(0);
+
+    palette.onGlobalKeydown(makeKeyEvent('ArrowDown'));
+    expect(palette.selectedIndex()).toBe(1);
+    palette.onGlobalKeydown(makeKeyEvent('ArrowUp'));
+    expect(palette.selectedIndex()).toBe(0);
+    palette.onGlobalKeydown(makeKeyEvent('ArrowUp'));
+    expect(palette.selectedIndex()).toBe(3);
+
+    palette.setQuery('Bulba');
+    expect(palette.selectedIndex()).toBe(0);
+    expect(palette.flatResults().map((i) => i.id)).toEqual(['mon-1']);
+
+    palette.onGlobalKeydown(makeKeyEvent('Enter'));
+    expect(selectedIds).toEqual(['mon-1']);
+    expect(closeCalls.length).toBe(1);
+
+    palette.setQuery('');
+    palette.onSelect(sampleItems[1]);
+    expect(selectedIds).toEqual(['mon-1', 'nav-stats']);
+
+    palette.onGlobalKeydown(makeKeyEvent('Escape'));
+    expect(closeCalls.length).toBe(3);
   });
 });

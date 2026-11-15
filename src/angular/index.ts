@@ -1,6 +1,7 @@
 export * from './auth.service.js';
 export * from './animated-number.js';
 export * from './bottom-sheet-drag.js';
+export * from './command-palette.component.js';
 export * from './dialog-sheet.component.js';
 export * from './segmented-meter.component.js';
 export * from './status-feedback.component.js';
