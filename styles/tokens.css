@@ -267,14 +267,14 @@
   width: calc(100% - var(--spacing-32, 32px));
   max-width: 640px;
   max-height: calc(85vh - 48px);
-  background: var(--m3-surface-container-high);
-  border: 1px solid var(--m3-outline-variant);
-  border-radius: var(--radius-md, 16px);
+  background: var(--kit-surface-container-high);
+  border: 1px solid var(--kit-outline-variant);
+  border-radius: var(--kit-radius-md, 16px);
   box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  color: var(--m3-on-surface);
+  color: var(--kit-on-surface);
 }
 
 .kit-command-palette:not([open]) {
@@ -291,13 +291,13 @@
   backdrop-filter: blur(16px) contrast(95%) brightness(85%);
   -webkit-backdrop-filter: blur(16px) contrast(95%) brightness(85%);
   overscroll-behavior: contain;
-  transition: opacity var(--kit-motion-duration-medium, 220ms)
-    var(--kit-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+  transition: opacity var(--kit-duration-medium, 220ms)
+    var(--kit-ease-standard, cubic-bezier(0.2, 0, 0, 1));
 }
 
 .kit-command-palette.slide-up-enter {
-  animation: kitPaletteDesktopIn var(--kit-motion-duration-medium, 220ms)
-    var(--kit-motion-easing-expressive, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+  animation: kitPaletteDesktopIn var(--kit-duration-medium, 220ms)
+    var(--kit-ease-emphasized, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }
 
 @keyframes kitPaletteDesktopIn {
@@ -315,10 +315,10 @@
   opacity: 0;
   transform: scale(0.96) translateY(8px);
   transition:
-    opacity var(--kit-motion-duration-medium, 220ms)
-      var(--kit-motion-easing-exit, cubic-bezier(0.4, 0, 1, 1)),
-    transform var(--kit-motion-duration-medium, 220ms)
-      var(--kit-motion-easing-exit, cubic-bezier(0.4, 0, 1, 1));
+    opacity var(--kit-duration-medium, 220ms)
+      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),
+    transform var(--kit-duration-medium, 220ms)
+      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));
 }
 
 .kit-command-palette.closing::backdrop {
@@ -339,15 +339,15 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-12, 12px) var(--spacing-20, 20px);
-  border-bottom: 1px solid var(--m3-outline-variant);
-  background: var(--m3-surface-container);
+  border-bottom: 1px solid var(--kit-outline-variant);
+  background: var(--kit-surface-container);
 }
 
 .kit-palette-title-group {
   display: flex;
   align-items: center;
   gap: var(--spacing-8, 8px);
-  color: var(--m3-primary);
+  color: var(--kit-primary);
 }
 
 .kit-palette-title {
@@ -356,7 +356,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 0;
-  color: var(--m3-on-surface);
+  color: var(--kit-on-surface);
 }
 
 .kit-palette-shortcut-badge {
@@ -365,9 +365,9 @@
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 4px;
-  background: var(--m3-surface-container-highest);
-  color: var(--m3-on-surface-variant);
-  border: 1px solid var(--m3-outline-variant);
+  background: var(--kit-surface-container-highest);
+  color: var(--kit-on-surface-variant);
+  border: 1px solid var(--kit-outline-variant);
 }
 
 .kit-palette-search-wrapper {
@@ -375,12 +375,12 @@
   align-items: center;
   gap: var(--spacing-12, 12px);
   padding: var(--spacing-16, 16px) var(--spacing-20, 20px);
-  border-bottom: 1px solid var(--m3-outline-variant);
-  background: var(--m3-surface-container-high);
+  border-bottom: 1px solid var(--kit-outline-variant);
+  background: var(--kit-surface-container-high);
 }
 
 .kit-palette-search-icon {
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
   flex-shrink: 0;
 }
 
@@ -390,7 +390,7 @@
   border: none;
   outline: none;
   font-size: 1.05rem;
-  color: var(--m3-on-surface);
+  color: var(--kit-on-surface);
   font-family: inherit;
 }
 
@@ -401,7 +401,7 @@
 }
 
 .kit-palette-input::placeholder {
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
   opacity: 0.7;
 }
 
@@ -423,9 +423,9 @@
   font-weight: 600;
   padding: 3px 6px;
   border-radius: 4px;
-  background: var(--m3-surface-container-highest);
-  color: var(--m3-on-surface-variant);
-  border: 1px solid var(--m3-outline-variant);
+  background: var(--kit-surface-container-highest);
+  color: var(--kit-on-surface-variant);
+  border: 1px solid var(--kit-outline-variant);
   line-height: 1;
 }
 
@@ -437,13 +437,13 @@
 .kit-palette-esc-badge {
   cursor: pointer;
   transition:
-    background-color var(--kit-motion-duration-fast, 150ms) ease,
-    color var(--kit-motion-duration-fast, 150ms) ease;
+    background-color var(--kit-duration-fast, 150ms) ease,
+    color var(--kit-duration-fast, 150ms) ease;
 }
 
 .kit-palette-esc-badge:hover {
-  background: var(--m3-surface-container);
-  color: var(--m3-on-surface);
+  background: var(--kit-surface-container);
+  color: var(--kit-on-surface);
 }
 
 .kit-palette-results {
@@ -470,7 +470,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--m3-primary);
+  color: var(--kit-primary);
 }
 
 .kit-palette-clear-btn {
@@ -479,19 +479,19 @@
   font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
   line-height: 1;
   transition:
-    color var(--kit-motion-duration-fast, 150ms) ease,
-    background-color var(--kit-motion-duration-fast, 150ms) ease;
+    color var(--kit-duration-fast, 150ms) ease,
+    background-color var(--kit-duration-fast, 150ms) ease;
 }
 
 .kit-palette-clear-btn:hover {
-  color: var(--m3-error, #ef4444);
-  background: var(--m3-surface-container-highest);
+  color: var(--m3-error, var(--kit-danger, #ef4444));
+  background: var(--kit-surface-container-highest);
 }
 
 .kit-palette-item {
@@ -501,19 +501,19 @@
   gap: var(--spacing-12, 12px);
   padding: var(--spacing-8, 8px) var(--spacing-20, 20px);
   margin: 2px var(--spacing-8, 8px);
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--kit-radius-xs, 8px);
   cursor: pointer;
   transition:
-    background-color var(--kit-motion-duration-fast, 150ms) ease,
-    color var(--kit-motion-duration-fast, 150ms) ease,
-    transform var(--kit-motion-duration-fast, 150ms)
-      var(--kit-motion-easing-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    background-color var(--kit-duration-fast, 150ms) ease,
+    color var(--kit-duration-fast, 150ms) ease,
+    transform var(--kit-duration-fast, 150ms)
+      var(--kit-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .kit-palette-item:hover,
 .kit-palette-item.selected {
-  background: var(--m3-secondary-container);
-  color: var(--m3-on-secondary-container);
+  background: var(--m3-secondary-container, var(--kit-primary-container));
+  color: var(--m3-on-secondary-container, var(--kit-on-primary-container));
 }
 
 .kit-palette-item.selected {
@@ -531,12 +531,12 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: var(--m3-surface-container-highest);
-  color: var(--m3-on-surface);
+  background: var(--kit-surface-container-highest);
+  color: var(--kit-on-surface);
   flex-shrink: 0;
   transition:
-    background-color var(--kit-motion-duration-fast, 150ms) ease,
-    color var(--kit-motion-duration-fast, 150ms) ease;
+    background-color var(--kit-duration-fast, 150ms) ease,
+    color var(--kit-duration-fast, 150ms) ease;
 }
 
 .kit-palette-item-glyph {
@@ -546,8 +546,8 @@
 }
 
 .kit-palette-item.selected .kit-palette-item-icon {
-  background: var(--m3-on-secondary-container);
-  color: var(--m3-secondary-container);
+  background: var(--m3-on-secondary-container, var(--kit-on-primary-container));
+  color: var(--m3-secondary-container, var(--kit-primary-container));
 }
 
 .kit-palette-item-info {
@@ -578,34 +578,34 @@
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 4px;
-  background: var(--m3-surface-container-highest);
-  color: var(--m3-on-surface-variant);
-  border: 1px solid var(--m3-outline-variant);
+  background: var(--kit-surface-container-highest);
+  color: var(--kit-on-surface-variant);
+  border: 1px solid var(--kit-outline-variant);
   flex-shrink: 0;
   line-height: 1.2;
 }
 
 .kit-palette-item.selected .kit-palette-region-badge {
-  background: var(--m3-on-secondary-container);
-  color: var(--m3-secondary-container);
+  background: var(--m3-on-secondary-container, var(--kit-on-primary-container));
+  color: var(--m3-secondary-container, var(--kit-primary-container));
   border-color: transparent;
 }
 
 .kit-palette-item-subtitle {
   font-size: 0.8rem;
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .kit-palette-item.selected .kit-palette-item-subtitle {
-  color: var(--m3-on-secondary-container);
+  color: var(--m3-on-secondary-container, var(--kit-on-primary-container));
   opacity: 0.85;
 }
 
 .kit-palette-mark {
-  background: color-mix(in srgb, var(--m3-primary, #6366f1) 24%, transparent);
+  background: color-mix(in srgb, var(--kit-primary, #6366f1) 24%, transparent);
   color: inherit;
   font-weight: 700;
   border-radius: 2px;
@@ -622,8 +622,8 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 12px;
-  background: var(--m3-surface-container-highest);
-  color: var(--m3-on-surface-variant);
+  background: var(--kit-surface-container-highest);
+  color: var(--kit-on-surface-variant);
   flex-shrink: 0;
 }
 
@@ -656,26 +656,26 @@
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
   cursor: pointer;
   opacity: 0.6;
   flex-shrink: 0;
   padding: 0;
   margin-left: auto;
   transition:
-    opacity var(--kit-motion-duration-fast, 150ms) ease,
-    background-color var(--kit-motion-duration-fast, 150ms) ease,
-    color var(--kit-motion-duration-fast, 150ms) ease;
+    opacity var(--kit-duration-fast, 150ms) ease,
+    background-color var(--kit-duration-fast, 150ms) ease,
+    color var(--kit-duration-fast, 150ms) ease;
 }
 
 .kit-palette-item-remove-btn:hover {
   opacity: 1;
-  color: var(--m3-error, #ef4444);
-  background: var(--m3-surface-container-highest);
+  color: var(--m3-error, var(--kit-danger, #ef4444));
+  background: var(--kit-surface-container-highest);
 }
 
 .kit-palette-item.selected .kit-palette-item-remove-btn {
-  color: var(--m3-on-secondary-container);
+  color: var(--m3-on-secondary-container, var(--kit-on-primary-container));
   opacity: 0.85;
 }
 
@@ -686,7 +686,7 @@
   justify-content: center;
   padding: var(--spacing-48, 48px) var(--spacing-20, 20px);
   gap: var(--spacing-12, 12px);
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
 }
 
 .kit-palette-empty-state p {
@@ -699,10 +699,10 @@
   align-items: center;
   gap: var(--spacing-16, 16px);
   padding: var(--spacing-8, 8px) var(--spacing-20, 20px);
-  border-top: 1px solid var(--m3-outline-variant);
-  background: var(--m3-surface-container);
+  border-top: 1px solid var(--kit-outline-variant);
+  background: var(--kit-surface-container);
   font-size: 0.75rem;
-  color: var(--m3-on-surface-variant);
+  color: var(--kit-on-surface-variant);
 }
 
 .kit-palette-hint {
@@ -734,9 +734,8 @@
   }
 
   .kit-command-palette.slide-up-enter {
-    animation: kitPaletteSheetUp var(--kit-motion-duration-enter, 280ms)
-      var(--kit-motion-easing-expressive, cubic-bezier(0.16, 1, 0.3, 1))
-      forwards;
+    animation: kitPaletteSheetUp var(--kit-duration-medium, 280ms)
+      var(--kit-ease-emphasized, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
   }
 
   @keyframes kitPaletteSheetUp {
@@ -751,8 +750,8 @@
   .kit-command-palette.closing {
     transform: translateY(100%) !important;
     opacity: 1 !important;
-    transition: transform var(--kit-motion-duration-medium, 220ms)
-      var(--kit-motion-easing-exit, cubic-bezier(0.4, 0, 1, 1)) !important;
+    transition: transform var(--kit-duration-medium, 220ms)
+      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) !important;
   }
 
   .kit-palette-drag-handle-bar {
@@ -762,14 +761,14 @@
     padding: 10px 0 4px;
     cursor: grab;
     touch-action: none;
-    background: var(--m3-surface-container);
+    background: var(--kit-surface-container);
   }
 
   .kit-palette-drag-handle {
     width: 36px;
     height: 4px;
     border-radius: 2px;
-    background: var(--m3-outline-variant);
+    background: var(--kit-outline-variant);
   }
 
   .kit-palette-item {

@@ -852,4 +852,29 @@ describe('@wesdizzle/app-kit/angular', () => {
     palette.onGlobalKeydown(makeKeyEvent('Escape'));
     expect(closeCalls.length).toBe(3);
   });
+
+  it('uses shared --kit-* semantic surface tokens in .kit-command-palette styles without bare --m3-* dependencies', () => {
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const tokensCss = readFileSync(
+      join(specDir, '../../styles/tokens.css'),
+      'utf8',
+    );
+    const startIdx = tokensCss.indexOf(
+      '/* Shared Command Palette (Dialog + Bottom Sheet) */',
+    );
+    const endIdx = tokensCss.indexOf(
+      '/* Accessible Focus Rings Across Shared Kit Components */',
+    );
+    expect(startIdx).toBeGreaterThan(-1);
+    expect(endIdx).toBeGreaterThan(startIdx);
+    const paletteSection = tokensCss.slice(startIdx, endIdx);
+
+    expect(paletteSection).toMatch(
+      /background:\s*var\(--kit-surface-container-high\)/,
+    );
+    expect(paletteSection).not.toMatch(/var\(--m3-surface/);
+    expect(paletteSection).not.toMatch(/var\(--m3-on-surface/);
+    expect(paletteSection).not.toMatch(/var\(--m3-outline-variant\)/);
+    expect(paletteSection).not.toMatch(/var\(--m3-primary/);
+  });
 });
