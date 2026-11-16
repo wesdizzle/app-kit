@@ -28,8 +28,10 @@ import { KitThemeToggleComponent } from './theme-toggle.component.js';
 import { interpolateNumber } from './animated-number.js';
 import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
 import {
+  KitDegradedBannerComponent,
   KitStatusBannerComponent,
   KitSyncIndicatorComponent,
+  formatKitDegradedTimestamp,
 } from './status-feedback.component.js';
 import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
 import {
@@ -963,8 +965,34 @@ describe('@wesdizzle/app-kit/angular', () => {
       expect(tokensCss).not.toMatch(/kitSheetSlideUp[^;]*\b(both|forwards)\b/);
       expect(tokensCss).toMatch(/\.kit-profile-dialog\.dragging\s*\{/);
       expect(tokensCss).toMatch(/\.kit-dialog-sheet-panel\.dragging\s*\{/);
+      expect(tokensCss).toMatch(/\.kit-degraded-banner\s*\{/);
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it('formats backup and offline read-only warnings in KitDegradedBannerComponent', () => {
+    const modeSignal = signal<'offline' | 'backup' | null>('backup');
+    const tsSignal = signal<string | Date | null>('2026-11-16T03:00:00.000Z');
+    const customSignal = signal<string | null>(null);
+
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const banner = runInInjectionContext(
+      injector,
+      () => new KitDegradedBannerComponent(),
+    );
+    Object.defineProperty(banner, 'mode', { value: modeSignal });
+    Object.defineProperty(banner, 'snapshotTimestamp', { value: tsSignal });
+    Object.defineProperty(banner, 'customMessage', { value: customSignal });
+
+    expect(formatKitDegradedTimestamp('2026-11-16T03:00:00.000Z')).toBeTruthy();
+    expect(banner.resolvedMessage()).toContain('Database read quota');
+    expect(banner.resolvedMessage()).toContain('Editing is disabled');
+
+    modeSignal.set('offline');
+    expect(banner.resolvedMessage()).toContain('Showing locally cached data');
+    expect(banner.resolvedMessage()).toContain('connection is restored');
   });
 });

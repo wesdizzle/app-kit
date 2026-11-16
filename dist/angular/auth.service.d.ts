@@ -1,6 +1,8 @@
 import { OnDestroy } from '@angular/core';
 import { KitUserPreferences } from './theme.service.js';
 import * as i0 from "@angular/core";
+export declare const KIT_DEGRADED_HEADER = "X-Kit-Degraded";
+export declare const KIT_SNAPSHOT_TIMESTAMP_HEADER = "X-Kit-Snapshot-Timestamp";
 export interface BaseUserProfile {
     id: number;
     email?: string | null;
@@ -21,12 +23,17 @@ export interface AuthMeResponse<TUser extends BaseUserProfile = BaseUserProfile>
     oidcIssuer?: string | null;
     oidcClientId?: string | null;
     user: TUser | null;
+    degraded?: boolean;
+    degradedReason?: string;
+    snapshotTimestamp?: string | null;
 }
 export interface UpstreamOidcStatusResult {
     reachable: boolean;
     authenticated: boolean;
     authorized: boolean;
     cookiePresent?: boolean;
+    degraded?: boolean;
+    snapshotTimestamp?: string | null;
     preferences?: KitUserPreferences;
     user: {
         id?: number;
@@ -36,6 +43,17 @@ export interface UpstreamOidcStatusResult {
         preferences?: KitUserPreferences;
     } | null;
 }
+export interface CachedKitAuthSnapshot<TUser extends BaseUserProfile = BaseUserProfile> {
+    user: TUser;
+    accountHubUrl: string | null;
+    oidcIssuer: string | null;
+    oidcClientId: string | null;
+    updatedAt: number;
+}
+export declare function readCachedKitAuthSnapshot<TUser extends BaseUserProfile = BaseUserProfile>(storageKey?: string): CachedKitAuthSnapshot<TUser> | null;
+export declare function writeCachedKitAuthSnapshot<TUser extends BaseUserProfile = BaseUserProfile>(snapshot: CachedKitAuthSnapshot<TUser>, storageKey?: string): void;
+export declare function clearCachedKitAuthSnapshot(storageKey?: string): void;
+export declare function mergeDegradedUserProfile<TUser extends BaseUserProfile = BaseUserProfile>(incoming: TUser, cached?: TUser | null): TUser;
 export declare function sanitizeClientReturnToPath(raw: string | null | undefined, defaultPath?: string): string;
 export declare function consumeSilentSsoCallbackParam(clientId?: string | null): boolean;
 export declare function shouldAttemptSilentSso(clientId?: string | null): boolean;
@@ -56,6 +74,9 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     readonly accountHubUrl: import("@angular/core").WritableSignal<string | null>;
     readonly oidcIssuer: import("@angular/core").WritableSignal<string | null>;
     readonly oidcClientId: import("@angular/core").WritableSignal<string | null>;
+    readonly isDegraded: import("@angular/core").WritableSignal<boolean>;
+    readonly degradedMode: import("@angular/core").WritableSignal<"offline" | "backup" | null>;
+    readonly degradedSnapshotTimestamp: import("@angular/core").WritableSignal<string | null>;
     readonly isLoading: import("@angular/core").Signal<boolean>;
     readonly isAuthenticated: import("@angular/core").Signal<boolean>;
     readonly isAdmin: import("@angular/core").Signal<boolean>;
@@ -71,6 +92,7 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     constructor();
     ngOnDestroy(): void;
     private registerUpstreamSessionLifecycleListeners;
+    private restoreSessionFromOfflineCache;
     ensureAuthLoaded(): Promise<void>;
     checkSession(): Promise<void>;
     protected canAutoSignIn(): boolean;

@@ -6,10 +6,13 @@ import {
   derToP1363,
   isAllowedPushEndpoint,
   isCrossOriginMutatingRequest,
+  isD1QuotaOrReadError,
+  loadR2LatestSnapshot,
   parseAuthenticatorData,
   performScheduledBackup,
   readSessionCookie,
   resetOidcJwksCache,
+  resetR2SnapshotCache,
   resolveStrongSecret,
   sanitizeReturnToPath,
   serializeClearSessionCookies,
@@ -461,5 +464,46 @@ describe('@wesdizzle/app-kit/worker', () => {
 
     expect(writeRes.prunedCount).toBe(2);
     expect(deletedKeys).toHaveLength(2);
+  });
+
+  it('detects D1 quota/read errors and caches/deduplicates loadR2LatestSnapshot calls', async () => {
+    resetR2SnapshotCache();
+    expect(
+      isD1QuotaOrReadError(
+        new Error('D1_ERROR: Exceeded maximum rows read for today'),
+      ),
+    ).toBe(true);
+    expect(
+      isD1QuotaOrReadError(new Error('SQLITE_BUSY: database locked')),
+    ).toBe(true);
+    expect(isD1QuotaOrReadError(new TypeError('Unexpected JSON token'))).toBe(
+      false,
+    );
+
+    const payload = JSON.stringify({
+      timestamp: '2026-11-16T03:00:00.000Z',
+      tables: { users: [{ id: 1, username: 'alice' }] },
+    });
+    const getSpy = vi.fn().mockImplementation(async () => ({
+      text: async () => payload,
+    }));
+    const bucket = { get: getSpy } as unknown as R2Bucket;
+
+    // Parallel callers share 1 R2 Class B GetObject request and reuse cached snapshot
+    const [first, second] = await Promise.all([
+      loadR2LatestSnapshot(bucket),
+      loadR2LatestSnapshot(bucket),
+    ]);
+    const third = await loadR2LatestSnapshot(bucket);
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith('snapshots/latest.json');
+    expect(first?.timestamp).toBe('2026-11-16T03:00:00.000Z');
+    expect(second?.tables['users']).toEqual([{ id: 1, username: 'alice' }]);
+    expect(third?.tables['users']).toHaveLength(1);
+
+    resetR2SnapshotCache(bucket);
+    await loadR2LatestSnapshot(bucket);
+    expect(getSpy).toHaveBeenCalledTimes(2);
   });
 });

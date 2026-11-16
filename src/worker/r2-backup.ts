@@ -24,6 +24,179 @@ export interface ScheduledBackupOptions {
 }
 
 const VALID_TABLE_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const DEFAULT_R2_SNAPSHOT_CACHE_TTL_MS = 10 * 60 * 1000;
+const DEFAULT_R2_MISSING_CACHE_TTL_MS = 30 * 1000;
+
+export interface R2BackupSnapshot<
+  TTables = Record<string, Array<Record<string, unknown>>>,
+> {
+  timestamp: string | null;
+  version?: string;
+  metadata?: {
+    timestamp?: string;
+    date?: string;
+    totalRows?: number;
+    sha256?: string;
+    tableCounts?: Record<string, number>;
+  };
+  tables: TTables;
+}
+
+export interface LoadR2LatestSnapshotOptions {
+  cacheTtlMs?: number;
+  forceRefresh?: boolean;
+  objectKey?: string;
+}
+
+interface R2SnapshotCacheEntry {
+  epoch: number;
+  expiresAt: number;
+  snapshot: R2BackupSnapshot | null;
+  inFlight?: Promise<R2BackupSnapshot | null>;
+}
+
+let r2SnapshotCacheEpoch = 0;
+const r2SnapshotCache = new WeakMap<
+  R2Bucket,
+  Map<string, R2SnapshotCacheEntry>
+>();
+
+/**
+ * Clears cached R2 backup snapshots (all buckets when called without arguments,
+ * or a specific R2Bucket instance).
+ */
+export function resetR2SnapshotCache(bucket?: R2Bucket | null): void {
+  if (bucket) {
+    r2SnapshotCache.delete(bucket);
+  } else {
+    r2SnapshotCacheEpoch++;
+  }
+}
+
+async function parseR2SnapshotObject(
+  obj: R2ObjectBody,
+): Promise<R2BackupSnapshot | null> {
+  let rawParsed: unknown = null;
+  if (typeof obj.text === 'function') {
+    const rawText = await obj.text();
+    rawParsed = JSON.parse(rawText);
+  } else if (typeof obj.json === 'function') {
+    rawParsed = await obj.json();
+  }
+  if (!rawParsed || typeof rawParsed !== 'object' || Array.isArray(rawParsed)) {
+    return null;
+  }
+  const rec = rawParsed as {
+    timestamp?: unknown;
+    version?: unknown;
+    metadata?: R2BackupSnapshot['metadata'];
+    tables?: unknown;
+  };
+  const tables =
+    rec.tables && typeof rec.tables === 'object' && !Array.isArray(rec.tables)
+      ? (rec.tables as Record<string, Array<Record<string, unknown>>>)
+      : {};
+  const timestamp =
+    typeof rec.timestamp === 'string' && rec.timestamp
+      ? rec.timestamp
+      : typeof rec.metadata?.timestamp === 'string' && rec.metadata.timestamp
+        ? rec.metadata.timestamp
+        : null;
+  return {
+    timestamp,
+    version: typeof rec.version === 'string' ? rec.version : undefined,
+    metadata: rec.metadata,
+    tables,
+  };
+}
+
+/**
+ * Loads `snapshots/latest.json` from Cloudflare R2 with isolate-level TTL caching
+ * and single-flight request deduplication so concurrent fallback reads during a
+ * D1 outage consume at most 1 R2 Class B GetObject call per isolate window.
+ */
+export async function loadR2LatestSnapshot<
+  TTables = Record<string, Array<Record<string, unknown>>>,
+>(
+  bucket?: R2Bucket | null,
+  options: LoadR2LatestSnapshotOptions = {},
+): Promise<R2BackupSnapshot<TTables> | null> {
+  if (!bucket || typeof bucket.get !== 'function') {
+    return null;
+  }
+
+  const objectKey = options.objectKey ?? 'snapshots/latest.json';
+  const cacheTtlMs = Math.max(
+    0,
+    options.cacheTtlMs ?? DEFAULT_R2_SNAPSHOT_CACHE_TTL_MS,
+  );
+  const now = Date.now();
+  const epoch = r2SnapshotCacheEpoch;
+
+  let bucketMap = r2SnapshotCache.get(bucket);
+  if (!bucketMap) {
+    bucketMap = new Map<string, R2SnapshotCacheEntry>();
+    r2SnapshotCache.set(bucket, bucketMap);
+  }
+
+  const existing = bucketMap.get(objectKey);
+  if (
+    !options.forceRefresh &&
+    existing &&
+    existing.epoch === epoch &&
+    existing.expiresAt > now
+  ) {
+    return existing.snapshot as R2BackupSnapshot<TTables> | null;
+  }
+
+  if (existing && existing.epoch === epoch && existing.inFlight) {
+    return (await existing.inFlight) as R2BackupSnapshot<TTables> | null;
+  }
+
+  const fetchPromise = (async (): Promise<R2BackupSnapshot | null> => {
+    try {
+      const obj = await bucket.get(objectKey);
+      if (!obj) {
+        bucketMap!.set(objectKey, {
+          epoch,
+          expiresAt:
+            Date.now() + Math.min(cacheTtlMs, DEFAULT_R2_MISSING_CACHE_TTL_MS),
+          snapshot: null,
+        });
+        return null;
+      }
+      const parsed = await parseR2SnapshotObject(obj);
+      bucketMap!.set(objectKey, {
+        epoch,
+        expiresAt:
+          Date.now() +
+          (parsed
+            ? cacheTtlMs
+            : Math.min(cacheTtlMs, DEFAULT_R2_MISSING_CACHE_TTL_MS)),
+        snapshot: parsed,
+      });
+      return parsed;
+    } catch (err) {
+      console.warn(
+        `[WorkerBackup] Failed to read R2 fallback snapshot (${objectKey}):`,
+        err,
+      );
+      if (existing && existing.epoch === epoch) {
+        bucketMap!.delete(objectKey);
+      }
+      return null;
+    }
+  })();
+
+  bucketMap.set(objectKey, {
+    epoch,
+    expiresAt: existing?.epoch === epoch ? existing.expiresAt : 0,
+    snapshot: existing?.epoch === epoch ? existing.snapshot : null,
+    inFlight: fetchPromise,
+  });
+
+  return (await fetchPromise) as R2BackupSnapshot<TTables> | null;
+}
 
 export async function performScheduledBackup(
   env: BackupEnv,

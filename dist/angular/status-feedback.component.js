@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, effect, input, signal, } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, effect, input, signal, } from '@angular/core';
 import * as i0 from "@angular/core";
 function KitSyncIndicatorComponent_Conditional_0_Conditional_1_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵnamespaceSVG();
@@ -48,6 +48,20 @@ function KitStatusBannerComponent_Conditional_0_Template(rf, ctx) { if (rf & 1) 
     i0.ɵɵattribute("role", ctx_r0.variant() === "error" ? "alert" : "status");
     i0.ɵɵadvance(2);
     i0.ɵɵtextInterpolate(ctx_r0.message());
+} }
+function KitDegradedBannerComponent_Conditional_0_Template(rf, ctx) { if (rf & 1) {
+    i0.ɵɵdomElementStart(0, "div", 0)(1, "span", 1);
+    i0.ɵɵtext(2);
+    i0.ɵɵdomElementEnd();
+    i0.ɵɵdomElementStart(3, "span", 2);
+    i0.ɵɵtext(4);
+    i0.ɵɵdomElementEnd()();
+} if (rf & 2) {
+    const ctx_r0 = i0.ɵɵnextContext();
+    i0.ɵɵadvance(2);
+    i0.ɵɵtextInterpolate1(" ", ctx === "backup" ? "\u26A0\uFE0F Read-Only Backup Mode" : "\u26A0\uFE0F Offline Read-Only Mode", " ");
+    i0.ɵɵadvance(2);
+    i0.ɵɵtextInterpolate(ctx_r0.resolvedMessage());
 } }
 /**
  * Header-friendly sync pill that morphs from a spinning indicator into a
@@ -156,7 +170,7 @@ export class KitSyncIndicatorComponent {
   `,
             }]
     }], () => [], { isSaving: [{ type: i0.Input, args: [{ isSignal: true, alias: "isSaving", required: false }] }], savingLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "savingLabel", required: false }] }], savedLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "savedLabel", required: false }] }], lingerMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "lingerMs", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSyncIndicatorComponent, { className: "KitSyncIndicatorComponent", filePath: "status-feedback.component.ts", lineNumber: 66 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSyncIndicatorComponent, { className: "KitSyncIndicatorComponent", filePath: "status-feedback.component.ts", lineNumber: 67 }); })();
 /**
  * Animated inline status/alert banner with directional entrance and a subtle
  * horizontal shake on error feedback.
@@ -194,4 +208,86 @@ export class KitStatusBannerComponent {
   `,
             }]
     }], null, { message: [{ type: i0.Input, args: [{ isSignal: true, alias: "message", required: false }] }], variant: [{ type: i0.Input, args: [{ isSignal: true, alias: "variant", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitStatusBannerComponent, { className: "KitStatusBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 140 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitStatusBannerComponent, { className: "KitStatusBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 141 }); })();
+export function formatKitDegradedTimestamp(value) {
+    if (!value)
+        return null;
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return typeof value === 'string' && value.trim() ? value.trim() : null;
+    }
+    try {
+        return date.toLocaleString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }
+    catch {
+        return date.toISOString();
+    }
+}
+/**
+ * Shared read-only warning banner displayed when the app is running against an
+ * R2 backup snapshot (due to D1 read quota exhaustion) or offline cached data.
+ */
+export class KitDegradedBannerComponent {
+    constructor() {
+        this.mode = input(null, ...(ngDevMode ? [{ debugName: "mode" }] : /* istanbul ignore next */ []));
+        this.snapshotTimestamp = input(null, ...(ngDevMode ? [{ debugName: "snapshotTimestamp" }] : /* istanbul ignore next */ []));
+        this.customMessage = input(null, ...(ngDevMode ? [{ debugName: "customMessage" }] : /* istanbul ignore next */ []));
+        this.resolvedMessage = computed(() => {
+            const custom = this.customMessage()?.trim();
+            if (custom)
+                return custom;
+            const activeMode = this.mode();
+            const ts = formatKitDegradedTimestamp(this.snapshotTimestamp());
+            if (activeMode === 'backup') {
+                const fromPart = ts ? ` from ${ts}` : '';
+                return `Database read quota is temporarily exhausted. Showing backup snapshot${fromPart}. Editing is disabled until service resumes.`;
+            }
+            if (activeMode === 'offline') {
+                const syncedPart = ts ? ` (last synced ${ts})` : '';
+                return `Showing locally cached data${syncedPart}. Editing is disabled until connection is restored.`;
+            }
+            return '';
+        }, ...(ngDevMode ? [{ debugName: "resolvedMessage" }] : /* istanbul ignore next */ []));
+    }
+    static { this.ɵfac = function KitDegradedBannerComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitDegradedBannerComponent)(); }; }
+    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitDegradedBannerComponent, selectors: [["kit-degraded-banner"]], inputs: { mode: [1, "mode"], snapshotTimestamp: [1, "snapshotTimestamp"], customMessage: [1, "customMessage"] }, decls: 1, vars: 1, consts: [["data-testid", "kit-degraded-banner", "role", "status", "aria-live", "polite", 1, "kit-status-banner", "variant-warning", "kit-degraded-banner"], [1, "kit-degraded-badge"], [1, "kit-degraded-message"]], template: function KitDegradedBannerComponent_Template(rf, ctx) { if (rf & 1) {
+            i0.ɵɵconditionalCreate(0, KitDegradedBannerComponent_Conditional_0_Template, 5, 2, "div", 0);
+        } if (rf & 2) {
+            let tmp_0_0;
+            i0.ɵɵconditional((tmp_0_0 = ctx.mode()) ? 0 : -1, tmp_0_0);
+        } }, encapsulation: 2, changeDetection: 0 }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitDegradedBannerComponent, [{
+        type: Component,
+        args: [{
+                selector: 'kit-degraded-banner',
+                standalone: true,
+                encapsulation: ViewEncapsulation.None,
+                changeDetection: ChangeDetectionStrategy.OnPush,
+                template: `
+    @if (mode(); as activeMode) {
+      <div
+        class="kit-status-banner variant-warning kit-degraded-banner"
+        data-testid="kit-degraded-banner"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="kit-degraded-badge">
+          {{
+            activeMode === 'backup'
+              ? '⚠️ Read-Only Backup Mode'
+              : '⚠️ Offline Read-Only Mode'
+          }}
+        </span>
+        <span class="kit-degraded-message">{{ resolvedMessage() }}</span>
+      </div>
+    }
+  `,
+            }]
+    }], null, { mode: [{ type: i0.Input, args: [{ isSignal: true, alias: "mode", required: false }] }], snapshotTimestamp: [{ type: i0.Input, args: [{ isSignal: true, alias: "snapshotTimestamp", required: false }] }], customMessage: [{ type: i0.Input, args: [{ isSignal: true, alias: "customMessage", required: false }] }] }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitDegradedBannerComponent, { className: "KitDegradedBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 197 }); })();

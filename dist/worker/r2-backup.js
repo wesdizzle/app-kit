@@ -10,6 +10,116 @@
  */
 import { sha256Hex } from './crypto.js';
 const VALID_TABLE_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const DEFAULT_R2_SNAPSHOT_CACHE_TTL_MS = 10 * 60 * 1000;
+const DEFAULT_R2_MISSING_CACHE_TTL_MS = 30 * 1000;
+let r2SnapshotCacheEpoch = 0;
+const r2SnapshotCache = new WeakMap();
+/**
+ * Clears cached R2 backup snapshots (all buckets when called without arguments,
+ * or a specific R2Bucket instance).
+ */
+export function resetR2SnapshotCache(bucket) {
+    if (bucket) {
+        r2SnapshotCache.delete(bucket);
+    }
+    else {
+        r2SnapshotCacheEpoch++;
+    }
+}
+async function parseR2SnapshotObject(obj) {
+    let rawParsed = null;
+    if (typeof obj.text === 'function') {
+        const rawText = await obj.text();
+        rawParsed = JSON.parse(rawText);
+    }
+    else if (typeof obj.json === 'function') {
+        rawParsed = await obj.json();
+    }
+    if (!rawParsed || typeof rawParsed !== 'object' || Array.isArray(rawParsed)) {
+        return null;
+    }
+    const rec = rawParsed;
+    const tables = rec.tables && typeof rec.tables === 'object' && !Array.isArray(rec.tables)
+        ? rec.tables
+        : {};
+    const timestamp = typeof rec.timestamp === 'string' && rec.timestamp
+        ? rec.timestamp
+        : typeof rec.metadata?.timestamp === 'string' && rec.metadata.timestamp
+            ? rec.metadata.timestamp
+            : null;
+    return {
+        timestamp,
+        version: typeof rec.version === 'string' ? rec.version : undefined,
+        metadata: rec.metadata,
+        tables,
+    };
+}
+/**
+ * Loads `snapshots/latest.json` from Cloudflare R2 with isolate-level TTL caching
+ * and single-flight request deduplication so concurrent fallback reads during a
+ * D1 outage consume at most 1 R2 Class B GetObject call per isolate window.
+ */
+export async function loadR2LatestSnapshot(bucket, options = {}) {
+    if (!bucket || typeof bucket.get !== 'function') {
+        return null;
+    }
+    const objectKey = options.objectKey ?? 'snapshots/latest.json';
+    const cacheTtlMs = Math.max(0, options.cacheTtlMs ?? DEFAULT_R2_SNAPSHOT_CACHE_TTL_MS);
+    const now = Date.now();
+    const epoch = r2SnapshotCacheEpoch;
+    let bucketMap = r2SnapshotCache.get(bucket);
+    if (!bucketMap) {
+        bucketMap = new Map();
+        r2SnapshotCache.set(bucket, bucketMap);
+    }
+    const existing = bucketMap.get(objectKey);
+    if (!options.forceRefresh &&
+        existing &&
+        existing.epoch === epoch &&
+        existing.expiresAt > now) {
+        return existing.snapshot;
+    }
+    if (existing && existing.epoch === epoch && existing.inFlight) {
+        return (await existing.inFlight);
+    }
+    const fetchPromise = (async () => {
+        try {
+            const obj = await bucket.get(objectKey);
+            if (!obj) {
+                bucketMap.set(objectKey, {
+                    epoch,
+                    expiresAt: Date.now() + Math.min(cacheTtlMs, DEFAULT_R2_MISSING_CACHE_TTL_MS),
+                    snapshot: null,
+                });
+                return null;
+            }
+            const parsed = await parseR2SnapshotObject(obj);
+            bucketMap.set(objectKey, {
+                epoch,
+                expiresAt: Date.now() +
+                    (parsed
+                        ? cacheTtlMs
+                        : Math.min(cacheTtlMs, DEFAULT_R2_MISSING_CACHE_TTL_MS)),
+                snapshot: parsed,
+            });
+            return parsed;
+        }
+        catch (err) {
+            console.warn(`[WorkerBackup] Failed to read R2 fallback snapshot (${objectKey}):`, err);
+            if (existing && existing.epoch === epoch) {
+                bucketMap.delete(objectKey);
+            }
+            return null;
+        }
+    })();
+    bucketMap.set(objectKey, {
+        epoch,
+        expiresAt: existing?.epoch === epoch ? existing.expiresAt : 0,
+        snapshot: existing?.epoch === epoch ? existing.snapshot : null,
+        inFlight: fetchPromise,
+    });
+    return (await fetchPromise);
+}
 export async function performScheduledBackup(env, tables, options = {}) {
     const logPrefix = options.logPrefix ?? '[WorkerBackup]';
     const retentionDays = options.retentionDays ?? 30;

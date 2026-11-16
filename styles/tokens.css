@@ -1264,6 +1264,27 @@
   color: var(--kit-warning);
 }
 
+.kit-degraded-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.kit-degraded-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kit-degraded-message {
+  font-weight: 500;
+}
+
 .kit-profile-dialog .modal-card {
   display: flex;
   flex-direction: column;

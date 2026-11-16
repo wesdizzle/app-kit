@@ -31,3 +31,17 @@ export declare class KitStatusBannerComponent {
     static ɵfac: i0.ɵɵFactoryDeclaration<KitStatusBannerComponent, never>;
     static ɵcmp: i0.ɵɵComponentDeclaration<KitStatusBannerComponent, "kit-status-banner", never, { "message": { "alias": "message"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
 }
+export type KitDegradedMode = 'offline' | 'backup' | null;
+export declare function formatKitDegradedTimestamp(value: string | Date | null | undefined): string | null;
+/**
+ * Shared read-only warning banner displayed when the app is running against an
+ * R2 backup snapshot (due to D1 read quota exhaustion) or offline cached data.
+ */
+export declare class KitDegradedBannerComponent {
+    readonly mode: import("@angular/core").InputSignal<KitDegradedMode>;
+    readonly snapshotTimestamp: import("@angular/core").InputSignal<string | Date | null | undefined>;
+    readonly customMessage: import("@angular/core").InputSignal<string | null | undefined>;
+    readonly resolvedMessage: import("@angular/core").Signal<string>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<KitDegradedBannerComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<KitDegradedBannerComponent, "kit-degraded-banner", never, { "mode": { "alias": "mode"; "required": false; "isSignal": true; }; "snapshotTimestamp": { "alias": "snapshotTimestamp"; "required": false; "isSignal": true; }; "customMessage": { "alias": "customMessage"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+}

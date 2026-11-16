@@ -1,15 +1,23 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { KitAuthService, clearSilentSsoAttempt } from './auth.service.js';
+import {
+  KitAuthService,
+  clearCachedKitAuthSnapshot,
+  clearSilentSsoAttempt,
+  writeCachedKitAuthSnapshot,
+} from './auth.service.js';
 
 describe('@wesdizzle/app-kit/angular KitAuthService', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     clearSilentSsoAttempt();
+    clearCachedKitAuthSnapshot();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     clearSilentSsoAttempt();
+    clearCachedKitAuthSnapshot();
   });
 
   it('automatically triggers checkSession() on construction and sets authInitialized() to true', async () => {
@@ -185,6 +193,121 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
       '/api/auth/logout?silent=1',
       expect.anything(),
     );
+    service.ngOnDestroy();
+  });
+
+  it('preserves authenticated session from localStorage cache when /api/auth/me returns 503 or offline error', async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => store.set(k, v),
+      removeItem: (k: string) => store.delete(k),
+    });
+
+    writeCachedKitAuthSnapshot({
+      user: {
+        id: 1,
+        username: 'alice',
+        displayName: 'Alice',
+        role: 'admin',
+        isPublic: true,
+        homeRegion: 'Japan',
+      },
+      accountHubUrl: 'https://account.example.com/account',
+      oidcIssuer: 'https://account.example.com',
+      oidcClientId: 'living-dex',
+      updatedAt: 1700000000000,
+    });
+
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      headers: new Headers(),
+    } as Response);
+
+    const service = new KitAuthService();
+    await service.ensureAuthLoaded();
+
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.currentUser()?.username).toBe('alice');
+    expect(service.currentUser()?.homeRegion).toBe('Japan');
+    expect(service.isDegraded()).toBe(true);
+    expect(service.degradedMode()).toBe('offline');
+
+    // Subsequent network failure on focus recheck also preserves session
+    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('Offline'));
+    await service.checkSession();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.degradedMode()).toBe('offline');
+
+    // Explicit authenticated: false clears cached session
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      headers: new Headers(),
+      json: async () => ({
+        authenticated: false,
+        user: null,
+      }),
+    } as Response);
+    await service.checkSession();
+    expect(service.isAuthenticated()).toBe(false);
+    expect(service.isDegraded()).toBe(false);
+    expect(store.size).toBe(0);
+    service.ngOnDestroy();
+  });
+
+  it('merges cached profile fields and enters backup degradedMode when /api/auth/me returns degraded: true', async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => store.set(k, v),
+      removeItem: (k: string) => store.delete(k),
+    });
+
+    writeCachedKitAuthSnapshot({
+      user: {
+        id: 1,
+        username: 'alice',
+        displayName: 'Alice Collector',
+        bio: 'Full dex!',
+        role: 'admin',
+        isPublic: true,
+        homeRegion: 'USA',
+      },
+      accountHubUrl: null,
+      oidcIssuer: null,
+      oidcClientId: null,
+      updatedAt: 1700000000000,
+    });
+
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      headers: new Headers(),
+      json: async () => ({
+        authenticated: true,
+        degraded: true,
+        degradedReason: 'r2-backup',
+        snapshotTimestamp: '2026-11-16T03:00:00.000Z',
+        user: {
+          id: 1,
+          username: 'alice',
+          role: 'admin',
+          isPublic: false,
+        },
+      }),
+    } as Response);
+
+    const service = new KitAuthService();
+    await service.ensureAuthLoaded();
+
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.isDegraded()).toBe(true);
+    expect(service.degradedMode()).toBe('backup');
+    expect(service.degradedSnapshotTimestamp()).toBe(
+      '2026-11-16T03:00:00.000Z',
+    );
+    expect(service.currentUser()?.displayName).toBe('Alice Collector');
+    expect(service.currentUser()?.isPublic).toBe(true);
     service.ngOnDestroy();
   });
 });

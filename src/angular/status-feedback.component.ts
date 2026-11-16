@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   ViewEncapsulation,
+  computed,
   effect,
   input,
   signal,
@@ -140,4 +141,78 @@ export type KitStatusBannerVariant = 'error' | 'success' | 'info' | 'warning';
 export class KitStatusBannerComponent {
   readonly message = input<string | null | undefined>(null);
   readonly variant = input<KitStatusBannerVariant>('info');
+}
+
+export type KitDegradedMode = 'offline' | 'backup' | null;
+
+export function formatKitDegradedTimestamp(
+  value: string | Date | null | undefined,
+): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
+  }
+  try {
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  } catch {
+    return date.toISOString();
+  }
+}
+
+/**
+ * Shared read-only warning banner displayed when the app is running against an
+ * R2 backup snapshot (due to D1 read quota exhaustion) or offline cached data.
+ */
+@Component({
+  selector: 'kit-degraded-banner',
+  standalone: true,
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (mode(); as activeMode) {
+      <div
+        class="kit-status-banner variant-warning kit-degraded-banner"
+        data-testid="kit-degraded-banner"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="kit-degraded-badge">
+          {{
+            activeMode === 'backup'
+              ? '⚠️ Read-Only Backup Mode'
+              : '⚠️ Offline Read-Only Mode'
+          }}
+        </span>
+        <span class="kit-degraded-message">{{ resolvedMessage() }}</span>
+      </div>
+    }
+  `,
+})
+export class KitDegradedBannerComponent {
+  readonly mode = input<KitDegradedMode>(null);
+  readonly snapshotTimestamp = input<string | Date | null | undefined>(null);
+  readonly customMessage = input<string | null | undefined>(null);
+
+  readonly resolvedMessage = computed(() => {
+    const custom = this.customMessage()?.trim();
+    if (custom) return custom;
+
+    const activeMode = this.mode();
+    const ts = formatKitDegradedTimestamp(this.snapshotTimestamp());
+    if (activeMode === 'backup') {
+      const fromPart = ts ? ` from ${ts}` : '';
+      return `Database read quota is temporarily exhausted. Showing backup snapshot${fromPart}. Editing is disabled until service resumes.`;
+    }
+    if (activeMode === 'offline') {
+      const syncedPart = ts ? ` (last synced ${ts})` : '';
+      return `Showing locally cached data${syncedPart}. Editing is disabled until connection is restored.`;
+    }
+    return '';
+  });
 }

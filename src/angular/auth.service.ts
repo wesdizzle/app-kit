@@ -6,6 +6,9 @@ import {
   notifyActiveThemeService,
 } from './theme.service.js';
 
+export const KIT_DEGRADED_HEADER = 'X-Kit-Degraded';
+export const KIT_SNAPSHOT_TIMESTAMP_HEADER = 'X-Kit-Snapshot-Timestamp';
+
 export interface BaseUserProfile {
   id: number;
   email?: string | null;
@@ -29,6 +32,9 @@ export interface AuthMeResponse<
   oidcIssuer?: string | null;
   oidcClientId?: string | null;
   user: TUser | null;
+  degraded?: boolean;
+  degradedReason?: string;
+  snapshotTimestamp?: string | null;
 }
 
 export interface UpstreamOidcStatusResult {
@@ -36,6 +42,8 @@ export interface UpstreamOidcStatusResult {
   authenticated: boolean;
   authorized: boolean;
   cookiePresent?: boolean;
+  degraded?: boolean;
+  snapshotTimestamp?: string | null;
   preferences?: KitUserPreferences;
   user: {
     id?: number;
@@ -44,6 +52,118 @@ export interface UpstreamOidcStatusResult {
     role?: 'admin' | 'user';
     preferences?: KitUserPreferences;
   } | null;
+}
+
+export interface CachedKitAuthSnapshot<
+  TUser extends BaseUserProfile = BaseUserProfile,
+> {
+  user: TUser;
+  accountHubUrl: string | null;
+  oidcIssuer: string | null;
+  oidcClientId: string | null;
+  updatedAt: number;
+}
+
+const DEFAULT_CACHED_AUTH_STORAGE_KEY = 'kit_auth_cached_session_v1';
+
+export function readCachedKitAuthSnapshot<
+  TUser extends BaseUserProfile = BaseUserProfile,
+>(
+  storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY,
+): CachedKitAuthSnapshot<TUser> | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<
+      CachedKitAuthSnapshot<TUser>
+    > | null;
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !parsed.user ||
+      typeof parsed.user !== 'object' ||
+      typeof parsed.user.id !== 'number' ||
+      typeof parsed.user.username !== 'string'
+    ) {
+      return null;
+    }
+    return {
+      user: parsed.user,
+      accountHubUrl:
+        typeof parsed.accountHubUrl === 'string' ? parsed.accountHubUrl : null,
+      oidcIssuer:
+        typeof parsed.oidcIssuer === 'string' ? parsed.oidcIssuer : null,
+      oidcClientId:
+        typeof parsed.oidcClientId === 'string' ? parsed.oidcClientId : null,
+      updatedAt:
+        typeof parsed.updatedAt === 'number' &&
+        Number.isFinite(parsed.updatedAt)
+          ? parsed.updatedAt
+          : Date.now(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function writeCachedKitAuthSnapshot<
+  TUser extends BaseUserProfile = BaseUserProfile,
+>(
+  snapshot: CachedKitAuthSnapshot<TUser>,
+  storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY,
+): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(snapshot));
+  } catch {
+    // Ignore storage quota / privacy mode errors
+  }
+}
+
+export function clearCachedKitAuthSnapshot(
+  storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY,
+): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(storageKey);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function mergeDegradedUserProfile<
+  TUser extends BaseUserProfile = BaseUserProfile,
+>(incoming: TUser, cached?: TUser | null): TUser {
+  if (!cached || cached.id !== incoming.id) {
+    return incoming;
+  }
+  const merged = { ...cached, ...incoming };
+  if (
+    (!incoming.displayName || incoming.displayName === incoming.username) &&
+    cached.displayName
+  ) {
+    merged.displayName = cached.displayName;
+  }
+  if ((incoming.bio === undefined || incoming.bio === null) && cached.bio) {
+    merged.bio = cached.bio;
+  }
+  if (incoming.isPublic === false && cached.isPublic === true) {
+    merged.isPublic = cached.isPublic;
+  }
+  if (!incoming.email && cached.email) {
+    merged.email = cached.email;
+  }
+  if (!incoming.homeRegion && cached.homeRegion) {
+    merged.homeRegion = cached.homeRegion;
+  }
+  if (
+    (!incoming.createdAt || incoming.createdAt === new Date(0).toISOString()) &&
+    cached.createdAt
+  ) {
+    merged.createdAt = cached.createdAt;
+  }
+  return merged;
 }
 
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
@@ -247,6 +367,8 @@ export async function checkUpstreamOidcStatus(
       authenticated?: boolean;
       authorized?: boolean;
       cookiePresent?: boolean;
+      degraded?: boolean;
+      snapshotTimestamp?: string | null;
       preferences?: unknown;
       user?: {
         id?: number;
@@ -310,6 +432,10 @@ export async function checkUpstreamOidcStatus(
         typeof data.cookiePresent === 'boolean'
           ? data.cookiePresent
           : undefined,
+      ...(data.degraded === true ? { degraded: true } : {}),
+      ...(typeof data.snapshotTimestamp === 'string' && data.snapshotTimestamp
+        ? { snapshotTimestamp: data.snapshotTimestamp }
+        : {}),
       ...(hasPrefs ? { preferences: normalizedPrefs } : {}),
       user: userObj,
     };
@@ -337,6 +463,9 @@ export class KitAuthService<
   readonly accountHubUrl = signal<string | null>(null);
   readonly oidcIssuer = signal<string | null>(null);
   readonly oidcClientId = signal<string | null>(null);
+  readonly isDegraded = signal<boolean>(false);
+  readonly degradedMode = signal<'offline' | 'backup' | null>(null);
+  readonly degradedSnapshotTimestamp = signal<string | null>(null);
 
   readonly isLoading = computed(
     () => !this.authInitialized() || this.isAutoSigningIn(),
@@ -413,12 +542,56 @@ export class KitAuthService<
           triggerCheck(true);
         }
       };
+      const onOnline = () => {
+        if (this.isDegraded()) {
+          triggerCheck(true);
+        }
+      };
+      const onOffline = () => {
+        if (this.currentUser()) {
+          this.isDegraded.set(true);
+          this.degradedMode.set('offline');
+        }
+      };
       window.addEventListener('focus', onFocus);
       window.addEventListener('pageshow', onPageShow);
+      window.addEventListener('online', onOnline);
+      window.addEventListener('offline', onOffline);
       this.cleanupCallbacks.push(() => {
         window.removeEventListener('focus', onFocus);
         window.removeEventListener('pageshow', onPageShow);
+        window.removeEventListener('online', onOnline);
+        window.removeEventListener('offline', onOffline);
       });
+    }
+  }
+
+  private restoreSessionFromOfflineCache(
+    mode: 'offline' | 'backup' = 'offline',
+    snapshotTs?: string | null,
+  ): void {
+    const cached = readCachedKitAuthSnapshot<TUser>();
+    const preserved = this.currentUser() ?? cached?.user ?? null;
+    if (preserved) {
+      if (!this.currentUser() && cached) {
+        this.currentUser.set(cached.user);
+        this.accountHubUrl.set(cached.accountHubUrl);
+        this.oidcIssuer.set(cached.oidcIssuer);
+        this.oidcClientId.set(cached.oidcClientId);
+      }
+      this.isDegraded.set(true);
+      this.degradedMode.set(mode);
+      this.degradedSnapshotTimestamp.set(
+        snapshotTs ??
+          (cached ? new Date(cached.updatedAt).toISOString() : null),
+      );
+      this.isProvisioned.set(true);
+      this.unprovisionedEmail.set(null);
+    } else {
+      this.currentUser.set(null);
+      this.isDegraded.set(false);
+      this.degradedMode.set(null);
+      this.degradedSnapshotTimestamp.set(null);
     }
   }
 
@@ -444,7 +617,17 @@ export class KitAuthService<
       });
       if (epoch !== this.sessionEpoch) return;
       if (!response.ok) {
-        this.currentUser.set(null);
+        if (response.status === 401) {
+          clearCachedKitAuthSnapshot();
+          this.currentUser.set(null);
+          this.isDegraded.set(false);
+          this.degradedMode.set(null);
+          this.degradedSnapshotTimestamp.set(null);
+          return;
+        }
+        const headerTs =
+          response.headers?.get?.(KIT_SNAPSHOT_TIMESTAMP_HEADER) || null;
+        this.restoreSessionFromOfflineCache('offline', headerTs);
         return;
       }
       const data = (await response.json()) as AuthMeResponse<TUser>;
@@ -472,7 +655,7 @@ export class KitAuthService<
         const u = data.user;
         const fallbackUsername =
           u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
-        this.currentUser.set({
+        const normalizedUser: TUser = {
           ...u,
           id: typeof u.id === 'number' ? u.id : 1,
           email: u.email ?? null,
@@ -481,12 +664,54 @@ export class KitAuthService<
           isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : false,
           displayName: u.displayName ?? fallbackUsername,
           bio: u.bio ?? null,
+        };
+
+        const headerDegraded =
+          response.headers?.get?.(KIT_DEGRADED_HEADER) || null;
+        const headerSnapshotTs =
+          response.headers?.get?.(KIT_SNAPSHOT_TIMESTAMP_HEADER) || null;
+        const isDegradedResp = Boolean(data.degraded || headerDegraded);
+        const snapshotTs =
+          (typeof data.snapshotTimestamp === 'string' && data.snapshotTimestamp
+            ? data.snapshotTimestamp
+            : null) ?? headerSnapshotTs;
+
+        const cachedSnapshot = readCachedKitAuthSnapshot<TUser>();
+        const existingOrCachedUser =
+          this.currentUser() ?? cachedSnapshot?.user ?? null;
+        const finalUser = isDegradedResp
+          ? mergeDegradedUserProfile(normalizedUser, existingOrCachedUser)
+          : normalizedUser;
+
+        this.currentUser.set(finalUser);
+        writeCachedKitAuthSnapshot({
+          user: finalUser,
+          accountHubUrl: this.accountHubUrl(),
+          oidcIssuer: this.oidcIssuer(),
+          oidcClientId: this.oidcClientId(),
+          updatedAt:
+            isDegradedResp && cachedSnapshot?.updatedAt
+              ? cachedSnapshot.updatedAt
+              : Date.now(),
         });
+        this.isDegraded.set(isDegradedResp);
+        this.degradedMode.set(
+          isDegradedResp
+            ? data.degradedReason === 'offline'
+              ? 'offline'
+              : 'backup'
+            : null,
+        );
+        this.degradedSnapshotTimestamp.set(isDegradedResp ? snapshotTs : null);
         this.isProvisioned.set(true);
         this.unprovisionedEmail.set(null);
         await this.verifyUpstreamOidcSession();
       } else {
+        clearCachedKitAuthSnapshot();
         this.currentUser.set(null);
+        this.isDegraded.set(false);
+        this.degradedMode.set(null);
+        this.degradedSnapshotTimestamp.set(null);
         if (data.provisioned === false) {
           this.isProvisioned.set(false);
           this.unprovisionedEmail.set(
@@ -500,7 +725,7 @@ export class KitAuthService<
       }
     } catch {
       if (epoch === this.sessionEpoch) {
-        this.currentUser.set(null);
+        this.restoreSessionFromOfflineCache('offline', null);
       }
     } finally {
       this.authInitialized.set(true);
@@ -571,7 +796,15 @@ export class KitAuthService<
         credentials: 'same-origin',
         cache: 'no-store',
       }).catch(() => null);
+      clearCachedKitAuthSnapshot();
       this.currentUser.set(null);
+      this.isDegraded.set(false);
+      this.degradedMode.set(null);
+      this.degradedSnapshotTimestamp.set(null);
+      return;
+    }
+
+    if (status.degraded) {
       return;
     }
 
@@ -634,6 +867,13 @@ export class KitAuthService<
     const data = (await response.json()) as { user: TUser };
     if (data?.user) {
       this.currentUser.set(data.user);
+      writeCachedKitAuthSnapshot({
+        user: data.user,
+        accountHubUrl: this.accountHubUrl(),
+        oidcIssuer: this.oidcIssuer(),
+        oidcClientId: this.oidcClientId(),
+        updatedAt: Date.now(),
+      });
     }
     return data.user;
   }
@@ -653,7 +893,11 @@ export class KitAuthService<
         issuerUrl: null,
         authenticated: false,
       });
+      clearCachedKitAuthSnapshot();
       this.currentUser.set(null);
+      this.isDegraded.set(false);
+      this.degradedMode.set(null);
+      this.degradedSnapshotTimestamp.set(null);
     }
   }
 

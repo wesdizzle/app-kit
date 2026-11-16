@@ -17,6 +17,46 @@ export const HOST_OIDC_STATE_COOKIE = '__Host-app_oidc_state';
 export const OIDC_STATE_COOKIE = 'app_oidc_state';
 export const LEGACY_OIDC_STATE_COOKIE = 'oidc_login_state';
 export const OIDC_STATE_TTL_SECONDS = 600; // 10 minutes
+export const KIT_DEGRADED_HEADER = 'X-Kit-Degraded';
+export const KIT_SNAPSHOT_TIMESTAMP_HEADER = 'X-Kit-Snapshot-Timestamp';
+const D1_QUOTA_OR_READ_ERROR_RE = /d1_error|exceeded|quota|too many requests|overloaded|sqlite_busy|database is locked|no such table|maximum.*rows/i;
+/**
+ * Returns true when an error thrown during a D1 operation indicates quota
+ * exhaustion, transient D1 unavailability, or an uninitialized/locked DB read.
+ */
+export function isD1QuotaOrReadError(err) {
+    if (!err)
+        return false;
+    const seen = new Set();
+    let current = err;
+    for (let depth = 0; depth < 4 && current && !seen.has(current); depth++) {
+        seen.add(current);
+        if (typeof current === 'string') {
+            if (D1_QUOTA_OR_READ_ERROR_RE.test(current))
+                return true;
+            break;
+        }
+        if (current instanceof Error) {
+            if (D1_QUOTA_OR_READ_ERROR_RE.test(current.message || ''))
+                return true;
+            if (D1_QUOTA_OR_READ_ERROR_RE.test(current.name || ''))
+                return true;
+            current = current.cause;
+            continue;
+        }
+        if (typeof current === 'object') {
+            const rec = current;
+            if (typeof rec.message === 'string' &&
+                D1_QUOTA_OR_READ_ERROR_RE.test(rec.message)) {
+                return true;
+            }
+            current = rec.cause;
+            continue;
+        }
+        break;
+    }
+    return false;
+}
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 export async function signSession(user, secret, days = DEFAULT_SESSION_DAYS, nowMs = Date.now()) {

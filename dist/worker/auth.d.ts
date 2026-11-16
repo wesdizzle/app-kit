@@ -17,6 +17,13 @@ export declare const HOST_OIDC_STATE_COOKIE = "__Host-app_oidc_state";
 export declare const OIDC_STATE_COOKIE = "app_oidc_state";
 export declare const LEGACY_OIDC_STATE_COOKIE = "oidc_login_state";
 export declare const OIDC_STATE_TTL_SECONDS = 600;
+export declare const KIT_DEGRADED_HEADER = "X-Kit-Degraded";
+export declare const KIT_SNAPSHOT_TIMESTAMP_HEADER = "X-Kit-Snapshot-Timestamp";
+/**
+ * Returns true when an error thrown during a D1 operation indicates quota
+ * exhaustion, transient D1 unavailability, or an uninitialized/locked DB read.
+ */
+export declare function isD1QuotaOrReadError(err: unknown): boolean;
 export type UserRole = 'admin' | 'user';
 export interface SessionUser {
     id: number;

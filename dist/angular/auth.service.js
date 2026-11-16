@@ -1,6 +1,87 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { KitThemeService, normalizeKitUserPreferences, notifyActiveThemeService, } from './theme.service.js';
 import * as i0 from "@angular/core";
+export const KIT_DEGRADED_HEADER = 'X-Kit-Degraded';
+export const KIT_SNAPSHOT_TIMESTAMP_HEADER = 'X-Kit-Snapshot-Timestamp';
+const DEFAULT_CACHED_AUTH_STORAGE_KEY = 'kit_auth_cached_session_v1';
+export function readCachedKitAuthSnapshot(storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY) {
+    if (typeof localStorage === 'undefined')
+        return null;
+    try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw)
+            return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed ||
+            typeof parsed !== 'object' ||
+            !parsed.user ||
+            typeof parsed.user !== 'object' ||
+            typeof parsed.user.id !== 'number' ||
+            typeof parsed.user.username !== 'string') {
+            return null;
+        }
+        return {
+            user: parsed.user,
+            accountHubUrl: typeof parsed.accountHubUrl === 'string' ? parsed.accountHubUrl : null,
+            oidcIssuer: typeof parsed.oidcIssuer === 'string' ? parsed.oidcIssuer : null,
+            oidcClientId: typeof parsed.oidcClientId === 'string' ? parsed.oidcClientId : null,
+            updatedAt: typeof parsed.updatedAt === 'number' &&
+                Number.isFinite(parsed.updatedAt)
+                ? parsed.updatedAt
+                : Date.now(),
+        };
+    }
+    catch {
+        return null;
+    }
+}
+export function writeCachedKitAuthSnapshot(snapshot, storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY) {
+    if (typeof localStorage === 'undefined')
+        return;
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(snapshot));
+    }
+    catch {
+        // Ignore storage quota / privacy mode errors
+    }
+}
+export function clearCachedKitAuthSnapshot(storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY) {
+    if (typeof localStorage === 'undefined')
+        return;
+    try {
+        localStorage.removeItem(storageKey);
+    }
+    catch {
+        // Ignore storage errors
+    }
+}
+export function mergeDegradedUserProfile(incoming, cached) {
+    if (!cached || cached.id !== incoming.id) {
+        return incoming;
+    }
+    const merged = { ...cached, ...incoming };
+    if ((!incoming.displayName || incoming.displayName === incoming.username) &&
+        cached.displayName) {
+        merged.displayName = cached.displayName;
+    }
+    if ((incoming.bio === undefined || incoming.bio === null) && cached.bio) {
+        merged.bio = cached.bio;
+    }
+    if (incoming.isPublic === false && cached.isPublic === true) {
+        merged.isPublic = cached.isPublic;
+    }
+    if (!incoming.email && cached.email) {
+        merged.email = cached.email;
+    }
+    if (!incoming.homeRegion && cached.homeRegion) {
+        merged.homeRegion = cached.homeRegion;
+    }
+    if ((!incoming.createdAt || incoming.createdAt === new Date(0).toISOString()) &&
+        cached.createdAt) {
+        merged.createdAt = cached.createdAt;
+    }
+    return merged;
+}
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
 const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
 const DEFAULT_FOCUS_RECHECK_COOLDOWN_MS = 60_000;
@@ -226,6 +307,10 @@ export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
             cookiePresent: typeof data.cookiePresent === 'boolean'
                 ? data.cookiePresent
                 : undefined,
+            ...(data.degraded === true ? { degraded: true } : {}),
+            ...(typeof data.snapshotTimestamp === 'string' && data.snapshotTimestamp
+                ? { snapshotTimestamp: data.snapshotTimestamp }
+                : {}),
             ...(hasPrefs ? { preferences: normalizedPrefs } : {}),
             user: userObj,
         };
@@ -249,6 +334,9 @@ export class KitAuthService {
         this.accountHubUrl = signal(null, ...(ngDevMode ? [{ debugName: "accountHubUrl" }] : /* istanbul ignore next */ []));
         this.oidcIssuer = signal(null, ...(ngDevMode ? [{ debugName: "oidcIssuer" }] : /* istanbul ignore next */ []));
         this.oidcClientId = signal(null, ...(ngDevMode ? [{ debugName: "oidcClientId" }] : /* istanbul ignore next */ []));
+        this.isDegraded = signal(false, ...(ngDevMode ? [{ debugName: "isDegraded" }] : /* istanbul ignore next */ []));
+        this.degradedMode = signal(null, ...(ngDevMode ? [{ debugName: "degradedMode" }] : /* istanbul ignore next */ []));
+        this.degradedSnapshotTimestamp = signal(null, ...(ngDevMode ? [{ debugName: "degradedSnapshotTimestamp" }] : /* istanbul ignore next */ []));
         this.isLoading = computed(() => !this.authInitialized() || this.isAutoSigningIn(), ...(ngDevMode ? [{ debugName: "isLoading" }] : /* istanbul ignore next */ []));
         this.isAuthenticated = computed(() => this.currentUser() !== null, ...(ngDevMode ? [{ debugName: "isAuthenticated" }] : /* istanbul ignore next */ []));
         this.isAdmin = computed(() => this.currentUser()?.role === 'admin', ...(ngDevMode ? [{ debugName: "isAdmin" }] : /* istanbul ignore next */ []));
@@ -309,12 +397,51 @@ export class KitAuthService {
                     triggerCheck(true);
                 }
             };
+            const onOnline = () => {
+                if (this.isDegraded()) {
+                    triggerCheck(true);
+                }
+            };
+            const onOffline = () => {
+                if (this.currentUser()) {
+                    this.isDegraded.set(true);
+                    this.degradedMode.set('offline');
+                }
+            };
             window.addEventListener('focus', onFocus);
             window.addEventListener('pageshow', onPageShow);
+            window.addEventListener('online', onOnline);
+            window.addEventListener('offline', onOffline);
             this.cleanupCallbacks.push(() => {
                 window.removeEventListener('focus', onFocus);
                 window.removeEventListener('pageshow', onPageShow);
+                window.removeEventListener('online', onOnline);
+                window.removeEventListener('offline', onOffline);
             });
+        }
+    }
+    restoreSessionFromOfflineCache(mode = 'offline', snapshotTs) {
+        const cached = readCachedKitAuthSnapshot();
+        const preserved = this.currentUser() ?? cached?.user ?? null;
+        if (preserved) {
+            if (!this.currentUser() && cached) {
+                this.currentUser.set(cached.user);
+                this.accountHubUrl.set(cached.accountHubUrl);
+                this.oidcIssuer.set(cached.oidcIssuer);
+                this.oidcClientId.set(cached.oidcClientId);
+            }
+            this.isDegraded.set(true);
+            this.degradedMode.set(mode);
+            this.degradedSnapshotTimestamp.set(snapshotTs ??
+                (cached ? new Date(cached.updatedAt).toISOString() : null));
+            this.isProvisioned.set(true);
+            this.unprovisionedEmail.set(null);
+        }
+        else {
+            this.currentUser.set(null);
+            this.isDegraded.set(false);
+            this.degradedMode.set(null);
+            this.degradedSnapshotTimestamp.set(null);
         }
     }
     async ensureAuthLoaded() {
@@ -340,7 +467,16 @@ export class KitAuthService {
             if (epoch !== this.sessionEpoch)
                 return;
             if (!response.ok) {
-                this.currentUser.set(null);
+                if (response.status === 401) {
+                    clearCachedKitAuthSnapshot();
+                    this.currentUser.set(null);
+                    this.isDegraded.set(false);
+                    this.degradedMode.set(null);
+                    this.degradedSnapshotTimestamp.set(null);
+                    return;
+                }
+                const headerTs = response.headers?.get?.(KIT_SNAPSHOT_TIMESTAMP_HEADER) || null;
+                this.restoreSessionFromOfflineCache('offline', headerTs);
                 return;
             }
             const data = (await response.json());
@@ -369,7 +505,7 @@ export class KitAuthService {
                 this.isAutoSigningIn.set(false);
                 const u = data.user;
                 const fallbackUsername = u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
-                this.currentUser.set({
+                const normalizedUser = {
                     ...u,
                     id: typeof u.id === 'number' ? u.id : 1,
                     email: u.email ?? null,
@@ -378,13 +514,45 @@ export class KitAuthService {
                     isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : false,
                     displayName: u.displayName ?? fallbackUsername,
                     bio: u.bio ?? null,
+                };
+                const headerDegraded = response.headers?.get?.(KIT_DEGRADED_HEADER) || null;
+                const headerSnapshotTs = response.headers?.get?.(KIT_SNAPSHOT_TIMESTAMP_HEADER) || null;
+                const isDegradedResp = Boolean(data.degraded || headerDegraded);
+                const snapshotTs = (typeof data.snapshotTimestamp === 'string' && data.snapshotTimestamp
+                    ? data.snapshotTimestamp
+                    : null) ?? headerSnapshotTs;
+                const cachedSnapshot = readCachedKitAuthSnapshot();
+                const existingOrCachedUser = this.currentUser() ?? cachedSnapshot?.user ?? null;
+                const finalUser = isDegradedResp
+                    ? mergeDegradedUserProfile(normalizedUser, existingOrCachedUser)
+                    : normalizedUser;
+                this.currentUser.set(finalUser);
+                writeCachedKitAuthSnapshot({
+                    user: finalUser,
+                    accountHubUrl: this.accountHubUrl(),
+                    oidcIssuer: this.oidcIssuer(),
+                    oidcClientId: this.oidcClientId(),
+                    updatedAt: isDegradedResp && cachedSnapshot?.updatedAt
+                        ? cachedSnapshot.updatedAt
+                        : Date.now(),
                 });
+                this.isDegraded.set(isDegradedResp);
+                this.degradedMode.set(isDegradedResp
+                    ? data.degradedReason === 'offline'
+                        ? 'offline'
+                        : 'backup'
+                    : null);
+                this.degradedSnapshotTimestamp.set(isDegradedResp ? snapshotTs : null);
                 this.isProvisioned.set(true);
                 this.unprovisionedEmail.set(null);
                 await this.verifyUpstreamOidcSession();
             }
             else {
+                clearCachedKitAuthSnapshot();
                 this.currentUser.set(null);
+                this.isDegraded.set(false);
+                this.degradedMode.set(null);
+                this.degradedSnapshotTimestamp.set(null);
                 if (data.provisioned === false) {
                     this.isProvisioned.set(false);
                     this.unprovisionedEmail.set(data.unprovisionedEmail ?? data.email ?? null);
@@ -398,7 +566,7 @@ export class KitAuthService {
         }
         catch {
             if (epoch === this.sessionEpoch) {
-                this.currentUser.set(null);
+                this.restoreSessionFromOfflineCache('offline', null);
             }
         }
         finally {
@@ -463,7 +631,14 @@ export class KitAuthService {
                 credentials: 'same-origin',
                 cache: 'no-store',
             }).catch(() => null);
+            clearCachedKitAuthSnapshot();
             this.currentUser.set(null);
+            this.isDegraded.set(false);
+            this.degradedMode.set(null);
+            this.degradedSnapshotTimestamp.set(null);
+            return;
+        }
+        if (status.degraded) {
             return;
         }
         if ((status.user.username &&
@@ -506,6 +681,13 @@ export class KitAuthService {
         const data = (await response.json());
         if (data?.user) {
             this.currentUser.set(data.user);
+            writeCachedKitAuthSnapshot({
+                user: data.user,
+                accountHubUrl: this.accountHubUrl(),
+                oidcIssuer: this.oidcIssuer(),
+                oidcClientId: this.oidcClientId(),
+                updatedAt: Date.now(),
+            });
         }
         return data.user;
     }
@@ -526,7 +708,11 @@ export class KitAuthService {
                 issuerUrl: null,
                 authenticated: false,
             });
+            clearCachedKitAuthSnapshot();
             this.currentUser.set(null);
+            this.isDegraded.set(false);
+            this.degradedMode.set(null);
+            this.degradedSnapshotTimestamp.set(null);
         }
     }
     getLogoutRedirectUrl() {
