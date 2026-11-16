@@ -565,14 +565,6 @@ export class KitCommandPaletteComponent {
     }
     onDragHandleTouchEnd() {
         this.sheetDrag.onTouchEnd(() => {
-            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                try {
-                    navigator.vibrate(10);
-                }
-                catch {
-                    // Ignore vibration limitations
-                }
-            }
             this.requestClose();
         });
     }
@@ -735,7 +727,7 @@ export class KitCommandPaletteComponent {
             i0.ɵɵtext(40, "Close");
             i0.ɵɵelementEnd()()()();
         } if (rf & 2) {
-            i0.ɵɵstyleProp("transform", ctx.effectiveTransformY() !== null ? "translateY(" + ctx.effectiveTransformY() + "px)" : null);
+            i0.ɵɵstyleProp("transform", !ctx.isClosing() && ctx.effectiveTransformY() !== 0 ? "translateY(" + ctx.effectiveTransformY() + "px)" : null);
             i0.ɵɵclassProp("dragging", ctx.isDraggingSheet() || ctx.externalDragging())("slide-up-enter", ctx.isEntering())("closing", ctx.isClosing());
             i0.ɵɵattribute("aria-label", ctx.ariaLabel() || ctx.title());
             i0.ɵɵadvance(7);
@@ -773,7 +765,7 @@ export class KitCommandPaletteComponent {
       [class.slide-up-enter]="isEntering()"
       [class.closing]="isClosing()"
       [style.transform]="
-        effectiveTransformY() !== null
+        !isClosing() && effectiveTransformY() !== 0
           ? 'translateY(' + effectiveTransformY() + 'px)'
           : null
       "

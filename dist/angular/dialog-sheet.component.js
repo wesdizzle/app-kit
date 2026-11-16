@@ -131,7 +131,7 @@ export class KitDialogSheetComponent {
         } if (rf & 2) {
             let _t;
             i0.ɵɵqueryRefresh(_t = i0.ɵɵloadQuery()) && (ctx.dialogEl = _t.first);
-        } }, inputs: { isOpen: [1, "isOpen"], ariaLabelledby: [1, "ariaLabelledby"], ariaLabel: [1, "ariaLabel"], maxWidth: [1, "maxWidth"], showHandle: [1, "showHandle"], panelClass: [1, "panelClass"], closeDurationMs: [1, "closeDurationMs"] }, outputs: { closed: "closed" }, ngContentSelectors: _c1, decls: 5, vars: 13, consts: [["dialogEl", ""], [1, "kit-dialog-sheet", 3, "click", "cancel"], [1, "kit-dialog-sheet-panel", 3, "click", "touchstart", "touchmove", "touchend", "touchcancel"], ["aria-hidden", "true", 1, "sheet-drag-area"], [1, "sheet-handle"]], template: function KitDialogSheetComponent_Template(rf, ctx) { if (rf & 1) {
+        } }, inputs: { isOpen: [1, "isOpen"], ariaLabelledby: [1, "ariaLabelledby"], ariaLabel: [1, "ariaLabel"], maxWidth: [1, "maxWidth"], showHandle: [1, "showHandle"], panelClass: [1, "panelClass"], closeDurationMs: [1, "closeDurationMs"] }, outputs: { closed: "closed" }, ngContentSelectors: _c1, decls: 5, vars: 15, consts: [["dialogEl", ""], [1, "kit-dialog-sheet", 3, "click", "cancel"], [1, "kit-dialog-sheet-panel", 3, "click", "touchstart", "touchmove", "touchend", "touchcancel"], ["aria-hidden", "true", 1, "sheet-drag-area"], [1, "sheet-handle"]], template: function KitDialogSheetComponent_Template(rf, ctx) { if (rf & 1) {
             i0.ɵɵprojectionDef();
             i0.ɵɵdomElementStart(0, "dialog", 1, 0);
             i0.ɵɵdomListener("click", function KitDialogSheetComponent_Template_dialog_click_0_listener($event) { return ctx.onBackdropClick($event); })("cancel", function KitDialogSheetComponent_Template_dialog_cancel_0_listener($event) { return ctx.onDialogCancel($event); });
@@ -146,6 +146,7 @@ export class KitDialogSheetComponent {
             i0.ɵɵadvance(2);
             i0.ɵɵclassMap(ctx.panelClass());
             i0.ɵɵstyleProp("max-width", ctx.maxWidth())("transform", ctx.dragController.effectiveTransformY() !== 0 ? "translateY(" + ctx.dragController.effectiveTransformY() + "px)" : null)("transition", ctx.dragController.isDragging() ? "none" : "transform var(--kit-duration-medium, 260ms) var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1))");
+            i0.ɵɵclassProp("dragging", ctx.dragController.isDragging());
             i0.ɵɵadvance();
             i0.ɵɵconditional(ctx.showHandle() ? 3 : -1);
         } }, encapsulation: 2, changeDetection: 0 }); }
@@ -170,6 +171,7 @@ export class KitDialogSheetComponent {
       <div
         class="kit-dialog-sheet-panel"
         [class]="panelClass()"
+        [class.dragging]="dragController.isDragging()"
         [style.max-width]="maxWidth()"
         [style.transform]="
           dragController.effectiveTransformY() !== 0
@@ -201,4 +203,4 @@ export class KitDialogSheetComponent {
             type: ViewChild,
             args: ['dialogEl']
         }], isOpen: [{ type: i0.Input, args: [{ isSignal: true, alias: "isOpen", required: false }] }], ariaLabelledby: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabelledby", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }], maxWidth: [{ type: i0.Input, args: [{ isSignal: true, alias: "maxWidth", required: false }] }], showHandle: [{ type: i0.Input, args: [{ isSignal: true, alias: "showHandle", required: false }] }], panelClass: [{ type: i0.Input, args: [{ isSignal: true, alias: "panelClass", required: false }] }], closeDurationMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "closeDurationMs", required: false }] }], closed: [{ type: i0.Output, args: ["closed"] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitDialogSheetComponent, { className: "KitDialogSheetComponent", filePath: "dialog-sheet.component.ts", lineNumber: 79 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitDialogSheetComponent, { className: "KitDialogSheetComponent", filePath: "dialog-sheet.component.ts", lineNumber: 80 }); })();

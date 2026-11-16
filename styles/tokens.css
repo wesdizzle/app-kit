@@ -900,7 +900,12 @@
   overflow: hidden;
   margin: auto;
   animation: kitModalSpringIn var(--kit-duration-medium) var(--kit-ease-spring)
-    both;
+    backwards;
+}
+
+.kit-profile-dialog.dragging {
+  animation: none !important;
+  transition: none !important;
 }
 
 .kit-profile-dialog.closing {
@@ -967,10 +972,6 @@
 }
 
 @keyframes kitSheetSlideDown {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
   to {
     opacity: 0;
     transform: translateY(100%);
@@ -1059,7 +1060,12 @@
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   animation: kitModalSpringIn var(--kit-duration-medium) var(--kit-ease-spring)
-    both;
+    backwards;
+}
+
+.kit-dialog-sheet-panel.dragging {
+  animation: none !important;
+  transition: none !important;
 }
 
 .kit-dialog-sheet.closing .kit-dialog-sheet-panel {
@@ -1082,7 +1088,7 @@
     border-bottom: none;
     max-height: 92dvh;
     overflow-y: auto;
-    animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) both;
+    animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) backwards;
   }
 
   .kit-dialog-sheet.closing .kit-dialog-sheet-panel {
@@ -1770,7 +1776,7 @@
     margin: auto 0 0 0;
     border-radius: 24px 24px 0 0;
     border-bottom: none;
-    animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) both;
+    animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) backwards;
   }
 
   .kit-profile-dialog.closing {

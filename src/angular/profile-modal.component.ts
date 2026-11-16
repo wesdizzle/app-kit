@@ -32,6 +32,7 @@ export interface ProfileSavePayload {
     <dialog
       #dialogEl
       class="kit-profile-dialog profile-dialog"
+      [class.dragging]="isDragging()"
       [class.closing]="isClosing()"
       [style.transform]="
         effectiveTransformY() !== 0
@@ -52,7 +53,7 @@ export interface ProfileSavePayload {
         (touchstart)="onTouchStart($event)"
         (touchmove)="onTouchMove($event)"
         (touchend)="onTouchEnd()"
-        (touchcancel)="onTouchEnd()"
+        (touchcancel)="onTouchCancel()"
       >
         <div class="sheet-drag-area">
           <div class="sheet-handle"></div>
@@ -534,5 +535,9 @@ export class KitProfileModalComponent implements OnDestroy {
 
   onTouchEnd(): void {
     this.sheetDrag.onTouchEnd(() => this.requestClose());
+  }
+
+  onTouchCancel(): void {
+    this.sheetDrag.reset();
   }
 }

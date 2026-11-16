@@ -195,7 +195,7 @@ let nextPaletteInstanceId = 0;
       [class.slide-up-enter]="isEntering()"
       [class.closing]="isClosing()"
       [style.transform]="
-        effectiveTransformY() !== null
+        !isClosing() && effectiveTransformY() !== 0
           ? 'translateY(' + effectiveTransformY() + 'px)'
           : null
       "
@@ -680,13 +680,6 @@ export class KitCommandPaletteComponent implements AfterViewInit {
 
   public onDragHandleTouchEnd(): void {
     this.sheetDrag.onTouchEnd(() => {
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        try {
-          navigator.vibrate(10);
-        } catch {
-          // Ignore vibration limitations
-        }
-      }
       this.requestClose();
     });
   }

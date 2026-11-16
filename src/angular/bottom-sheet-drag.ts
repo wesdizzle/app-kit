@@ -22,6 +22,8 @@ export class BottomSheetDragController {
   private lastTouchY = 0;
   private lastTouchTime = 0;
   private velocityY = 0;
+  private lastMoveDirectionY = 0;
+  private maxDragOffsetY = 0;
 
   readonly dragOffsetY = signal(0);
   readonly isDragging = signal(false);
@@ -35,7 +37,13 @@ export class BottomSheetDragController {
   onTouchStart(event: TouchEvent): void {
     if (!event.touches || event.touches.length !== 1) return;
 
-    const target = event.target as Element | null | undefined;
+    const rawTarget = event.target as Node | null | undefined;
+    const target =
+      rawTarget &&
+      'closest' in rawTarget &&
+      typeof (rawTarget as Element).closest === 'function'
+        ? (rawTarget as Element)
+        : (rawTarget?.parentElement ?? null);
     if (target && typeof target.closest === 'function') {
       if (target.closest(INTERACTIVE_SELECTOR)) {
         return;
@@ -52,6 +60,8 @@ export class BottomSheetDragController {
     this.touchStartTime = now;
     this.lastTouchTime = now;
     this.velocityY = 0;
+    this.lastMoveDirectionY = 0;
+    this.maxDragOffsetY = 0;
     this.isDragging.set(true);
   }
 
@@ -61,13 +71,18 @@ export class BottomSheetDragController {
     }
     const now = getTimestamp();
     const currentY = event.touches[0].clientY;
+    const dy = currentY - this.lastTouchY;
     const dt = Math.max(1, now - this.lastTouchTime);
-    this.velocityY = (currentY - this.lastTouchY) / dt;
-    this.lastTouchY = currentY;
-    this.lastTouchTime = now;
+    if (dy !== 0) {
+      this.velocityY = dy / dt;
+      this.lastMoveDirectionY = Math.sign(dy);
+      this.lastTouchY = currentY;
+      this.lastTouchTime = now;
+    }
 
     const deltaY = currentY - this.touchStartY;
     if (deltaY > 0) {
+      this.maxDragOffsetY = Math.max(this.maxDragOffsetY, deltaY);
       this.dragOffsetY.set(deltaY);
     } else if (deltaY < 0) {
       const damped = -Math.min(
@@ -83,16 +98,25 @@ export class BottomSheetDragController {
   onTouchEnd(onDismiss: () => void): void {
     if (!this.isDragging()) return;
     const finalOffset = this.dragOffsetY();
-    const totalDt = Math.max(1, getTimestamp() - this.touchStartTime);
-    const averageVelocity = finalOffset / totalDt;
-    const flickVelocity = Math.max(this.velocityY, averageVelocity);
+    const now = getTimestamp();
+    const isMovingUpward =
+      this.velocityY < 0 ||
+      this.lastMoveDirectionY < 0 ||
+      (this.maxDragOffsetY > 0 && finalOffset < this.maxDragOffsetY - 8);
+    const isRecentDownwardFlick =
+      !isMovingUpward &&
+      now - this.lastTouchTime <= 120 &&
+      this.velocityY >= this.velocityThresholdPxPerMs;
     const shouldDismiss =
-      finalOffset > this.dismissThresholdPx ||
-      (finalOffset > 24 && flickVelocity >= this.velocityThresholdPxPerMs);
+      !isMovingUpward &&
+      (finalOffset > this.dismissThresholdPx ||
+        (finalOffset > 24 && isRecentDownwardFlick));
 
     this.isDragging.set(false);
     this.dragOffsetY.set(0);
     this.velocityY = 0;
+    this.lastMoveDirectionY = 0;
+    this.maxDragOffsetY = 0;
 
     if (shouldDismiss) {
       onDismiss();
@@ -103,5 +127,7 @@ export class BottomSheetDragController {
     this.dragOffsetY.set(0);
     this.isDragging.set(false);
     this.velocityY = 0;
+    this.lastMoveDirectionY = 0;
+    this.maxDragOffsetY = 0;
   }
 }

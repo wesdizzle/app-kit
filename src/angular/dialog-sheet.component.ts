@@ -49,6 +49,7 @@ export function canAnimateKitDialogExit(
       <div
         class="kit-dialog-sheet-panel"
         [class]="panelClass()"
+        [class.dragging]="dragController.isDragging()"
         [style.max-width]="maxWidth()"
         [style.transform]="
           dragController.effectiveTransformY() !== 0

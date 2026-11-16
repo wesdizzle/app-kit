@@ -11,6 +11,8 @@ export declare class BottomSheetDragController {
     private lastTouchY;
     private lastTouchTime;
     private velocityY;
+    private lastMoveDirectionY;
+    private maxDragOffsetY;
     readonly dragOffsetY: import("@angular/core").WritableSignal<number>;
     readonly isDragging: import("@angular/core").WritableSignal<boolean>;
     readonly effectiveTransformY: import("@angular/core").Signal<number>;

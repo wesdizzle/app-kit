@@ -122,6 +122,59 @@ describe('@wesdizzle/app-kit/angular', () => {
     }
   });
 
+  it('snaps back open when dragged with upward momentum instead of dismissing', () => {
+    vi.useFakeTimers();
+    try {
+      const controller = new BottomSheetDragController(90, 0.55);
+      const onDismiss = vi.fn();
+      const handleTarget = {
+        closest: (sel: string) =>
+          sel.includes('.sheet-handle') ? ({} as Element) : null,
+      };
+
+      // 1. Pull down past dismissThresholdPx (130px) then flick upward to 95px
+      controller.onTouchStart({
+        touches: [{ clientY: 100 }],
+        target: handleTarget,
+      } as unknown as TouchEvent);
+      vi.advanceTimersByTime(50);
+      controller.onTouchMove({
+        touches: [{ clientY: 230 }],
+      } as unknown as TouchEvent);
+      expect(controller.dragOffsetY()).toBe(130);
+
+      vi.advanceTimersByTime(16);
+      controller.onTouchMove({
+        touches: [{ clientY: 195 }],
+      } as unknown as TouchEvent);
+      expect(controller.dragOffsetY()).toBe(95);
+
+      controller.onTouchEnd(onDismiss);
+      expect(onDismiss).not.toHaveBeenCalled();
+      expect(controller.dragOffsetY()).toBe(0);
+      expect(controller.isDragging()).toBe(false);
+
+      // 2. Fast downward pull below dismissThresholdPx followed by upward flick
+      controller.onTouchStart({
+        touches: [{ clientY: 100 }],
+        target: handleTarget,
+      } as unknown as TouchEvent);
+      vi.advanceTimersByTime(10);
+      controller.onTouchMove({
+        touches: [{ clientY: 160 }],
+      } as unknown as TouchEvent);
+      vi.advanceTimersByTime(10);
+      controller.onTouchMove({
+        touches: [{ clientY: 145 }],
+      } as unknown as TouchEvent);
+      controller.onTouchEnd(onDismiss);
+      expect(onDismiss).not.toHaveBeenCalled();
+      expect(controller.dragOffsetY()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('sanitizes client return_to paths against backslash and protocol-relative redirects', () => {
     expect(sanitizeClientReturnToPath('/account?tab=security')).toBe(
       '/account?tab=security',
@@ -876,5 +929,42 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(paletteSection).not.toMatch(/var\(--m3-on-surface/);
     expect(paletteSection).not.toMatch(/var\(--m3-outline-variant\)/);
     expect(paletteSection).not.toMatch(/var\(--m3-primary/);
+  });
+
+  it('does not trigger navigator.vibrate when dismissing KitCommandPaletteComponent via drag handle and avoids forwards/both entrance animation locks in tokens.css', () => {
+    const vibrateSpy = vi.fn();
+    vi.stubGlobal('navigator', { vibrate: vibrateSpy });
+
+    try {
+      const injector = {
+        get: () => ({ onDestroy: () => () => {} }),
+      } as unknown as Injector;
+      const palette = runInInjectionContext(
+        injector,
+        () => new KitCommandPaletteComponent(),
+      );
+
+      palette.onDragHandleTouchStart({
+        touches: [{ clientY: 100 }],
+      } as unknown as TouchEvent);
+      palette.onDragHandleTouchMove({
+        touches: [{ clientY: 240 }],
+      } as unknown as TouchEvent);
+      palette.onDragHandleTouchEnd();
+
+      expect(vibrateSpy).not.toHaveBeenCalled();
+
+      const specDir = dirname(fileURLToPath(import.meta.url));
+      const tokensCss = readFileSync(
+        join(specDir, '../../styles/tokens.css'),
+        'utf8',
+      );
+      expect(tokensCss).not.toMatch(/kitModalSpringIn[^;]*\b(both|forwards)\b/);
+      expect(tokensCss).not.toMatch(/kitSheetSlideUp[^;]*\b(both|forwards)\b/);
+      expect(tokensCss).toMatch(/\.kit-profile-dialog\.dragging\s*\{/);
+      expect(tokensCss).toMatch(/\.kit-dialog-sheet-panel\.dragging\s*\{/);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
