@@ -83,7 +83,7 @@ export function mergeDegradedUserProfile(incoming, cached) {
     return merged;
 }
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
-const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
+const SSO_ATTEMPT_COOLDOWN_MS = 300_000;
 const DEFAULT_FOCUS_RECHECK_COOLDOWN_MS = 60_000;
 const ssoCheckedInMemory = new Set();
 function getSsoAttemptStorageKey(clientId) {
@@ -378,10 +378,7 @@ export class KitAuthService {
         };
         if (typeof document.addEventListener === 'function') {
             const onVisibilityChange = () => {
-                if (document.visibilityState === 'hidden') {
-                    ssoCheckedInMemory.clear();
-                }
-                else if (document.visibilityState === 'visible') {
+                if (document.visibilityState === 'visible') {
                     triggerCheck(false);
                 }
             };
@@ -501,7 +498,6 @@ export class KitAuthService {
                 this.oidcClientId.set(null);
             }
             if (data.authenticated && data.user) {
-                clearSilentSsoAttempt(this.oidcClientId());
                 this.isAutoSigningIn.set(false);
                 const u = data.user;
                 const fallbackUsername = u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
@@ -596,7 +592,7 @@ export class KitAuthService {
             markSilentSsoAttempt(clientId);
             this.isAutoSigningIn.set(true);
             const returnTo = getCurrentReturnToPath('/');
-            this.redirectTo(this.getLoginUrl(returnTo));
+            this.redirectTo(this.getLoginUrl(returnTo, { prompt: 'none' }));
             return true;
         }
         if (status.reachable && status.cookiePresent === false) {
@@ -638,7 +634,7 @@ export class KitAuthService {
             this.degradedSnapshotTimestamp.set(null);
             return;
         }
-        if (status.degraded) {
+        if (status.degraded || this.isDegraded()) {
             return;
         }
         if ((status.user.username &&
@@ -646,8 +642,12 @@ export class KitAuthService {
             status.user.username.toLowerCase() !==
                 localUser.username.toLowerCase()) ||
             (status.user.role && status.user.role !== localUser.role)) {
+            if (!shouldAttemptSilentSso(clientId)) {
+                return;
+            }
+            markSilentSsoAttempt(clientId);
             const returnTo = getCurrentReturnToPath('/');
-            this.redirectTo(this.getLoginUrl(returnTo));
+            this.redirectTo(this.getLoginUrl(returnTo, { prompt: 'none' }));
         }
     }
     getLoginUrl(returnTo = '/', options) {

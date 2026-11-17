@@ -310,4 +310,72 @@ describe('@wesdizzle/app-kit/angular KitAuthService', () => {
     expect(service.currentUser()?.isPublic).toBe(true);
     service.ngOnDestroy();
   });
+
+  it('prevents infinite username/role mismatch redirects during degraded mode and across repeat verifyUpstreamOidcSession calls', async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal('sessionStorage', {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => store.set(k, v),
+      removeItem: (k: string) => store.delete(k),
+    });
+
+    class TestAuthService extends KitAuthService {
+      redirects: string[] = [];
+      protected override redirectTo(url: string): void {
+        this.redirects.push(url);
+      }
+    }
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url === '/api/auth/me') {
+        return {
+          ok: true,
+          headers: new Headers(),
+          json: async () => ({
+            authenticated: true,
+            degraded: false,
+            oidcIssuer: 'https://auth.example.com',
+            oidcClientId: 'living-dex',
+            user: {
+              id: 1,
+              username: 'old_alice',
+              role: 'admin',
+              isPublic: false,
+            },
+          }),
+        } as Response;
+      }
+      if (url.startsWith('https://auth.example.com/api/auth/status')) {
+        return {
+          ok: true,
+          headers: new Headers(),
+          json: async () => ({
+            authenticated: true,
+            authorized: true,
+            user: { id: 1, username: 'new_alice', role: 'admin' },
+          }),
+        } as Response;
+      }
+      return { ok: false } as Response;
+    });
+
+    const service = new TestAuthService();
+    await service.ensureAuthLoaded();
+
+    expect(service.redirects).toEqual([
+      '/api/auth/login?return_to=%2F&prompt=none',
+    ]);
+
+    // Second check within the 5-minute cooldown must not redirect again
+    await service.verifyUpstreamOidcSession();
+    expect(service.redirects).toHaveLength(1);
+
+    // Local degraded mode skips mismatch redirect even after clearing the cooldown
+    clearSilentSsoAttempt('living-dex');
+    service.isDegraded.set(true);
+    await service.verifyUpstreamOidcSession();
+    expect(service.redirects).toHaveLength(1);
+    service.ngOnDestroy();
+  });
 });

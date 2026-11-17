@@ -309,7 +309,9 @@ describe('@wesdizzle/app-kit/angular', () => {
     const service = new TestAuthService();
     await service.ensureAuthLoaded();
 
-    expect(service.redirectedUrl).toBe('/api/auth/login?return_to=%2F');
+    expect(service.redirectedUrl).toBe(
+      '/api/auth/login?return_to=%2F&prompt=none',
+    );
     expect(service.isAutoSigningIn()).toBe(true);
     expect(service.isLoading()).toBe(true);
     expect(shouldAttemptSilentSso('living-dex')).toBe(false);

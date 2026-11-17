@@ -46,6 +46,7 @@ export interface LoadR2LatestSnapshotOptions {
   cacheTtlMs?: number;
   forceRefresh?: boolean;
   objectKey?: string;
+  maxBytes?: number;
 }
 
 interface R2SnapshotCacheEntry {
@@ -75,10 +76,18 @@ export function resetR2SnapshotCache(bucket?: R2Bucket | null): void {
 
 async function parseR2SnapshotObject(
   obj: R2ObjectBody,
+  maxBytes?: number,
 ): Promise<R2BackupSnapshot | null> {
   let rawParsed: unknown = null;
   if (typeof obj.text === 'function') {
     const rawText = await obj.text();
+    if (
+      typeof maxBytes === 'number' &&
+      maxBytes > 0 &&
+      rawText.length > maxBytes
+    ) {
+      return null;
+    }
     rawParsed = JSON.parse(rawText);
   } else if (typeof obj.json === 'function') {
     rawParsed = await obj.json();
@@ -165,7 +174,37 @@ export async function loadR2LatestSnapshot<
         });
         return null;
       }
-      const parsed = await parseR2SnapshotObject(obj);
+      const objSize = (obj as { size?: unknown }).size;
+      if (
+        typeof options.maxBytes === 'number' &&
+        options.maxBytes > 0 &&
+        typeof objSize === 'number' &&
+        objSize > options.maxBytes
+      ) {
+        console.warn(
+          `[WorkerBackup] Skipping R2 snapshot (${objectKey}): size ${objSize} exceeds maxBytes ${options.maxBytes}`,
+        );
+        void (obj as { body?: { cancel?: () => Promise<unknown> } }).body
+          ?.cancel?.()
+          .catch(() => {});
+        bucketMap!.set(objectKey, {
+          epoch,
+          expiresAt:
+            Date.now() + Math.min(cacheTtlMs, DEFAULT_R2_MISSING_CACHE_TTL_MS),
+          snapshot: null,
+        });
+        return null;
+      }
+      const parsed = await parseR2SnapshotObject(obj, options.maxBytes);
+      if (
+        parsed === null &&
+        typeof options.maxBytes === 'number' &&
+        options.maxBytes > 0
+      ) {
+        console.warn(
+          `[WorkerBackup] Skipping R2 snapshot (${objectKey}): payload exceeds maxBytes ${options.maxBytes} or is invalid`,
+        );
+      }
       bucketMap!.set(objectKey, {
         epoch,
         expiresAt:

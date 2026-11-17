@@ -167,7 +167,7 @@ export function mergeDegradedUserProfile<
 }
 
 const SSO_ATTEMPT_KEY_PREFIX = 'kit_sso_attempt_';
-const SSO_ATTEMPT_COOLDOWN_MS = 4_000;
+const SSO_ATTEMPT_COOLDOWN_MS = 300_000;
 const DEFAULT_FOCUS_RECHECK_COOLDOWN_MS = 60_000;
 const ssoCheckedInMemory = new Set<string>();
 
@@ -521,9 +521,7 @@ export class KitAuthService<
 
     if (typeof document.addEventListener === 'function') {
       const onVisibilityChange = () => {
-        if (document.visibilityState === 'hidden') {
-          ssoCheckedInMemory.clear();
-        } else if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'visible') {
           triggerCheck(false);
         }
       };
@@ -650,7 +648,6 @@ export class KitAuthService<
       }
 
       if (data.authenticated && data.user) {
-        clearSilentSsoAttempt(this.oidcClientId());
         this.isAutoSigningIn.set(false);
         const u = data.user;
         const fallbackUsername =
@@ -757,7 +754,7 @@ export class KitAuthService<
       markSilentSsoAttempt(clientId);
       this.isAutoSigningIn.set(true);
       const returnTo = getCurrentReturnToPath('/');
-      this.redirectTo(this.getLoginUrl(returnTo));
+      this.redirectTo(this.getLoginUrl(returnTo, { prompt: 'none' }));
       return true;
     }
 
@@ -804,7 +801,7 @@ export class KitAuthService<
       return;
     }
 
-    if (status.degraded) {
+    if (status.degraded || this.isDegraded()) {
       return;
     }
 
@@ -815,8 +812,12 @@ export class KitAuthService<
           localUser.username.toLowerCase()) ||
       (status.user.role && status.user.role !== localUser.role)
     ) {
+      if (!shouldAttemptSilentSso(clientId)) {
+        return;
+      }
+      markSilentSsoAttempt(clientId);
       const returnTo = getCurrentReturnToPath('/');
-      this.redirectTo(this.getLoginUrl(returnTo));
+      this.redirectTo(this.getLoginUrl(returnTo, { prompt: 'none' }));
     }
   }
 

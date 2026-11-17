@@ -506,4 +506,42 @@ describe('@wesdizzle/app-kit/worker', () => {
     await loadR2LatestSnapshot(bucket);
     expect(getSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('skips parsing oversized R2 snapshots when maxBytes is exceeded', async () => {
+    resetR2SnapshotCache();
+    const cancelSpy = vi.fn().mockResolvedValue(undefined);
+    const textSpy = vi.fn().mockResolvedValue(
+      JSON.stringify({
+        timestamp: '2026-11-16T03:00:00.000Z',
+        tables: { games: [{ id: 1 }] },
+      }),
+    );
+    const bucket = {
+      get: vi.fn().mockResolvedValue({
+        size: 10_000_000,
+        body: { cancel: cancelSpy },
+        text: textSpy,
+      }),
+    } as unknown as R2Bucket;
+
+    const oversized = await loadR2LatestSnapshot(bucket, {
+      objectKey: 'snapshots/latest.json',
+      maxBytes: 2_000_000,
+    });
+    expect(oversized).toBeNull();
+    expect(textSpy).not.toHaveBeenCalled();
+    expect(cancelSpy).toHaveBeenCalledTimes(1);
+
+    // Also checks raw text length when R2 mock omits .size
+    const bucketNoSize = {
+      get: vi.fn().mockResolvedValue({
+        text: async () => JSON.stringify({ tables: { users: [{ id: 1 }] } }),
+      }),
+    } as unknown as R2Bucket;
+    const tooLongText = await loadR2LatestSnapshot(bucketNoSize, {
+      objectKey: 'snapshots/meta-lite.json',
+      maxBytes: 10,
+    });
+    expect(tooLongText).toBeNull();
+  });
 });

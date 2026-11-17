@@ -34,6 +34,7 @@ export interface LoadR2LatestSnapshotOptions {
     cacheTtlMs?: number;
     forceRefresh?: boolean;
     objectKey?: string;
+    maxBytes?: number;
 }
 /**
  * Clears cached R2 backup snapshots (all buckets when called without arguments,
