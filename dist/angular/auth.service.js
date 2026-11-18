@@ -4,6 +4,13 @@ import * as i0 from "@angular/core";
 export const KIT_DEGRADED_HEADER = 'X-Kit-Degraded';
 export const KIT_SNAPSHOT_TIMESTAMP_HEADER = 'X-Kit-Snapshot-Timestamp';
 const DEFAULT_CACHED_AUTH_STORAGE_KEY = 'kit_auth_cached_session_v1';
+function isPlaceholderUserLabel(val, realUsername) {
+    if (typeof val !== 'string')
+        return false;
+    if (val.trim().toLowerCase() !== 'user')
+        return false;
+    return !realUsername || realUsername.trim().toLowerCase() !== 'user';
+}
 export function readCachedKitAuthSnapshot(storageKey = DEFAULT_CACHED_AUTH_STORAGE_KEY) {
     if (typeof localStorage === 'undefined')
         return null;
@@ -20,8 +27,15 @@ export function readCachedKitAuthSnapshot(storageKey = DEFAULT_CACHED_AUTH_STORA
             typeof parsed.user.username !== 'string') {
             return null;
         }
+        if (parsed.user.username.trim().toLowerCase() === 'user') {
+            clearCachedKitAuthSnapshot(storageKey);
+            return null;
+        }
+        const sanitizedUser = isPlaceholderUserLabel(parsed.user.displayName, parsed.user.username)
+            ? { ...parsed.user, displayName: null }
+            : parsed.user;
         return {
-            user: parsed.user,
+            user: sanitizedUser,
             accountHubUrl: typeof parsed.accountHubUrl === 'string' ? parsed.accountHubUrl : null,
             oidcIssuer: typeof parsed.oidcIssuer === 'string' ? parsed.oidcIssuer : null,
             oidcClientId: typeof parsed.oidcClientId === 'string' ? parsed.oidcClientId : null,
@@ -56,12 +70,23 @@ export function clearCachedKitAuthSnapshot(storageKey = DEFAULT_CACHED_AUTH_STOR
     }
 }
 export function mergeDegradedUserProfile(incoming, cached) {
+    const sanitizedIncomingDisplay = isPlaceholderUserLabel(incoming.displayName, incoming.username)
+        ? null
+        : incoming.displayName;
     if (!cached || cached.id !== incoming.id) {
-        return incoming;
+        return sanitizedIncomingDisplay === incoming.displayName
+            ? incoming
+            : { ...incoming, displayName: sanitizedIncomingDisplay };
     }
-    const merged = { ...cached, ...incoming };
-    if ((!incoming.displayName || incoming.displayName === incoming.username) &&
-        cached.displayName) {
+    const merged = {
+        ...cached,
+        ...incoming,
+        displayName: sanitizedIncomingDisplay,
+    };
+    if ((!sanitizedIncomingDisplay ||
+        sanitizedIncomingDisplay === incoming.username) &&
+        cached.displayName &&
+        !isPlaceholderUserLabel(cached.displayName, incoming.username)) {
         merged.displayName = cached.displayName;
     }
     if ((incoming.bio === undefined || incoming.bio === null) && cached.bio) {
@@ -500,7 +525,25 @@ export class KitAuthService {
             if (data.authenticated && data.user) {
                 this.isAutoSigningIn.set(false);
                 const u = data.user;
-                const fallbackUsername = u.username || (u.email ? u.email.split('@')[0] : 'user') || 'user';
+                const cachedSnapshot = readCachedKitAuthSnapshot();
+                const existingOrCachedUser = this.currentUser() ?? cachedSnapshot?.user ?? null;
+                const existingValidUsername = existingOrCachedUser?.username &&
+                    existingOrCachedUser.username.trim().toLowerCase() !== 'user'
+                    ? existingOrCachedUser.username
+                    : null;
+                const rawUsername = typeof u.username === 'string' && u.username.trim().length > 0
+                    ? u.username.trim()
+                    : '';
+                const fallbackUsername = rawUsername ||
+                    (u.email ? u.email.split('@')[0] : '') ||
+                    existingValidUsername ||
+                    'user';
+                const rawDisplayName = typeof u.displayName === 'string' && u.displayName.trim().length > 0
+                    ? u.displayName.trim()
+                    : null;
+                const sanitizedDisplayName = isPlaceholderUserLabel(rawDisplayName, fallbackUsername)
+                    ? null
+                    : rawDisplayName;
                 const normalizedUser = {
                     ...u,
                     id: typeof u.id === 'number' ? u.id : 1,
@@ -508,7 +551,7 @@ export class KitAuthService {
                     username: fallbackUsername,
                     role: u.role === 'admin' ? 'admin' : 'user',
                     isPublic: typeof u.isPublic === 'boolean' ? u.isPublic : false,
-                    displayName: u.displayName ?? fallbackUsername,
+                    displayName: sanitizedDisplayName,
                     bio: u.bio ?? null,
                 };
                 const headerDegraded = response.headers?.get?.(KIT_DEGRADED_HEADER) || null;
@@ -517,21 +560,21 @@ export class KitAuthService {
                 const snapshotTs = (typeof data.snapshotTimestamp === 'string' && data.snapshotTimestamp
                     ? data.snapshotTimestamp
                     : null) ?? headerSnapshotTs;
-                const cachedSnapshot = readCachedKitAuthSnapshot();
-                const existingOrCachedUser = this.currentUser() ?? cachedSnapshot?.user ?? null;
                 const finalUser = isDegradedResp
                     ? mergeDegradedUserProfile(normalizedUser, existingOrCachedUser)
                     : normalizedUser;
                 this.currentUser.set(finalUser);
-                writeCachedKitAuthSnapshot({
-                    user: finalUser,
-                    accountHubUrl: this.accountHubUrl(),
-                    oidcIssuer: this.oidcIssuer(),
-                    oidcClientId: this.oidcClientId(),
-                    updatedAt: isDegradedResp && cachedSnapshot?.updatedAt
-                        ? cachedSnapshot.updatedAt
-                        : Date.now(),
-                });
+                if (finalUser.username.trim().toLowerCase() !== 'user') {
+                    writeCachedKitAuthSnapshot({
+                        user: finalUser,
+                        accountHubUrl: this.accountHubUrl(),
+                        oidcIssuer: this.oidcIssuer(),
+                        oidcClientId: this.oidcClientId(),
+                        updatedAt: isDegradedResp && cachedSnapshot?.updatedAt
+                            ? cachedSnapshot.updatedAt
+                            : Date.now(),
+                    });
+                }
                 this.isDegraded.set(isDegradedResp);
                 this.degradedMode.set(isDegradedResp
                     ? data.degradedReason === 'offline'
@@ -633,6 +676,30 @@ export class KitAuthService {
             this.degradedMode.set(null);
             this.degradedSnapshotTimestamp.set(null);
             return;
+        }
+        if (!status.degraded && status.user) {
+            const authoritativeUsername = status.user.username || localUser.username;
+            const upstreamDisplayName = typeof status.user.displayName === 'string' &&
+                status.user.displayName.trim().length > 0 &&
+                !isPlaceholderUserLabel(status.user.displayName, authoritativeUsername)
+                ? status.user.displayName.trim()
+                : null;
+            if (upstreamDisplayName &&
+                (!localUser.displayName ||
+                    isPlaceholderUserLabel(localUser.displayName, authoritativeUsername))) {
+                const healedUser = {
+                    ...localUser,
+                    displayName: upstreamDisplayName,
+                };
+                this.currentUser.set(healedUser);
+                writeCachedKitAuthSnapshot({
+                    user: healedUser,
+                    accountHubUrl: this.accountHubUrl(),
+                    oidcIssuer: this.oidcIssuer(),
+                    oidcClientId: this.oidcClientId(),
+                    updatedAt: Date.now(),
+                });
+            }
         }
         if (status.degraded || this.isDegraded()) {
             return;

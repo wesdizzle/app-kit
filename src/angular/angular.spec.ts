@@ -25,8 +25,11 @@ import {
   KitAuthService,
   checkUpstreamOidcStatus,
   clearSilentSsoAttempt,
+  mergeDegradedUserProfile,
+  readCachedKitAuthSnapshot,
   sanitizeClientReturnToPath,
   shouldAttemptSilentSso,
+  writeCachedKitAuthSnapshot,
 } from './auth.service.js';
 import { KitThemeService, runKitViewTransition } from './theme.service.js';
 import { KitThemeToggleComponent } from './theme-toggle.component.js';
@@ -1182,5 +1185,153 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(publicSaved).toEqual([true, false]);
 
     modal.ngOnDestroy();
+  });
+
+  it('prevents flex shrink clipping on .public-sharing-card in tokens.css and hardens KitAuthService displayName/cache self-healing', async () => {
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const tokensCss = readFileSync(
+      join(specDir, '..', '..', 'styles', 'tokens.css'),
+      'utf8',
+    );
+    expect(tokensCss).toMatch(
+      /\.kit-profile-dialog\s+\.modal-body\s*>\s*\*\s*\{[^}]*flex-shrink:\s*0/,
+    );
+    expect(tokensCss).toMatch(
+      /\.kit-profile-dialog\s+\.public-sharing-card\s*\{[^}]*flex-shrink:\s*0/,
+    );
+
+    const storage = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => storage.get(k) ?? null,
+      setItem: (k: string, v: string) => storage.set(k, v),
+      removeItem: (k: string) => storage.delete(k),
+    });
+
+    try {
+      // 1. Poisoned cache entry with username: 'user' is rejected & cleared
+      writeCachedKitAuthSnapshot({
+        user: {
+          id: 1,
+          username: 'user',
+          displayName: 'user',
+          role: 'admin',
+          isPublic: true,
+        },
+        accountHubUrl: null,
+        oidcIssuer: null,
+        oidcClientId: null,
+        updatedAt: Date.now(),
+      });
+      expect(readCachedKitAuthSnapshot()).toBeNull();
+      expect(storage.has('kit_auth_cached_session_v1')).toBe(false);
+
+      // 2. Cache entry with real username + poisoned displayName: 'user' is sanitized to null
+      writeCachedKitAuthSnapshot({
+        user: {
+          id: 1,
+          username: 'wesley',
+          displayName: 'user',
+          role: 'admin',
+          isPublic: true,
+        },
+        accountHubUrl: null,
+        oidcIssuer: null,
+        oidcClientId: null,
+        updatedAt: Date.now(),
+      });
+      const sanitizedSnap = readCachedKitAuthSnapshot();
+      expect(sanitizedSnap?.user.username).toBe('wesley');
+      expect(sanitizedSnap?.user.displayName).toBeNull();
+
+      // 3. mergeDegradedUserProfile never overwrites real/fallback incoming with cached 'user'
+      const merged = mergeDegradedUserProfile(
+        {
+          id: 1,
+          username: 'wesley',
+          displayName: 'wesley',
+          role: 'admin',
+          isPublic: false,
+        },
+        {
+          id: 1,
+          username: 'wesley',
+          displayName: 'user',
+          role: 'admin',
+          isPublic: true,
+        },
+      );
+      expect(merged.displayName).toBe('wesley');
+
+      // 4. KitAuthService.checkSession keeps displayName null when server omits it or sends 'user',
+      // and verifyUpstreamOidcSession heals displayName from upstream /api/auth/status
+      storage.clear();
+      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+        const url = typeof input === 'string' ? input : (input as Request).url;
+        if (url.includes('/api/auth/me')) {
+          return new Response(
+            JSON.stringify({
+              authenticated: true,
+              oidcIssuer: 'https://account.example.com',
+              oidcClientId: 'living-dex',
+              user: {
+                id: 1,
+                username: 'wesley',
+                displayName: 'user',
+                role: 'admin',
+                isPublic: true,
+              },
+            }),
+            { status: 200 },
+          );
+        }
+        if (url.includes('/api/auth/status')) {
+          return new Response(
+            JSON.stringify({
+              authenticated: true,
+              authorized: true,
+              user: {
+                id: 1,
+                username: 'wesley',
+                displayName: 'Wesley',
+                role: 'admin',
+              },
+            }),
+            { status: 200 },
+          );
+        }
+        return new Response('{}', { status: 200 });
+      });
+
+      const service = new KitAuthService();
+      await service.ensureAuthLoaded();
+      expect(service.currentUser()?.username).toBe('wesley');
+      expect(service.currentUser()?.displayName).toBe('Wesley');
+      expect(readCachedKitAuthSnapshot()?.user.displayName).toBe('Wesley');
+
+      // 5. When upstream is unavailable and displayName is null, normalizedUser keeps displayName: null
+      // instead of fabricating a 'user' or username copy into currentUser().displayName
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            authenticated: true,
+            user: {
+              id: 2,
+              username: 'misty',
+              displayName: null,
+              role: 'user',
+              isPublic: false,
+            },
+          }),
+          { status: 200 },
+        ),
+      );
+      await service.checkSession();
+      expect(service.currentUser()?.username).toBe('misty');
+      expect(service.currentUser()?.displayName).toBeNull();
+      expect(service.displayName()).toBe('misty');
+      service.ngOnDestroy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
