@@ -59,12 +59,141 @@ export interface ProfileSavePayload {
           <div class="sheet-handle"></div>
         </div>
 
-        @if (activeView() !== 'profile') {
+        @if (effectiveView() !== 'profile' && effectiveView() !== 'edit') {
           <div class="profile-view-panel view-enter-subview">
             <ng-content select="[profileSubview]" />
           </div>
+        } @else if (effectiveView() === 'edit') {
+          <div
+            class="profile-view-panel view-enter-subview"
+            data-testid="profile-edit-subview"
+          >
+            <header class="modal-header">
+              <div class="header-title-row">
+                <button
+                  type="button"
+                  class="subview-back-btn state-layer"
+                  (click)="closeEditProfile()"
+                  aria-label="Back to Profile"
+                  data-testid="profile-edit-back-btn"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <h2>Edit Profile</h2>
+              </div>
+              <button
+                type="button"
+                class="close-btn"
+                (click)="requestClose()"
+                aria-label="Close profile dialog"
+                data-testid="profile-modal-close-btn"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </header>
+
+            <div class="modal-body">
+              <div class="field-group">
+                <div class="field-label-row">
+                  <label for="kit-profile-display-name">Display Name</label>
+                  <span class="char-hint">{{ displayName().length }} / 60</span>
+                </div>
+                <input
+                  id="kit-profile-display-name"
+                  type="text"
+                  maxlength="60"
+                  [ngModel]="displayName()"
+                  (ngModelChange)="displayNameChange.emit($event)"
+                  placeholder="Your collector handle"
+                  class="text-input"
+                />
+                <span class="field-hint">
+                  Shown on your public collection banner when sharing is
+                  enabled.
+                </span>
+              </div>
+
+              <div class="field-group">
+                <div class="field-label-row">
+                  <label for="kit-profile-bio">Bio</label>
+                  <span class="char-hint">{{ bio().length }} / 300</span>
+                </div>
+                <textarea
+                  id="kit-profile-bio"
+                  rows="3"
+                  maxlength="300"
+                  [ngModel]="bio()"
+                  (ngModelChange)="bioChange.emit($event)"
+                  placeholder="Share what you collect or hunt..."
+                  class="text-input bio-input"
+                ></textarea>
+              </div>
+
+              <ng-content select="[profileExtraFields]" />
+
+              @if (statusMessage()) {
+                <p
+                  class="status-msg"
+                  [class.error]="isError()"
+                  [attr.role]="isError() ? 'alert' : 'status'"
+                  aria-live="polite"
+                >
+                  {{ statusMessage() }}
+                </p>
+              }
+            </div>
+
+            <footer class="modal-footer">
+              <div></div>
+              <div class="footer-actions">
+                <button
+                  type="button"
+                  class="cancel-btn"
+                  (click)="closeEditProfile()"
+                  data-testid="profile-edit-cancel-btn"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  class="save-btn state-layer"
+                  [disabled]="saving()"
+                  (click)="saveClicked.emit()"
+                  data-testid="profile-save-btn"
+                >
+                  {{ saving() ? 'Saving...' : 'Save Changes' }}
+                </button>
+              </div>
+            </footer>
+          </div>
         } @else {
-          <div class="profile-view-panel view-enter-profile">
+          <div
+            class="profile-view-panel view-enter-profile"
+            data-testid="profile-hub-view"
+          >
             <header class="modal-header">
               <div class="header-title-row">
                 <span class="header-icon" aria-hidden="true">
@@ -108,91 +237,75 @@ export interface ProfileSavePayload {
               @if (isAuthenticated()) {
                 @if (user(); as u) {
                   <div class="identity-banner">
-                    <div class="identity-avatar">
-                      {{
-                        (u.displayName || u.username || 'U')[0].toUpperCase()
-                      }}
-                    </div>
-                    <div class="identity-details">
-                      <div class="identity-primary">
-                        <span class="username-tag">&#64;{{ u.username }}</span>
-                        <span class="role-badge">{{ u.role }}</span>
+                    <div class="identity-top-row">
+                      <div class="identity-avatar">
+                        {{
+                          (displayName() ||
+                            u.displayName ||
+                            u.username ||
+                            'U')[0].toUpperCase()
+                        }}
                       </div>
-                      @if (u.email) {
-                        <span class="identity-email">{{ u.email }}</span>
-                      }
+                      <div class="identity-details">
+                        <div class="identity-primary">
+                          @if (displayName() || u.displayName) {
+                            <span class="identity-display-name">{{
+                              displayName() || u.displayName
+                            }}</span>
+                          }
+                          <span class="username-tag"
+                            >&#64;{{ u.username }}</span
+                          >
+                          <span class="role-badge">{{ u.role }}</span>
+                          <ng-content select="[profileIdentityBadges]" />
+                        </div>
+                        @if (u.email) {
+                          <span class="identity-email">{{ u.email }}</span>
+                        }
+                      </div>
+                      <button
+                        type="button"
+                        class="identity-edit-btn state-layer"
+                        (click)="openEditProfile()"
+                        data-testid="profile-edit-btn"
+                        aria-label="Edit profile details"
+                      >
+                        Edit
+                      </button>
                     </div>
+                    @if (bio() || u.bio) {
+                      <p class="identity-bio-preview">{{ bio() || u.bio }}</p>
+                    }
                   </div>
                 }
 
-                <div class="field-group">
-                  <div class="field-label-row">
-                    <label for="kit-profile-display-name">Display Name</label>
-                    <span class="char-hint"
-                      >{{ displayName().length }} / 60</span
-                    >
-                  </div>
-                  <input
-                    id="kit-profile-display-name"
-                    type="text"
-                    maxlength="60"
-                    [ngModel]="displayName()"
-                    (ngModelChange)="displayNameChange.emit($event)"
-                    placeholder="Your collector handle"
-                    class="text-input"
-                  />
-                  <span class="field-hint">
-                    Shown on your public collection banner when sharing is
-                    enabled.
-                  </span>
-                </div>
-
-                <div class="field-group">
-                  <div class="field-label-row">
-                    <label for="kit-profile-bio">Bio</label>
-                    <span class="char-hint">{{ bio().length }} / 300</span>
-                  </div>
-                  <textarea
-                    id="kit-profile-bio"
-                    rows="3"
-                    maxlength="300"
-                    [ngModel]="bio()"
-                    (ngModelChange)="bioChange.emit($event)"
-                    placeholder="Share what you collect or hunt..."
-                    class="text-input bio-input"
-                  ></textarea>
-                </div>
-
-                <ng-content select="[profileExtraFields]" />
-
-                <label class="toggle-row" for="kit-profile-is-public">
-                  <div class="toggle-text">
-                    <span class="toggle-title">Public Collection</span>
-                    <span class="toggle-desc">
-                      Allow anyone with your link to view your read-only
-                      {{ collectionNoun() }}.
+                <div class="public-sharing-card">
+                  <label class="toggle-row" for="kit-profile-is-public">
+                    <div class="toggle-text">
+                      <span class="toggle-title">Public Collection</span>
+                      <span class="toggle-desc">
+                        Allow anyone with your link to view your read-only
+                        {{ collectionNoun() }}.
+                      </span>
+                    </div>
+                    <span class="switch-wrapper">
+                      <input
+                        id="kit-profile-is-public"
+                        type="checkbox"
+                        role="switch"
+                        class="sr-only-checkbox"
+                        [attr.aria-checked]="isPublic()"
+                        [ngModel]="isPublic()"
+                        (ngModelChange)="onPublicToggleChange($event)"
+                      />
+                      <span class="switch-track" [class.checked]="isPublic()">
+                        <span class="switch-thumb"></span>
+                      </span>
                     </span>
-                  </div>
-                  <span class="switch-wrapper">
-                    <input
-                      id="kit-profile-is-public"
-                      type="checkbox"
-                      role="switch"
-                      class="sr-only-checkbox"
-                      [attr.aria-checked]="isPublic()"
-                      [ngModel]="isPublic()"
-                      (ngModelChange)="isPublicChange.emit($event)"
-                    />
-                    <span class="switch-track" [class.checked]="isPublic()">
-                      <span class="switch-thumb"></span>
-                    </span>
-                  </span>
-                </label>
+                  </label>
 
-                @if (isPublic() && publicUrl()) {
-                  <div class="share-box">
-                    <span class="share-label">Public Share Link</span>
-                    <div class="share-url-row">
+                  @if (isPublic() && publicUrl()) {
+                    <div class="share-inline-bar">
                       <code class="share-url">{{ publicUrl() }}</code>
                       <button
                         type="button"
@@ -202,73 +315,21 @@ export interface ProfileSavePayload {
                       >
                         {{ isCopied() ? 'Copied!' : 'Copy' }}
                       </button>
+                      @if (publicRelativePath()) {
+                        <a
+                          class="share-open-link"
+                          [href]="publicRelativePath()"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Open public collection page"
+                          aria-label="Open public collection page"
+                        >
+                          &#8599;
+                        </a>
+                      }
                     </div>
-                    @if (publicRelativePath()) {
-                      <a
-                        class="share-open-link"
-                        [href]="publicRelativePath()"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Open public collection page &#8599;
-                      </a>
-                    }
-                  </div>
-                }
-
-                @if (accountHubUrl()) {
-                  <a
-                    class="nav-section-btn"
-                    [href]="accountHubUrl()"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="profile-account-hub-link"
-                  >
-                    <div class="nav-section-left">
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        class="nav-section-icon"
-                        aria-hidden="true"
-                      >
-                        <rect
-                          x="3"
-                          y="11"
-                          width="18"
-                          height="11"
-                          rx="2"
-                          ry="2"
-                        />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                      </svg>
-                      <div class="nav-section-text">
-                        <span class="nav-section-title">
-                          Account &amp; Security Hub
-                        </span>
-                        <span class="nav-section-desc">
-                          Manage password, 2FA authenticator, passkeys, and
-                          active sessions
-                        </span>
-                      </div>
-                    </div>
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="18"
-                      height="18"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      class="nav-section-chevron"
-                      aria-hidden="true"
-                    >
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </a>
-                }
+                  }
+                </div>
               } @else {
                 <div class="guest-card" data-testid="profile-guest-view">
                   <div class="guest-icon-circle">
@@ -298,6 +359,65 @@ export interface ProfileSavePayload {
               }
 
               <ng-content select="[profileExtraNav]" />
+
+              @if (isAuthenticated() && accountHubUrl()) {
+                <div class="kit-nav-group">
+                  <span class="kit-nav-group-label">Account</span>
+                  <div class="kit-nav-group-list">
+                    <a
+                      class="nav-section-btn"
+                      [href]="accountHubUrl()"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="profile-account-hub-link"
+                    >
+                      <div class="nav-section-left">
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          class="nav-section-icon"
+                          aria-hidden="true"
+                        >
+                          <rect
+                            x="3"
+                            y="11"
+                            width="18"
+                            height="11"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <div class="nav-section-text">
+                          <span class="nav-section-title">
+                            Account &amp; Security Hub
+                          </span>
+                          <span class="nav-section-desc">
+                            Passkeys, 2FA authenticator, password &amp; active
+                            sessions
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        class="nav-section-chevron"
+                        aria-hidden="true"
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              }
 
               @if (statusMessage()) {
                 <p
@@ -340,16 +460,7 @@ export interface ProfileSavePayload {
                     class="cancel-btn"
                     (click)="requestClose()"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    class="save-btn state-layer"
-                    [disabled]="saving()"
-                    (click)="saveClicked.emit()"
-                    data-testid="profile-save-btn"
-                  >
-                    {{ saving() ? 'Saving...' : 'Save Changes' }}
+                    Close
                   </button>
                 </div>
               } @else {
@@ -397,16 +508,26 @@ export class KitProfileModalComponent implements OnDestroy {
   readonly displayNameChange = output<string>();
   readonly bioChange = output<string>();
   readonly isPublicChange = output<boolean>();
+  readonly publicToggleSaved = output<boolean>();
+  readonly editProfileClicked = output<void>();
   readonly saveClicked = output<void>();
   readonly copyClicked = output<void>();
   readonly signOutClicked = output<void>();
   readonly closed = output<void>();
   readonly backToProfile = output<void>();
 
+  readonly isEditingProfile = signal<boolean>(false);
   readonly isClosing = signal(false);
   private readonly copiedInternal = signal(false);
   private copyTimer: ReturnType<typeof setTimeout> | null = null;
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private previousActiveView = 'profile';
+
+  readonly effectiveView = computed(() => {
+    const v = this.activeView();
+    if (v !== 'profile') return v;
+    return this.isEditingProfile() ? 'edit' : 'profile';
+  });
 
   private readonly sheetDrag = new BottomSheetDragController(90);
   readonly dragOffsetY = this.sheetDrag.dragOffsetY;
@@ -432,6 +553,9 @@ export class KitProfileModalComponent implements OnDestroy {
     effect(() => {
       const open = this.isOpen();
       queueMicrotask(() => {
+        if (!open) {
+          this.isEditingProfile.set(false);
+        }
         const dialog = this.dialogEl?.nativeElement;
         if (!dialog) return;
         if (open) {
@@ -449,6 +573,35 @@ export class KitProfileModalComponent implements OnDestroy {
         }
       });
     });
+
+    effect(() => {
+      const view = this.activeView();
+      const prev = this.previousActiveView;
+      this.previousActiveView = view;
+      if (
+        (prev === 'edit' && view === 'profile') ||
+        (view !== 'profile' && view !== 'edit')
+      ) {
+        queueMicrotask(() => {
+          this.isEditingProfile.set(false);
+        });
+      }
+    });
+  }
+
+  openEditProfile(): void {
+    this.isEditingProfile.set(true);
+    this.editProfileClicked.emit();
+  }
+
+  closeEditProfile(): void {
+    this.isEditingProfile.set(false);
+    this.backToProfile.emit();
+  }
+
+  onPublicToggleChange(checked: boolean): void {
+    this.isPublicChange.emit(checked);
+    this.publicToggleSaved.emit(checked);
   }
 
   ngOnDestroy(): void {
@@ -495,6 +648,7 @@ export class KitProfileModalComponent implements OnDestroy {
       this.closeTimer = setTimeout(() => {
         this.closeTimer = null;
         this.isClosing.set(false);
+        this.isEditingProfile.set(false);
         if (dialog?.open && typeof dialog.close === 'function') {
           dialog.close();
         }
@@ -503,6 +657,7 @@ export class KitProfileModalComponent implements OnDestroy {
       return;
     }
     this.isClosing.set(false);
+    this.isEditingProfile.set(false);
     if (dialog?.open && typeof dialog.close === 'function') {
       dialog.close();
     }
@@ -516,8 +671,9 @@ export class KitProfileModalComponent implements OnDestroy {
   }
 
   onDialogCancel(event: Event): void {
-    if (this.activeView() !== 'profile') {
+    if (this.effectiveView() !== 'profile') {
       event.preventDefault();
+      this.isEditingProfile.set(false);
       this.backToProfile.emit();
       return;
     }

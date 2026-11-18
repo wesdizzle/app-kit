@@ -1,5 +1,10 @@
 import '@angular/compiler';
-import { Injector, runInInjectionContext, signal } from '@angular/core';
+import {
+  DestroyRef,
+  Injector,
+  runInInjectionContext,
+  signal,
+} from '@angular/core';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -48,6 +53,7 @@ import {
 } from './filter-bar.component.js';
 import { KitConfirmationDialogComponent } from './confirmation-dialog.component.js';
 import { KitOfflineStore, getScopedStorageKey } from './offline-store.js';
+import { KitProfileModalComponent } from './profile-modal.component.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -1092,5 +1098,89 @@ describe('@wesdizzle/app-kit/angular', () => {
       vi.useRealTimers();
       vi.unstubAllGlobals();
     }
+  });
+
+  it('manages Edit Profile subview, Escape navigation, and instant public toggle output in KitProfileModalComponent', () => {
+    const mockScheduler = {
+      notify: () => {},
+      schedule: () => {},
+      add: () => {},
+      remove: () => {},
+    };
+    const injector = {
+      get: (token: unknown, notFoundValue?: unknown) => {
+        if (token === Injector) return injector;
+        if (token === DestroyRef) return { onDestroy: () => () => {} };
+        if (notFoundValue === null) return null;
+        return mockScheduler;
+      },
+    } as unknown as Injector;
+
+    const modal = runInInjectionContext(
+      injector,
+      () => new KitProfileModalComponent(),
+    );
+
+    const activeViewSig = signal<string>('profile');
+    Object.defineProperty(modal, 'activeView', { value: activeViewSig });
+
+    let editClickedCount = 0;
+    let backCount = 0;
+    let closedCount = 0;
+    const publicChanges: boolean[] = [];
+    const publicSaved: boolean[] = [];
+
+    modal.editProfileClicked.subscribe(() => {
+      editClickedCount += 1;
+    });
+    modal.backToProfile.subscribe(() => {
+      backCount += 1;
+    });
+    modal.closed.subscribe(() => {
+      closedCount += 1;
+    });
+    modal.isPublicChange.subscribe((v) => publicChanges.push(v));
+    modal.publicToggleSaved.subscribe((v) => publicSaved.push(v));
+
+    expect(modal.effectiveView()).toBe('profile');
+
+    modal.openEditProfile();
+    expect(modal.isEditingProfile()).toBe(true);
+    expect(modal.effectiveView()).toBe('edit');
+    expect(editClickedCount).toBe(1);
+
+    // Escape while in 'edit' returns to 'profile' instead of closing modal
+    const cancelEvent = { preventDefault: vi.fn() } as unknown as Event;
+    modal.onDialogCancel(cancelEvent);
+    expect(cancelEvent.preventDefault).toHaveBeenCalled();
+    expect(modal.isEditingProfile()).toBe(false);
+    expect(modal.effectiveView()).toBe('profile');
+    expect(backCount).toBe(1);
+    expect(closedCount).toBe(0);
+
+    // closeEditProfile() exits edit view cleanly
+    modal.openEditProfile();
+    expect(modal.effectiveView()).toBe('edit');
+    modal.closeEditProfile();
+    expect(modal.effectiveView()).toBe('profile');
+    expect(backCount).toBe(2);
+
+    // External subviews override internal edit state
+    activeViewSig.set('notifications');
+    expect(modal.effectiveView()).toBe('notifications');
+
+    // Escape on root profile closes dialog
+    activeViewSig.set('profile');
+    expect(modal.effectiveView()).toBe('profile');
+    modal.onDialogCancel(cancelEvent);
+    expect(closedCount).toBe(1);
+
+    // Toggling public sharing emits both isPublicChange and publicToggleSaved
+    modal.onPublicToggleChange(true);
+    modal.onPublicToggleChange(false);
+    expect(publicChanges).toEqual([true, false]);
+    expect(publicSaved).toEqual([true, false]);
+
+    modal.ngOnDestroy();
   });
 });
