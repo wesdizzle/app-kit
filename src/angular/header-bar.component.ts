@@ -58,7 +58,7 @@ export interface KitHeaderTab {
               @if (tab.href) {
                 <a
                   [href]="tab.href"
-                  class="nav-item state-layer"
+                  class="nav-item"
                   [class.active]="activeTab() === tab.id"
                   [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
                   [attr.data-testid]="tab.testId || 'nav-tab-' + tab.id"
@@ -70,7 +70,7 @@ export interface KitHeaderTab {
               } @else {
                 <button
                   type="button"
-                  class="nav-item state-layer"
+                  class="nav-item"
                   [class.active]="activeTab() === tab.id"
                   [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
                   [attr.data-testid]="tab.testId || 'nav-tab-' + tab.id"
@@ -191,6 +191,7 @@ export interface KitHeaderTab {
         border-radius: 12px;
         text-decoration: none;
         color: inherit;
+        -webkit-tap-highlight-color: transparent;
         transition: background-color 0.2s;
       }
 
@@ -258,6 +259,12 @@ export interface KitHeaderTab {
         background: transparent;
         border: none;
         font-family: inherit;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .kit-header-bar .nav-item::after {
+        display: none;
+        content: none;
       }
 
       .kit-header-bar .nav-item .label {
@@ -293,8 +300,10 @@ export interface KitHeaderTab {
         transform: scaleX(1);
       }
 
-      .kit-header-bar .nav-item:hover {
-        color: var(--kit-on-surface);
+      @media (hover: hover) {
+        .kit-header-bar .nav-item:not(.active):hover {
+          color: var(--kit-on-surface);
+        }
       }
 
       .kit-header-bar .m3-button-icon {
@@ -309,6 +318,7 @@ export interface KitHeaderTab {
         color: var(--kit-on-surface-variant);
         cursor: pointer;
         font-size: 1.25rem;
+        -webkit-tap-highlight-color: transparent;
         transition:
           background-color 0.2s,
           color 0.2s;
@@ -343,6 +353,12 @@ export interface KitHeaderTab {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .kit-header-bar .nav-item:focus,
+        .kit-header-bar .nav-item:active,
+        .kit-header-bar .nav-item.active {
+          background: transparent;
         }
 
         .kit-header-bar .nav-item .indicator {

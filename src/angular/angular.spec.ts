@@ -29,8 +29,10 @@ import { interpolateNumber } from './animated-number.js';
 import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
 import {
   KitDegradedBannerComponent,
+  KitLoadingBannerComponent,
   KitStatusBannerComponent,
   KitSyncIndicatorComponent,
+  canAnimateKitBannerExit,
   formatKitDegradedTimestamp,
 } from './status-feedback.component.js';
 import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
@@ -996,5 +998,99 @@ describe('@wesdizzle/app-kit/angular', () => {
     modeSignal.set('offline');
     expect(banner.resolvedMessage()).toContain('Showing locally cached data');
     expect(banner.resolvedMessage()).toContain('connection is restored');
+  });
+
+  it('prevents sticky hover/focus darkening on header nav tabs and gates .state-layer hover behind @media (hover: hover)', () => {
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const headerSource = readFileSync(
+      join(specDir, 'header-bar.component.ts'),
+      'utf8',
+    );
+    const tokensCss = readFileSync(
+      join(specDir, '..', '..', 'styles', 'tokens.css'),
+      'utf8',
+    );
+
+    expect(headerSource).not.toMatch(/class="nav-item state-layer"/);
+    expect(headerSource).toMatch(/\.kit-header-bar \.nav-item::after\s*\{/);
+    expect(headerSource).toMatch(/@media\s*\(hover:\s*hover\)/);
+    expect(tokensCss).toMatch(
+      /@media\s*\(hover:\s*hover\)\s*\{\s*\.state-layer:hover::after/,
+    );
+    expect(tokensCss).toMatch(/\.kit-banner-collapse\s*\{/);
+    expect(tokensCss).toMatch(/\.kit-banner-collapse\.closing\s*\{/);
+    expect(tokensCss).toMatch(/\.kit-loading-banner\s*\{/);
+  });
+
+  it('animates KitDegradedBannerComponent, KitStatusBannerComponent, and KitLoadingBannerComponent through closing before unmounting', () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal('window', {
+        matchMedia: vi.fn((query: string) => ({
+          matches: query.includes('prefers-reduced-motion: no-preference'),
+        })),
+      });
+
+      expect(canAnimateKitBannerExit()).toBe(true);
+
+      const injector = {
+        get: () => ({ onDestroy: () => () => {} }),
+      } as unknown as Injector;
+
+      const degraded = runInInjectionContext(
+        injector,
+        () => new KitDegradedBannerComponent(),
+      );
+      degraded.syncModeState('backup');
+      expect(degraded.effectiveMode()).toBe('backup');
+      expect(degraded.isClosing()).toBe(false);
+
+      degraded.syncModeState(null);
+      expect(degraded.effectiveMode()).toBe('backup');
+      expect(degraded.isClosing()).toBe(true);
+
+      vi.advanceTimersByTime(220);
+      expect(degraded.effectiveMode()).toBeNull();
+      expect(degraded.isClosing()).toBe(false);
+      degraded.ngOnDestroy();
+
+      const status = runInInjectionContext(
+        injector,
+        () => new KitStatusBannerComponent(),
+      );
+      status.syncMessageState('Saved successfully');
+      expect(status.effectiveMessage()).toBe('Saved successfully');
+      status.syncMessageState(null);
+      expect(status.effectiveMessage()).toBe('Saved successfully');
+      expect(status.isClosing()).toBe(true);
+      vi.advanceTimersByTime(220);
+      expect(status.effectiveMessage()).toBeNull();
+      expect(status.isClosing()).toBe(false);
+      status.ngOnDestroy();
+
+      const loading = runInInjectionContext(
+        injector,
+        () => new KitLoadingBannerComponent(),
+      );
+      loading.syncActiveState(true, 'Syncing full catalog (10 / 20 games)', 50);
+      expect(loading.shouldShow()).toBe(true);
+      expect(loading.effectivePercent()).toBe(50);
+      expect(loading.effectiveMessage()).toBe(
+        'Syncing full catalog (10 / 20 games)',
+      );
+
+      loading.syncActiveState(false, '', null);
+      expect(loading.shouldShow()).toBe(true);
+      expect(loading.isClosing()).toBe(true);
+      expect(loading.effectivePercent()).toBe(50);
+
+      vi.advanceTimersByTime(220);
+      expect(loading.shouldShow()).toBe(false);
+      expect(loading.isClosing()).toBe(false);
+      loading.ngOnDestroy();
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
   });
 });

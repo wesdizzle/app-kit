@@ -162,6 +162,7 @@
 .state-layer {
   position: relative;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
   transition: transform var(--kit-duration-fast) var(--kit-ease-spring);
 }
 
@@ -176,8 +177,10 @@
   transition: opacity var(--kit-duration-fast) var(--kit-ease-standard);
 }
 
-.state-layer:hover::after {
-  opacity: 0.08;
+@media (hover: hover) {
+  .state-layer:hover::after {
+    opacity: 0.08;
+  }
 }
 
 .state-layer:focus-visible::after {
@@ -1201,7 +1204,7 @@
   animation: kitCheckDraw 240ms var(--kit-ease-emphasized) both;
 }
 
-/* Shared `<kit-status-banner>` Styles */
+/* Shared `<kit-status-banner>`, `<kit-degraded-banner>`, and `<kit-loading-banner>` Styles */
 @keyframes kitBannerIn {
   from {
     opacity: 0;
@@ -1211,6 +1214,48 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+@keyframes kitBannerOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+}
+
+.kit-banner-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--kit-duration-medium, 260ms)
+      var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@starting-style {
+  .kit-banner-collapse {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+
+.kit-banner-collapse.closing {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),
+    opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));
+}
+
+.kit-banner-collapse-inner {
+  min-height: 0;
+  overflow: hidden;
 }
 
 @keyframes kitErrorShake {
@@ -1283,6 +1328,68 @@
 
 .kit-degraded-message {
   font-weight: 500;
+}
+
+.kit-status-banner.closing,
+.kit-status-banner.variant-error.closing,
+.kit-loading-banner.closing {
+  animation: kitBannerOut 200ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1))
+    forwards;
+}
+
+/* Shared `<kit-loading-banner>` Styles */
+@keyframes kitLoadingBannerPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.kit-loading-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--kit-surface-container-high);
+  border: 1px solid var(--kit-outline-variant);
+  border-radius: var(--kit-radius-md);
+  font-size: 0.8125rem;
+  color: var(--kit-on-surface-variant);
+  animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;
+}
+
+.kit-loading-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kit-loading-banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--kit-primary);
+  flex-shrink: 0;
+  animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;
+}
+
+.kit-loading-banner-track {
+  width: 100%;
+  height: 4px;
+  border-radius: var(--kit-radius-full);
+  background: var(--kit-surface-container-highest);
+  overflow: hidden;
+}
+
+.kit-loading-banner-fill {
+  height: 100%;
+  border-radius: var(--kit-radius-full);
+  background: var(--kit-primary);
+  transition: width 180ms ease-out;
 }
 
 .kit-profile-dialog .modal-card {
@@ -2687,7 +2794,10 @@
   .kit-filter-bar *,
   .kit-command-palette,
   .kit-command-palette *,
+  .kit-banner-collapse,
   .kit-status-banner,
+  .kit-loading-banner,
+  .kit-loading-banner *,
   .kit-sync-indicator,
   .kit-segmented-meter * {
     animation-duration: 0.01ms !important;
