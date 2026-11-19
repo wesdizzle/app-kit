@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v1.5.0`)
+# `@wesdizzle/app-kit` (`v1.6.0`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
 
@@ -10,7 +10,7 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - **WebCrypto Primitives (`crypto.ts`)**: `base64UrlEncode`, `base64UrlDecode`, `timingSafeEqualBytes`, `timingSafeEqualStrings`, `generateRandomBytes`, `generateRandomToken`, `sha256Bytes`, `sha256Hex`, `sha256Base64Url`, `hmacSha256Bytes`, `hmacSha256Hex`, `derToP1363`, `resolveStrongSecret`
   - **WebAuthn Parser (`webauthn-utils.ts`)**: `parseAuthenticatorData` (RP ID hash, `UP`/`UV`/`BE`/`BS`/`AT` flags, `signCount`, `aaguid`, attested `credentialId`)
   - **Web Push (`web-push.ts`)**: Zero-dependency RFC 8291 (`aes128gcm`) + RFC 8292 (VAPID) `sendWebPushNotification`, `isAllowedPushEndpoint` (HTTPS + port `443` + `redirect: 'error'`)
-  - **CSRF & Security Headers**: `isCrossOriginMutatingRequest`, `validateSameOriginMutation`, `buildCspHeader`, `withSecurityHeaders` (CSP without `'unsafe-inline'` in `script-src`, HSTS, `Permissions-Policy`, `X-Frame-Options: DENY`, `nosniff`)
+  - **CSRF & Security Headers**: `isCrossOriginMutatingRequest`, `validateSameOriginMutation`, `buildCspHeader` (including optional `mediaSrc` directive), `withSecurityHeaders` (CSP without `'unsafe-inline'` in `script-src`, HSTS, `Permissions-Policy`, `X-Frame-Options: DENY`, `nosniff`)
   - **R2 Scheduled Backup (`r2-backup.ts`)**: `performScheduledBackup` (identifier validation, single-pass compact JSON, WebCrypto SHA-256 `head()` zero-download `skipIfUnchanged`, cursor-paginated retention pruning)
 - **`@wesdizzle/app-kit/scripts`**:
   - **Pre-Flight SQL Cost Guard**: `auditSqlCost`, `printCostReport`, `runWithD1CostGuard`, `isSecondaryIndexOrigin`, `isTableWithoutRowid`, `splitSqlStatements`
@@ -25,6 +25,12 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - `BottomSheetDragController`, `KitDialogSheetComponent` (`<kit-dialog-sheet>`), `canAnimateKitDialogExit`
   - `KitCommandPaletteComponent` (`<kit-command-palette>`), `tokenizeKitCommandQuery`, `matchesKitCommandTokens`, `filterAndGroupKitCommands`
   - `KitHeaderBarComponent` (`<kit-header-bar>`)
+  - `KitDetailShellComponent` (`<kit-detail-shell>`), `KitDetailNavItem`
+  - `KitTabsComponent` (`<kit-tabs>`), `KitTabItem`, `getNextEnabledTabId`
+  - `KitSectionCardComponent` (`<kit-section-card>`), `KitKvGridComponent` (`<kit-kv-grid>`), `KitKvItem`
+  - `KitStatBarListComponent` (`<kit-stat-bar-list>`), `KitStatBarItem`, `computeKitStatPct`, `resolveKitStatTone`
+  - `KitDataTableComponent` (`<kit-data-table>`), `KitTableColumn`, `KitTableSortState`, `sortKitTableRows`
+  - `KitAudioButtonComponent` (`<kit-audio-button>`), `canPlayKitAudioMime`, `stopActiveKitAudio`
   - `KitProfileModalComponent` (`<kit-profile-modal>`)
   - `KitPublicBannerComponent` (`<kit-public-banner>`)
   - `KitLandingCardComponent` (`<kit-landing-card>`)
@@ -38,4 +44,4 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - `createAnimatedNumber`, `interpolateNumber`
   - `KitOfflineStore<T>`, `getScopedStorageKey`
 - **`@wesdizzle/app-kit/styles/tokens.css`**:
-  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-motion-*`), interactive state-layer & stagger/shake/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared component styles (`<kit-public-banner>`, `<kit-filter-bar>`, `<kit-dialog-sheet>`, `<kit-command-palette>`, `<kit-segmented-meter>`, `<kit-time-series-chart>`, `<kit-sync-indicator>`, `<kit-status-banner>`), `:focus-visible`, and `prefers-reduced-motion` rules.
+  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-motion-*`), interactive state-layer & stagger/shake/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared component styles (`<kit-public-banner>`, `<kit-filter-bar>`, `<kit-dialog-sheet>`, `<kit-command-palette>`, `<kit-detail-shell>`, `<kit-tabs>`, `<kit-section-card>`, `<kit-kv-grid>`, `<kit-stat-bar-list>`, `<kit-data-table>`, `<kit-audio-button>`, `<kit-segmented-meter>`, `<kit-time-series-chart>`, `<kit-sync-indicator>`, `<kit-status-banner>`), `:focus-visible`, and `prefers-reduced-motion` rules.

@@ -505,6 +505,9 @@ export function buildCspHeader(options = {}) {
         "base-uri 'self'",
         "frame-ancestors 'none'",
     ];
+    if (options.mediaSrc) {
+        directives.push(`media-src ${options.mediaSrc}`);
+    }
     if (options.frameSrc) {
         directives.push(`frame-src ${options.frameSrc}`);
     }

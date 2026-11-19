@@ -772,6 +772,7 @@ export interface CspOptions {
   styleSrc?: string;
   fontSrc?: string;
   imgSrc?: string;
+  mediaSrc?: string;
   connectSrc?: string;
   frameSrc?: string;
   workerSrc?: string;
@@ -791,6 +792,9 @@ export function buildCspHeader(options: CspOptions = {}): string {
     "base-uri 'self'",
     "frame-ancestors 'none'",
   ];
+  if (options.mediaSrc) {
+    directives.push(`media-src ${options.mediaSrc}`);
+  }
   if (options.frameSrc) {
     directives.push(`frame-src ${options.frameSrc}`);
   }

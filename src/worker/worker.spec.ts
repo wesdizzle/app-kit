@@ -3,6 +3,7 @@ import {
   HOST_SESSION_COOKIE,
   SESSION_COOKIE,
   base64UrlEncode,
+  buildCspHeader,
   derToP1363,
   isAllowedPushEndpoint,
   isCrossOriginMutatingRequest,
@@ -383,6 +384,14 @@ describe('@wesdizzle/app-kit/worker', () => {
     expect(csp).toContain("script-src 'self'");
     expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).toContain("object-src 'none'");
+    expect(csp).not.toContain('media-src');
+
+    const customCsp = buildCspHeader({
+      mediaSrc: "'self' https://raw.githubusercontent.com blob:",
+    });
+    expect(customCsp).toContain(
+      "media-src 'self' https://raw.githubusercontent.com blob:",
+    );
   });
 
   it('validates SQL identifiers, uses head() sha256 zero-download skip, and paginates retention pruning', async () => {

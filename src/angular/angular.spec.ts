@@ -67,6 +67,30 @@ import {
 import { KitConfirmationDialogComponent } from './confirmation-dialog.component.js';
 import { KitOfflineStore, getScopedStorageKey } from './offline-store.js';
 import { KitProfileModalComponent } from './profile-modal.component.js';
+import {
+  KitDetailShellComponent,
+  shouldHandleDetailShellKeyNav,
+} from './detail-shell.component.js';
+import { KitTabsComponent, getNextEnabledTabId } from './tabs.component.js';
+import {
+  KitKvGridComponent,
+  KitSectionCardComponent,
+} from './section-card.component.js';
+import {
+  KitStatBarListComponent,
+  computeKitStatPct,
+  resolveKitStatTone,
+} from './stat-bar.component.js';
+import {
+  KitDataTableComponent,
+  sortKitTableRows,
+  type KitTableColumn,
+} from './data-table.component.js';
+import {
+  KitAudioButtonComponent,
+  canPlayKitAudioMime,
+  stopActiveKitAudio,
+} from './audio-button.component.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -1502,5 +1526,248 @@ describe('@wesdizzle/app-kit/angular', () => {
     );
     expect(tokensSource).toContain('.kit-ts-chart');
     expect(tokensSource).toContain('.kit-ts-tooltip');
+  });
+
+  it('KitDetailShellComponent supports back link interception and keyboard prev/next navigation guards', () => {
+    expect(shouldHandleDetailShellKeyNav({ key: 'ArrowLeft' }, false)).toBe(
+      'prev',
+    );
+    expect(shouldHandleDetailShellKeyNav({ key: 'ArrowRight' }, false)).toBe(
+      'next',
+    );
+    expect(
+      shouldHandleDetailShellKeyNav({ key: 'ArrowLeft', ctrlKey: true }, false),
+    ).toBeNull();
+    expect(
+      shouldHandleDetailShellKeyNav({ key: 'ArrowRight' }, true),
+    ).toBeNull();
+    expect(
+      shouldHandleDetailShellKeyNav(
+        { key: 'ArrowLeft', target: { tagName: 'INPUT' } },
+        false,
+      ),
+    ).toBeNull();
+
+    const injector = Injector.create({ providers: [] });
+    const shell = runInInjectionContext(
+      injector,
+      () => new KitDetailShellComponent(),
+    );
+    Object.defineProperty(shell, 'backHref', { value: signal('/collection') });
+    Object.defineProperty(shell, 'interceptBackClick', { value: signal(true) });
+    Object.defineProperty(shell, 'interceptPagerClick', {
+      value: signal(true),
+    });
+    Object.defineProperty(shell, 'prevItem', {
+      value: signal({ label: 'Prev' }),
+    });
+    Object.defineProperty(shell, 'nextItem', {
+      value: signal({ label: 'Next' }),
+    });
+
+    const backEvents: MouseEvent[] = [];
+    const prevEvents: Array<MouseEvent | KeyboardEvent> = [];
+    const nextEvents: Array<MouseEvent | KeyboardEvent> = [];
+    shell.backClicked.subscribe((e) => backEvents.push(e));
+    shell.prevClicked.subscribe((e) => prevEvents.push(e));
+    shell.nextClicked.subscribe((e) => nextEvents.push(e));
+
+    const preventDefault = vi.fn();
+    shell.onBackClick({ preventDefault } as unknown as MouseEvent);
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(backEvents).toHaveLength(1);
+
+    const keyPrevent = vi.fn();
+    shell.onDocumentKeydown({
+      key: 'ArrowRight',
+      preventDefault: keyPrevent,
+    } as unknown as KeyboardEvent);
+    expect(keyPrevent).toHaveBeenCalledTimes(1);
+    expect(nextEvents).toHaveLength(1);
+    expect(prevEvents).toHaveLength(0);
+  });
+
+  it('KitTabsComponent navigates enabled tabs via keyboard arrows, Home, and End', () => {
+    const tabs = [
+      { id: 'overview', label: 'Overview' },
+      { id: 'disabled', label: 'Disabled', disabled: true },
+      { id: 'stats', label: 'Stats' },
+      { id: 'moves', label: 'Moves' },
+    ];
+    expect(getNextEnabledTabId(tabs, 'overview', 'ArrowRight')).toBe('stats');
+    expect(getNextEnabledTabId(tabs, 'overview', 'ArrowLeft')).toBe('moves');
+    expect(getNextEnabledTabId(tabs, 'moves', 'Home')).toBe('overview');
+    expect(getNextEnabledTabId(tabs, 'overview', 'End')).toBe('moves');
+
+    const injector = Injector.create({ providers: [] });
+    const comp = runInInjectionContext(injector, () => new KitTabsComponent());
+    Object.defineProperty(comp, 'tabs', { value: signal(tabs) });
+    Object.defineProperty(comp, 'activeTab', { value: signal('overview') });
+
+    const changes: string[] = [];
+    comp.tabChange.subscribe((id) => changes.push(id));
+    comp.selectTab(tabs[1]);
+    expect(changes).toEqual([]);
+    comp.onTabKeydown(
+      {
+        key: 'ArrowRight',
+        preventDefault: vi.fn(),
+      } as unknown as KeyboardEvent,
+      'overview',
+    );
+    expect(changes).toEqual(['stats']);
+  });
+
+  it('KitSectionCardComponent toggles collapsible state and emits expandedChange', () => {
+    const injector = Injector.create({ providers: [] });
+    const card = runInInjectionContext(
+      injector,
+      () => new KitSectionCardComponent(),
+    );
+    Object.defineProperty(card, 'title', { value: signal('Details') });
+    Object.defineProperty(card, 'collapsible', { value: signal(true) });
+    Object.defineProperty(card, 'expanded', { value: signal(false) });
+
+    expect(card.isExpanded()).toBe(false);
+    const events: boolean[] = [];
+    card.expandedChange.subscribe((val) => events.push(val));
+
+    card.toggleExpanded();
+    expect(card.isExpanded()).toBe(true);
+    expect(events).toEqual([true]);
+
+    const kv = runInInjectionContext(injector, () => new KitKvGridComponent());
+    Object.defineProperty(kv, 'items', {
+      value: signal([{ label: 'Height', value: '0.7 m' }]),
+    });
+    expect(kv.items()).toHaveLength(1);
+  });
+
+  it('KitStatBarListComponent clamps percentages and maps semantic ratio tiers', () => {
+    expect(computeKitStatPct(127.5, 255)).toBe(50);
+    expect(computeKitStatPct(300, 255)).toBe(100);
+    expect(computeKitStatPct(-10, 255)).toBe(0);
+
+    expect(resolveKitStatTone(45, 255)).toBe('low');
+    expect(resolveKitStatTone(75, 255)).toBe('mid');
+    expect(resolveKitStatTone(100, 255)).toBe('good');
+    expect(resolveKitStatTone(135, 255)).toBe('high');
+    expect(resolveKitStatTone(180, 255)).toBe('peak');
+    expect(resolveKitStatTone(45, 255, 'primary')).toBe('primary');
+
+    const injector = Injector.create({ providers: [] });
+    const statList = runInInjectionContext(
+      injector,
+      () => new KitStatBarListComponent(),
+    );
+    expect(statList.computePct(51, 255)).toBe(20);
+  });
+
+  it('KitDataTableComponent sorts numeric and string columns cleanly with asc/desc toggling', () => {
+    interface Row {
+      id: number;
+      name: string;
+      power: number | null;
+    }
+    const cols: KitTableColumn<Row>[] = [
+      { key: 'name', label: 'Move', sortable: true },
+      { key: 'power', label: 'Power', sortable: true },
+    ];
+    const rows: Row[] = [
+      { id: 1, name: 'Tackle', power: 40 },
+      { id: 2, name: 'Growl', power: null },
+      { id: 3, name: 'Vine Whip', power: 45 },
+    ];
+
+    const ascPower = sortKitTableRows(rows, cols, {
+      key: 'power',
+      direction: 'asc',
+    });
+    expect(ascPower.map((r) => r.name)).toEqual([
+      'Tackle',
+      'Vine Whip',
+      'Growl',
+    ]);
+
+    const injector = Injector.create({ providers: [] });
+    const table = runInInjectionContext(
+      injector,
+      () => new KitDataTableComponent<Row>(),
+    );
+    Object.defineProperty(table, 'columns', { value: signal(cols) });
+    Object.defineProperty(table, 'rows', { value: signal(rows) });
+    Object.defineProperty(table, 'initialSort', { value: signal(null) });
+
+    table.toggleSort(cols[1]);
+    expect(table.sortState()).toEqual({ key: 'power', direction: 'asc' });
+    expect(table.getAriaSort(cols[1])).toBe('ascending');
+    table.toggleSort(cols[1]);
+    expect(table.sortState()).toEqual({ key: 'power', direction: 'desc' });
+    expect(table.sortedRows().map((r) => r.name)).toEqual([
+      'Vine Whip',
+      'Tackle',
+      'Growl',
+    ]);
+  });
+
+  it('KitAudioButtonComponent detects codec support (hiding when unsupported) and coordinates playback', () => {
+    expect(canPlayKitAudioMime('audio/ogg')).toBe(false);
+
+    const playSpy = vi.fn().mockResolvedValue(undefined);
+    const pauseSpy = vi.fn();
+    class FakeAudio {
+      src: string;
+      onplaying: (() => void) | null = null;
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(src: string = '') {
+        this.src = src;
+      }
+      canPlayType(mime: string): string {
+        return mime === 'audio/ogg' ? 'probably' : '';
+      }
+      play = playSpy;
+      pause = pauseSpy;
+    }
+
+    vi.stubGlobal('Audio', FakeAudio);
+    try {
+      expect(canPlayKitAudioMime('audio/ogg')).toBe(true);
+      expect(canPlayKitAudioMime('audio/flac')).toBe(false);
+
+      const injector = Injector.create({ providers: [] });
+      const btn = runInInjectionContext(
+        injector,
+        () => new KitAudioButtonComponent(),
+      );
+      Object.defineProperty(btn, 'src', {
+        value: signal('https://example.com/1.ogg'),
+      });
+      Object.defineProperty(btn, 'mimeType', { value: signal('audio/ogg') });
+      expect(btn.isSupported()).toBe(true);
+      btn.togglePlay();
+      expect(playSpy).toHaveBeenCalledTimes(1);
+      stopActiveKitAudio();
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      stopActiveKitAudio();
+      vi.unstubAllGlobals();
+    }
+
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const tokensSource = readFileSync(
+      join(specDir, '..', '..', 'styles', 'tokens.css'),
+      'utf8',
+    );
+    expect(tokensSource).toContain('.kit-detail-shell');
+    expect(tokensSource).toContain('.kit-tabs');
+    expect(tokensSource).toContain('.kit-section-card');
+    expect(tokensSource).toContain('.kit-kv-grid');
+    expect(tokensSource).toContain('.kit-stat-bar-list');
+    expect(tokensSource).toContain('.kit-data-table');
+    expect(tokensSource).toContain('.kit-audio-btn');
+    expect(ICON_CATALOG['arrow-left']).toBeDefined();
+    expect(ICON_CATALOG['volume']).toBeDefined();
+    expect(ICON_CATALOG['external-link']).toBeDefined();
   });
 });

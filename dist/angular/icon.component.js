@@ -252,6 +252,42 @@ export const ICON_CATALOG = {
         viewBox: '0 0 24 24',
         svgInner: `<rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2"/>`,
     },
+    'arrow-left': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    'chevron-left': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    'chevron-right': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    'chevron-up': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="m18 15-6-6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    volume: {
+        viewBox: '0 0 24 24',
+        svgInner: `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+    },
+    'external-link': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15 3 21 3 21 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    shield: {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    'map-pin': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/>`,
+    },
+    layers: {
+        viewBox: '0 0 24 24',
+        svgInner: `<polygon points="12 2 2 7 12 12 22 7 12 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
 };
 export class KitIconComponent {
     constructor() {
@@ -299,5 +335,5 @@ export class KitIconComponent {
     }
   `, changeDetection: ChangeDetectionStrategy.OnPush, styles: ["\n      :host {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        vertical-align: middle;\n        line-height: 0;\n      }\n      svg {\n        display: block;\n        flex-shrink: 0;\n      }\n    "] }]
     }], null, { name: [{ type: i0.Input, args: [{ isSignal: true, alias: "name", required: true }] }], size: [{ type: i0.Input, args: [{ isSignal: true, alias: "size", required: false }] }], className: [{ type: i0.Input, args: [{ isSignal: true, alias: "className", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitIconComponent, { className: "KitIconComponent", filePath: "icon.component.ts", lineNumber: 356 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitIconComponent, { className: "KitIconComponent", filePath: "icon.component.ts", lineNumber: 401 }); })();
 export { KitIconComponent as IconComponent };

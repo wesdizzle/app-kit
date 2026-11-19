@@ -110,6 +110,7 @@ export interface CspOptions {
     styleSrc?: string;
     fontSrc?: string;
     imgSrc?: string;
+    mediaSrc?: string;
     connectSrc?: string;
     frameSrc?: string;
     workerSrc?: string;
