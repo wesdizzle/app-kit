@@ -24,6 +24,7 @@ export declare class KitSelectComponent {
     readonly placeholder: import("@angular/core").InputSignal<string>;
     readonly variant: import("@angular/core").InputSignal<"default" | "compact-sort">;
     readonly disabled: import("@angular/core").InputSignal<boolean>;
+    readonly ariaLabel: import("@angular/core").InputSignal<string>;
     readonly valueChange: import("@angular/core").OutputEmitterRef<any>;
     readonly dropdownKey: import("@angular/core").Signal<string>;
     readonly isOpen: import("@angular/core").Signal<boolean>;
@@ -35,7 +36,7 @@ export declare class KitSelectComponent {
     onDocumentClick(event: MouseEvent): void;
     onEscape(): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitSelectComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<KitSelectComponent, "kit-select", never, { "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelTitle": { "alias": "labelTitle"; "required": false; "isSignal": true; }; "triggerId": { "alias": "triggerId"; "required": false; "isSignal": true; }; "dropdownName": { "alias": "dropdownName"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "groups": { "alias": "groups"; "required": false; "isSignal": true; }; "allOption": { "alias": "allOption"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<KitSelectComponent, "kit-select", never, { "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelTitle": { "alias": "labelTitle"; "required": false; "isSignal": true; }; "triggerId": { "alias": "triggerId"; "required": false; "isSignal": true; }; "dropdownName": { "alias": "dropdownName"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "groups": { "alias": "groups"; "required": false; "isSignal": true; }; "allOption": { "alias": "allOption"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
 }
 export declare class KitComboboxComponent implements OnDestroy {
     private readonly fallbackId;

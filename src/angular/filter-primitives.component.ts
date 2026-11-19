@@ -48,6 +48,7 @@ export function closeAllKitDropdowns(): void {
             [disabled]="disabled()"
             (click)="toggle($event)"
             [attr.id]="triggerId() || null"
+            [attr.aria-label]="ariaLabel() || null"
             aria-haspopup="listbox"
             [attr.aria-expanded]="isOpen()"
           >
@@ -136,6 +137,7 @@ export function closeAllKitDropdowns(): void {
             [disabled]="disabled()"
             (click)="toggle($event)"
             [attr.id]="triggerId() || null"
+            [attr.aria-label]="ariaLabel() || null"
             aria-haspopup="listbox"
             [attr.aria-expanded]="isOpen()"
           >
@@ -273,6 +275,7 @@ export class KitSelectComponent {
   readonly placeholder = input<string>('All');
   readonly variant = input<'default' | 'compact-sort'>('default');
   readonly disabled = input<boolean>(false);
+  readonly ariaLabel = input<string>('');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly valueChange = output<any>();

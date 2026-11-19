@@ -65,7 +65,7 @@ function KitSelectComponent_Conditional_0_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵadvance();
     i0.ɵɵclassProp("open", ctx_r1.isOpen());
     i0.ɵɵdomProperty("disabled", ctx_r1.disabled());
-    i0.ɵɵattribute("id", ctx_r1.triggerId() || null)("aria-expanded", ctx_r1.isOpen());
+    i0.ɵɵattribute("id", ctx_r1.triggerId() || null)("aria-label", ctx_r1.ariaLabel() || null)("aria-expanded", ctx_r1.isOpen());
     i0.ɵɵadvance(5);
     i0.ɵɵtextInterpolate(ctx_r1.selectedLabel());
     i0.ɵɵadvance(2);
@@ -228,7 +228,7 @@ function KitSelectComponent_Conditional_1_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵadvance();
     i0.ɵɵclassProp("open", ctx_r1.isOpen());
     i0.ɵɵdomProperty("disabled", ctx_r1.disabled());
-    i0.ɵɵattribute("id", ctx_r1.triggerId() || null)("aria-expanded", ctx_r1.isOpen());
+    i0.ɵɵattribute("id", ctx_r1.triggerId() || null)("aria-label", ctx_r1.ariaLabel() || null)("aria-expanded", ctx_r1.isOpen());
     i0.ɵɵadvance(2);
     i0.ɵɵtextInterpolate(ctx_r1.selectedLabel());
     i0.ɵɵadvance(2);
@@ -391,6 +391,7 @@ export class KitSelectComponent {
         this.placeholder = input('All', ...(ngDevMode ? [{ debugName: "placeholder" }] : /* istanbul ignore next */ []));
         this.variant = input('default', ...(ngDevMode ? [{ debugName: "variant" }] : /* istanbul ignore next */ []));
         this.disabled = input(false, ...(ngDevMode ? [{ debugName: "disabled" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input('', ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.valueChange = output();
         this.dropdownKey = computed(() => this.dropdownName() || this.triggerId() || this.fallbackId, ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
@@ -467,8 +468,8 @@ export class KitSelectComponent {
     static { this.ɵfac = function KitSelectComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitSelectComponent)(); }; }
     static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitSelectComponent, selectors: [["kit-select"]], hostBindings: function KitSelectComponent_HostBindings(rf, ctx) { if (rf & 1) {
             i0.ɵɵlistener("click", function KitSelectComponent_click_HostBindingHandler($event) { return ctx.onDocumentClick($event); }, i0.ɵɵresolveDocument)("keydown.escape", function KitSelectComponent_keydown_escape_HostBindingHandler() { return ctx.onEscape(); }, i0.ɵɵresolveDocument);
-        } }, inputs: { label: [1, "label"], labelTitle: [1, "labelTitle"], triggerId: [1, "triggerId"], dropdownName: [1, "dropdownName"], value: [1, "value"], options: [1, "options"], groups: [1, "groups"], allOption: [1, "allOption"], placeholder: [1, "placeholder"], variant: [1, "variant"], disabled: [1, "disabled"] }, outputs: { valueChange: "valueChange" }, decls: 2, vars: 1, consts: [[1, "quick-sort-wrapper"], [1, "filter-group"], [1, "input-wrapper", "dropdown-wrapper"], ["type", "button", "aria-haspopup", "listbox", 1, "m3-input", "dropdown-trigger", "quick-sort-trigger", 3, "click", "disabled"], ["aria-hidden", "true", 1, "sort-icon-prefix"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["d", "M3 6h18M6 12h12M10 18h4"], [1, "trigger-text"], ["aria-hidden", "true", 1, "dropdown-icon-wrapper"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "currentColor", 1, "dropdown-chevron"], ["d", "M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"], ["role", "listbox", 1, "dropdown-list", "animate-expressive"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "selected"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "click"], [1, "item-label"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "currentColor", 1, "selected-check"], ["d", "M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"], [1, "filter-group-header"], ["type", "button", "aria-haspopup", "listbox", 1, "m3-input", "dropdown-trigger", 3, "click", "disabled"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "currentColor", 1, "dropdown-chevron"], [1, "m3-label"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "child-platform", "selected"], [1, "sub-platform-arrow"], [1, "dropdown-group-header"]], template: function KitSelectComponent_Template(rf, ctx) { if (rf & 1) {
-            i0.ɵɵconditionalCreate(0, KitSelectComponent_Conditional_0_Template, 12, 11, "div", 0)(1, KitSelectComponent_Conditional_1_Template, 10, 12, "div", 1);
+        } }, inputs: { label: [1, "label"], labelTitle: [1, "labelTitle"], triggerId: [1, "triggerId"], dropdownName: [1, "dropdownName"], value: [1, "value"], options: [1, "options"], groups: [1, "groups"], allOption: [1, "allOption"], placeholder: [1, "placeholder"], variant: [1, "variant"], disabled: [1, "disabled"], ariaLabel: [1, "ariaLabel"] }, outputs: { valueChange: "valueChange" }, decls: 2, vars: 1, consts: [[1, "quick-sort-wrapper"], [1, "filter-group"], [1, "input-wrapper", "dropdown-wrapper"], ["type", "button", "aria-haspopup", "listbox", 1, "m3-input", "dropdown-trigger", "quick-sort-trigger", 3, "click", "disabled"], ["aria-hidden", "true", 1, "sort-icon-prefix"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["d", "M3 6h18M6 12h12M10 18h4"], [1, "trigger-text"], ["aria-hidden", "true", 1, "dropdown-icon-wrapper"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "currentColor", 1, "dropdown-chevron"], ["d", "M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"], ["role", "listbox", 1, "dropdown-list", "animate-expressive"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "selected"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "click"], [1, "item-label"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "currentColor", 1, "selected-check"], ["d", "M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"], [1, "filter-group-header"], ["type", "button", "aria-haspopup", "listbox", 1, "m3-input", "dropdown-trigger", 3, "click", "disabled"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "currentColor", 1, "dropdown-chevron"], [1, "m3-label"], ["type", "button", "role", "option", 1, "dropdown-item", "state-layer", 3, "child-platform", "selected"], [1, "sub-platform-arrow"], [1, "dropdown-group-header"]], template: function KitSelectComponent_Template(rf, ctx) { if (rf & 1) {
+            i0.ɵɵconditionalCreate(0, KitSelectComponent_Conditional_0_Template, 12, 12, "div", 0)(1, KitSelectComponent_Conditional_1_Template, 10, 13, "div", 1);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.variant() === "compact-sort" ? 0 : 1);
         } }, encapsulation: 2, changeDetection: 0 }); }
@@ -494,6 +495,7 @@ export class KitSelectComponent {
             [disabled]="disabled()"
             (click)="toggle($event)"
             [attr.id]="triggerId() || null"
+            [attr.aria-label]="ariaLabel() || null"
             aria-haspopup="listbox"
             [attr.aria-expanded]="isOpen()"
           >
@@ -582,6 +584,7 @@ export class KitSelectComponent {
             [disabled]="disabled()"
             (click)="toggle($event)"
             [attr.id]="triggerId() || null"
+            [attr.aria-label]="ariaLabel() || null"
             aria-haspopup="listbox"
             [attr.aria-expanded]="isOpen()"
           >
@@ -705,14 +708,14 @@ export class KitSelectComponent {
     }
   `,
             }]
-    }], null, { label: [{ type: i0.Input, args: [{ isSignal: true, alias: "label", required: false }] }], labelTitle: [{ type: i0.Input, args: [{ isSignal: true, alias: "labelTitle", required: false }] }], triggerId: [{ type: i0.Input, args: [{ isSignal: true, alias: "triggerId", required: false }] }], dropdownName: [{ type: i0.Input, args: [{ isSignal: true, alias: "dropdownName", required: false }] }], value: [{ type: i0.Input, args: [{ isSignal: true, alias: "value", required: false }] }], options: [{ type: i0.Input, args: [{ isSignal: true, alias: "options", required: false }] }], groups: [{ type: i0.Input, args: [{ isSignal: true, alias: "groups", required: false }] }], allOption: [{ type: i0.Input, args: [{ isSignal: true, alias: "allOption", required: false }] }], placeholder: [{ type: i0.Input, args: [{ isSignal: true, alias: "placeholder", required: false }] }], variant: [{ type: i0.Input, args: [{ isSignal: true, alias: "variant", required: false }] }], disabled: [{ type: i0.Input, args: [{ isSignal: true, alias: "disabled", required: false }] }], valueChange: [{ type: i0.Output, args: ["valueChange"] }], onDocumentClick: [{
+    }], null, { label: [{ type: i0.Input, args: [{ isSignal: true, alias: "label", required: false }] }], labelTitle: [{ type: i0.Input, args: [{ isSignal: true, alias: "labelTitle", required: false }] }], triggerId: [{ type: i0.Input, args: [{ isSignal: true, alias: "triggerId", required: false }] }], dropdownName: [{ type: i0.Input, args: [{ isSignal: true, alias: "dropdownName", required: false }] }], value: [{ type: i0.Input, args: [{ isSignal: true, alias: "value", required: false }] }], options: [{ type: i0.Input, args: [{ isSignal: true, alias: "options", required: false }] }], groups: [{ type: i0.Input, args: [{ isSignal: true, alias: "groups", required: false }] }], allOption: [{ type: i0.Input, args: [{ isSignal: true, alias: "allOption", required: false }] }], placeholder: [{ type: i0.Input, args: [{ isSignal: true, alias: "placeholder", required: false }] }], variant: [{ type: i0.Input, args: [{ isSignal: true, alias: "variant", required: false }] }], disabled: [{ type: i0.Input, args: [{ isSignal: true, alias: "disabled", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }], valueChange: [{ type: i0.Output, args: ["valueChange"] }], onDocumentClick: [{
             type: HostListener,
             args: ['document:click', ['$event']]
         }], onEscape: [{
             type: HostListener,
             args: ['document:keydown.escape']
         }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSelectComponent, { className: "KitSelectComponent", filePath: "filter-primitives.component.ts", lineNumber: 262 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSelectComponent, { className: "KitSelectComponent", filePath: "filter-primitives.component.ts", lineNumber: 264 }); })();
 export class KitComboboxComponent {
     constructor() {
         this.fallbackId = `kit-combobox-${nextDropdownInstanceId++}`;
@@ -989,7 +992,7 @@ export class KitComboboxComponent {
             type: HostListener,
             args: ['document:keydown.escape']
         }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitComboboxComponent, { className: "KitComboboxComponent", filePath: "filter-primitives.component.ts", lineNumber: 496 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitComboboxComponent, { className: "KitComboboxComponent", filePath: "filter-primitives.component.ts", lineNumber: 499 }); })();
 export class KitMultiSelectComponent {
     constructor() {
         this.fallbackId = `kit-multiselect-${nextDropdownInstanceId++}`;
@@ -1172,4 +1175,4 @@ export class KitMultiSelectComponent {
             type: HostListener,
             args: ['document:keydown.escape']
         }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitMultiSelectComponent, { className: "KitMultiSelectComponent", filePath: "filter-primitives.component.ts", lineNumber: 684 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitMultiSelectComponent, { className: "KitMultiSelectComponent", filePath: "filter-primitives.component.ts", lineNumber: 687 }); })();
