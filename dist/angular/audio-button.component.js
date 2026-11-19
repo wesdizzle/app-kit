@@ -146,17 +146,11 @@ export class KitAudioButtonComponent {
             i0.ɵɵconditionalCreate(0, KitAudioButtonComponent_Conditional_0_Template, 4, 12, "button", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.src() && (ctx.isSupported() || !ctx.hideIfUnsupported()) ? 0 : -1);
-        } }, dependencies: [KitIconComponent], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [KitIconComponent], styles: ["\n      .kit-audio-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 6px 13px;\n        border-radius: var(--kit-radius-full);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        color: var(--kit-on-surface);\n        font-family: var(--kit-font-sans);\n        font-size: 0.8rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-audio-btn:hover:not(:disabled) {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n      }\n\n      .kit-audio-btn.playing {\n        background: var(--kit-primary-container);\n        color: var(--kit-on-primary-container);\n        border-color: color-mix(in srgb, var(--kit-primary) 45%, transparent);\n      }\n\n      .kit-audio-btn.error {\n        border-color: var(--kit-danger-border);\n        color: var(--kit-danger);\n      }\n\n      .kit-audio-btn:disabled {\n        opacity: 0.45;\n        cursor: not-allowed;\n      }\n\n      .kit-audio-btn:focus-visible {\n        outline: 2.5px solid var(--kit-primary);\n        outline-offset: 2px;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitAudioButtonComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-audio-button',
-                standalone: true,
-                imports: [KitIconComponent],
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-audio-button', standalone: true, imports: [KitIconComponent], encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     @if (src() && (isSupported() || !hideIfUnsupported())) {
       <button
         type="button"
@@ -182,7 +176,6 @@ export class KitAudioButtonComponent {
         }}</span>
       </button>
     }
-  `,
-            }]
+  `, styles: ["\n      .kit-audio-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 6px 13px;\n        border-radius: var(--kit-radius-full);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        color: var(--kit-on-surface);\n        font-family: var(--kit-font-sans);\n        font-size: 0.8rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-audio-btn:hover:not(:disabled) {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n      }\n\n      .kit-audio-btn.playing {\n        background: var(--kit-primary-container);\n        color: var(--kit-on-primary-container);\n        border-color: color-mix(in srgb, var(--kit-primary) 45%, transparent);\n      }\n\n      .kit-audio-btn.error {\n        border-color: var(--kit-danger-border);\n        color: var(--kit-danger);\n      }\n\n      .kit-audio-btn:disabled {\n        opacity: 0.45;\n        cursor: not-allowed;\n      }\n\n      .kit-audio-btn:focus-visible {\n        outline: 2.5px solid var(--kit-primary);\n        outline-offset: 2px;\n      }\n    "] }]
     }], () => [], { src: [{ type: i0.Input, args: [{ isSignal: true, alias: "src", required: false }] }], mimeType: [{ type: i0.Input, args: [{ isSignal: true, alias: "mimeType", required: false }] }], label: [{ type: i0.Input, args: [{ isSignal: true, alias: "label", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }], hideIfUnsupported: [{ type: i0.Input, args: [{ isSignal: true, alias: "hideIfUnsupported", required: false }] }], testId: [{ type: i0.Input, args: [{ isSignal: true, alias: "testId", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitAudioButtonComponent, { className: "KitAudioButtonComponent", filePath: "audio-button.component.ts", lineNumber: 86 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitAudioButtonComponent, { className: "KitAudioButtonComponent", filePath: "audio-button.component.ts", lineNumber: 130 }); })();

@@ -69,7 +69,9 @@ function KitDegradedBannerComponent_Conditional_0_Template(rf, ctx) { if (rf & 1
     i0.ɵɵadvance(2);
     i0.ɵɵtextInterpolate(ctx_r0.resolvedMessage());
 } }
-const _c0 = ["*"];
+const _c0 = "\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--kit-duration-medium, 260ms)\n        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
+const _c1 = "\n  @keyframes kitErrorShake {\n    0%,\n    100% {\n      transform: translateX(0);\n    }\n    20% {\n      transform: translateX(-6px);\n    }\n    40% {\n      transform: translateX(5px);\n    }\n    60% {\n      transform: translateX(-3px);\n    }\n    80% {\n      transform: translateX(2px);\n    }\n  }\n\n  .kit-status-banner {\n    padding: 12px 16px;\n    border-radius: var(--kit-radius-sm);\n    font-size: 0.875rem;\n    font-weight: 600;\n    border: 1px solid var(--kit-outline-variant);\n    background: var(--kit-surface-container-high);\n    color: var(--kit-on-surface);\n    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n  }\n\n  .kit-status-banner.variant-error {\n    background: var(--kit-danger-subtle);\n    border-color: var(--kit-danger-border);\n    color: var(--kit-danger);\n    animation:\n      kitBannerIn 200ms var(--kit-ease-emphasized) both,\n      kitErrorShake 360ms var(--kit-ease-standard) both;\n  }\n\n  .kit-status-banner.variant-success {\n    background: var(--kit-success-subtle);\n    border-color: var(--kit-success-border);\n    color: var(--kit-success);\n  }\n\n  .kit-status-banner.variant-warning {\n    background: var(--kit-warning-subtle);\n    border-color: var(--kit-warning-border);\n    color: var(--kit-warning);\n  }\n\n  .kit-status-banner.closing,\n  .kit-status-banner.variant-error.closing {\n    animation: kitBannerOut 200ms\n      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-status-banner {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
+const _c2 = ["*"];
 function KitLoadingBannerComponent_Conditional_0_Conditional_6_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵtext(0);
 } if (rf & 2) {
@@ -113,6 +115,134 @@ export function canAnimateKitBannerExit() {
         typeof window.matchMedia === 'function' &&
         window.matchMedia('(prefers-reduced-motion: no-preference)').matches);
 }
+const KIT_BANNER_COLLAPSE_CSS = `
+  @keyframes kitBannerIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes kitBannerOut {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+  }
+
+  .kit-banner-collapse {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition:
+      grid-template-rows var(--kit-duration-medium, 260ms)
+        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+
+  @starting-style {
+    .kit-banner-collapse {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+  }
+
+  .kit-banner-collapse.closing {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),
+      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));
+  }
+
+  .kit-banner-collapse-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-banner-collapse {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+`;
+const KIT_STATUS_BANNER_CSS = `
+  @keyframes kitErrorShake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-6px);
+    }
+    40% {
+      transform: translateX(5px);
+    }
+    60% {
+      transform: translateX(-3px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+  }
+
+  .kit-status-banner {
+    padding: 12px 16px;
+    border-radius: var(--kit-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid var(--kit-outline-variant);
+    background: var(--kit-surface-container-high);
+    color: var(--kit-on-surface);
+    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;
+  }
+
+  .kit-status-banner.variant-error {
+    background: var(--kit-danger-subtle);
+    border-color: var(--kit-danger-border);
+    color: var(--kit-danger);
+    animation:
+      kitBannerIn 200ms var(--kit-ease-emphasized) both,
+      kitErrorShake 360ms var(--kit-ease-standard) both;
+  }
+
+  .kit-status-banner.variant-success {
+    background: var(--kit-success-subtle);
+    border-color: var(--kit-success-border);
+    color: var(--kit-success);
+  }
+
+  .kit-status-banner.variant-warning {
+    background: var(--kit-warning-subtle);
+    border-color: var(--kit-warning-border);
+    color: var(--kit-warning);
+  }
+
+  .kit-status-banner.closing,
+  .kit-status-banner.variant-error.closing {
+    animation: kitBannerOut 200ms
+      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-status-banner {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+`;
 /**
  * Header-friendly sync pill that morphs from a spinning indicator into a
  * checkmark confirmation before lingering briefly and fading out.
@@ -166,16 +296,11 @@ export class KitSyncIndicatorComponent {
             i0.ɵɵconditionalCreate(0, KitSyncIndicatorComponent_Conditional_0_Template, 3, 5, "div", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.phase() !== "idle" ? 0 : -1);
-        } }, encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      @keyframes kitSyncSpin {\n        to {\n          transform: rotate(360deg);\n        }\n      }\n\n      @keyframes kitSyncPopIn {\n        from {\n          opacity: 0;\n          transform: translateY(-4px) scale(0.92);\n        }\n        to {\n          opacity: 1;\n          transform: translateY(0) scale(1);\n        }\n      }\n\n      @keyframes kitCheckDraw {\n        from {\n          stroke-dashoffset: 24;\n        }\n        to {\n          stroke-dashoffset: 0;\n        }\n      }\n\n      .kit-sync-indicator {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--kit-radius-full);\n        font-size: 0.78rem;\n        font-weight: 600;\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-high);\n        color: var(--kit-on-surface-variant);\n        animation: kitSyncPopIn 200ms var(--kit-ease-spring) both;\n      }\n\n      .kit-sync-indicator.saving {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n        background: var(--kit-primary-container);\n      }\n\n      .kit-sync-indicator.saved {\n        border-color: var(--kit-success-border);\n        color: var(--kit-success);\n        background: var(--kit-success-subtle);\n      }\n\n      .kit-sync-spinner {\n        animation: kitSyncSpin 0.85s linear infinite;\n      }\n\n      .kit-sync-check path {\n        stroke-dasharray: 24;\n        animation: kitCheckDraw 240ms var(--kit-ease-emphasized) both;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-sync-indicator,\n        .kit-sync-indicator * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSyncIndicatorComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-sync-indicator',
-                standalone: true,
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-sync-indicator', standalone: true, encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     @if (phase() !== 'idle') {
       <div
         class="kit-sync-indicator"
@@ -217,10 +342,9 @@ export class KitSyncIndicatorComponent {
         }
       </div>
     }
-  `,
-            }]
+  `, styles: ["\n      @keyframes kitSyncSpin {\n        to {\n          transform: rotate(360deg);\n        }\n      }\n\n      @keyframes kitSyncPopIn {\n        from {\n          opacity: 0;\n          transform: translateY(-4px) scale(0.92);\n        }\n        to {\n          opacity: 1;\n          transform: translateY(0) scale(1);\n        }\n      }\n\n      @keyframes kitCheckDraw {\n        from {\n          stroke-dashoffset: 24;\n        }\n        to {\n          stroke-dashoffset: 0;\n        }\n      }\n\n      .kit-sync-indicator {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--kit-radius-full);\n        font-size: 0.78rem;\n        font-weight: 600;\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-high);\n        color: var(--kit-on-surface-variant);\n        animation: kitSyncPopIn 200ms var(--kit-ease-spring) both;\n      }\n\n      .kit-sync-indicator.saving {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n        background: var(--kit-primary-container);\n      }\n\n      .kit-sync-indicator.saved {\n        border-color: var(--kit-success-border);\n        color: var(--kit-success);\n        background: var(--kit-success-subtle);\n      }\n\n      .kit-sync-spinner {\n        animation: kitSyncSpin 0.85s linear infinite;\n      }\n\n      .kit-sync-check path {\n        stroke-dasharray: 24;\n        animation: kitCheckDraw 240ms var(--kit-ease-emphasized) both;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-sync-indicator,\n        .kit-sync-indicator * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "] }]
     }], () => [], { isSaving: [{ type: i0.Input, args: [{ isSignal: true, alias: "isSaving", required: false }] }], savingLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "savingLabel", required: false }] }], savedLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "savedLabel", required: false }] }], lingerMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "lingerMs", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSyncIndicatorComponent, { className: "KitSyncIndicatorComponent", filePath: "status-feedback.component.ts", lineNumber: 80 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSyncIndicatorComponent, { className: "KitSyncIndicatorComponent", filePath: "status-feedback.component.ts", lineNumber: 283 }); })();
 /**
  * Animated inline status/alert banner with directional entrance, height collapse,
  * and exit animation on dismissal, plus a subtle horizontal shake on error feedback.
@@ -285,16 +409,11 @@ export class KitStatusBannerComponent {
         } if (rf & 2) {
             let tmp_0_0;
             i0.ɵɵconditional((tmp_0_0 = ctx.effectiveMessage()) ? 0 : -1, tmp_0_0);
-        } }, encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, _c1], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitStatusBannerComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-status-banner',
-                standalone: true,
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-status-banner', standalone: true, encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     @if (effectiveMessage(); as activeMessage) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">
         <div class="kit-banner-collapse-inner">
@@ -313,10 +432,9 @@ export class KitStatusBannerComponent {
         </div>
       </div>
     }
-  `,
-            }]
+  `, styles: ["\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--kit-duration-medium, 260ms)\n        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n", "\n  @keyframes kitErrorShake {\n    0%,\n    100% {\n      transform: translateX(0);\n    }\n    20% {\n      transform: translateX(-6px);\n    }\n    40% {\n      transform: translateX(5px);\n    }\n    60% {\n      transform: translateX(-3px);\n    }\n    80% {\n      transform: translateX(2px);\n    }\n  }\n\n  .kit-status-banner {\n    padding: 12px 16px;\n    border-radius: var(--kit-radius-sm);\n    font-size: 0.875rem;\n    font-weight: 600;\n    border: 1px solid var(--kit-outline-variant);\n    background: var(--kit-surface-container-high);\n    color: var(--kit-on-surface);\n    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n  }\n\n  .kit-status-banner.variant-error {\n    background: var(--kit-danger-subtle);\n    border-color: var(--kit-danger-border);\n    color: var(--kit-danger);\n    animation:\n      kitBannerIn 200ms var(--kit-ease-emphasized) both,\n      kitErrorShake 360ms var(--kit-ease-standard) both;\n  }\n\n  .kit-status-banner.variant-success {\n    background: var(--kit-success-subtle);\n    border-color: var(--kit-success-border);\n    color: var(--kit-success);\n  }\n\n  .kit-status-banner.variant-warning {\n    background: var(--kit-warning-subtle);\n    border-color: var(--kit-warning-border);\n    color: var(--kit-warning);\n  }\n\n  .kit-status-banner.closing,\n  .kit-status-banner.variant-error.closing {\n    animation: kitBannerOut 200ms\n      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-status-banner {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"] }]
     }], () => [], { message: [{ type: i0.Input, args: [{ isSignal: true, alias: "message", required: false }] }], variant: [{ type: i0.Input, args: [{ isSignal: true, alias: "variant", required: false }] }], exitDurationMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "exitDurationMs", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitStatusBannerComponent, { className: "KitStatusBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 162 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitStatusBannerComponent, { className: "KitStatusBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 366 }); })();
 export function formatKitDegradedTimestamp(value) {
     if (!value)
         return null;
@@ -422,16 +540,11 @@ export class KitDegradedBannerComponent {
         } if (rf & 2) {
             let tmp_0_0;
             i0.ɵɵconditional((tmp_0_0 = ctx.effectiveMode()) ? 0 : -1, tmp_0_0);
-        } }, encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, _c1, "\n      .kit-degraded-banner {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px 12px;\n        margin-bottom: 16px;\n        line-height: 1.4;\n      }\n\n      .kit-degraded-badge {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        font-weight: 700;\n        white-space: nowrap;\n      }\n\n      .kit-degraded-message {\n        font-weight: 500;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitDegradedBannerComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-degraded-banner',
-                standalone: true,
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-degraded-banner', standalone: true, encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     @if (effectiveMode(); as activeMode) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">
         <div class="kit-banner-collapse-inner">
@@ -454,10 +567,9 @@ export class KitDegradedBannerComponent {
         </div>
       </div>
     }
-  `,
-            }]
+  `, styles: ["\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--kit-duration-medium, 260ms)\n        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n", "\n  @keyframes kitErrorShake {\n    0%,\n    100% {\n      transform: translateX(0);\n    }\n    20% {\n      transform: translateX(-6px);\n    }\n    40% {\n      transform: translateX(5px);\n    }\n    60% {\n      transform: translateX(-3px);\n    }\n    80% {\n      transform: translateX(2px);\n    }\n  }\n\n  .kit-status-banner {\n    padding: 12px 16px;\n    border-radius: var(--kit-radius-sm);\n    font-size: 0.875rem;\n    font-weight: 600;\n    border: 1px solid var(--kit-outline-variant);\n    background: var(--kit-surface-container-high);\n    color: var(--kit-on-surface);\n    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n  }\n\n  .kit-status-banner.variant-error {\n    background: var(--kit-danger-subtle);\n    border-color: var(--kit-danger-border);\n    color: var(--kit-danger);\n    animation:\n      kitBannerIn 200ms var(--kit-ease-emphasized) both,\n      kitErrorShake 360ms var(--kit-ease-standard) both;\n  }\n\n  .kit-status-banner.variant-success {\n    background: var(--kit-success-subtle);\n    border-color: var(--kit-success-border);\n    color: var(--kit-success);\n  }\n\n  .kit-status-banner.variant-warning {\n    background: var(--kit-warning-subtle);\n    border-color: var(--kit-warning-border);\n    color: var(--kit-warning);\n  }\n\n  .kit-status-banner.closing,\n  .kit-status-banner.variant-error.closing {\n    animation: kitBannerOut 200ms\n      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-status-banner {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n", "\n      .kit-degraded-banner {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px 12px;\n        margin-bottom: 16px;\n        line-height: 1.4;\n      }\n\n      .kit-degraded-badge {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        font-weight: 700;\n        white-space: nowrap;\n      }\n\n      .kit-degraded-message {\n        font-weight: 500;\n      }\n    "] }]
     }], () => [], { mode: [{ type: i0.Input, args: [{ isSignal: true, alias: "mode", required: false }] }], snapshotTimestamp: [{ type: i0.Input, args: [{ isSignal: true, alias: "snapshotTimestamp", required: false }] }], customMessage: [{ type: i0.Input, args: [{ isSignal: true, alias: "customMessage", required: false }] }], exitDurationMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "exitDurationMs", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitDegradedBannerComponent, { className: "KitDegradedBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 282 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitDegradedBannerComponent, { className: "KitDegradedBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 512 }); })();
 /**
  * Shared animated loading/sync progress banner with pulsing status indicator,
  * optional determinate progress track, and smooth appear/disappear animations.
@@ -542,21 +654,16 @@ export class KitLoadingBannerComponent {
         }
     }
     static { this.ɵfac = function KitLoadingBannerComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitLoadingBannerComponent)(); }; }
-    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitLoadingBannerComponent, selectors: [["kit-loading-banner"]], inputs: { active: [1, "active"], message: [1, "message"], percent: [1, "percent"], showProgress: [1, "showProgress"], testId: [1, "testId"], exitDurationMs: [1, "exitDurationMs"] }, ngContentSelectors: _c0, decls: 1, vars: 1, consts: [[1, "kit-banner-collapse", 3, "closing"], [1, "kit-banner-collapse"], [1, "kit-banner-collapse-inner"], ["role", "status", "aria-live", "polite", 1, "kit-loading-banner", "catalog-sync-banner"], [1, "kit-loading-banner-info", "catalog-sync-info"], ["aria-hidden", "true", 1, "kit-loading-banner-dot", "catalog-sync-dot"], [1, "kit-loading-banner-text"], ["aria-hidden", "true", 1, "kit-loading-banner-track", "catalog-sync-track"], [1, "kit-loading-banner-fill", "catalog-sync-fill"]], template: function KitLoadingBannerComponent_Template(rf, ctx) { if (rf & 1) {
+    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitLoadingBannerComponent, selectors: [["kit-loading-banner"]], inputs: { active: [1, "active"], message: [1, "message"], percent: [1, "percent"], showProgress: [1, "showProgress"], testId: [1, "testId"], exitDurationMs: [1, "exitDurationMs"] }, ngContentSelectors: _c2, decls: 1, vars: 1, consts: [[1, "kit-banner-collapse", 3, "closing"], [1, "kit-banner-collapse"], [1, "kit-banner-collapse-inner"], ["role", "status", "aria-live", "polite", 1, "kit-loading-banner", "catalog-sync-banner"], [1, "kit-loading-banner-info", "catalog-sync-info"], ["aria-hidden", "true", 1, "kit-loading-banner-dot", "catalog-sync-dot"], [1, "kit-loading-banner-text"], ["aria-hidden", "true", 1, "kit-loading-banner-track", "catalog-sync-track"], [1, "kit-loading-banner-fill", "catalog-sync-fill"]], template: function KitLoadingBannerComponent_Template(rf, ctx) { if (rf & 1) {
             i0.ɵɵprojectionDef();
             i0.ɵɵconditionalCreate(0, KitLoadingBannerComponent_Conditional_0_Template, 9, 7, "div", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.shouldShow() ? 0 : -1);
-        } }, encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, "\n      @keyframes kitLoadingBannerPulse {\n        0%,\n        100% {\n          opacity: 0.45;\n        }\n        50% {\n          opacity: 1;\n        }\n      }\n\n      .kit-loading-banner {\n        display: flex;\n        flex-direction: column;\n        gap: 0.4rem;\n        margin-bottom: 0.75rem;\n        padding: 0.5rem 0.875rem;\n        background: var(--kit-surface-container-high);\n        border: 1px solid var(--kit-outline-variant);\n        border-radius: var(--kit-radius-md);\n        font-size: 0.8125rem;\n        color: var(--kit-on-surface-variant);\n        animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n      }\n\n      .kit-loading-banner.closing {\n        animation: kitBannerOut 200ms\n          var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n      }\n\n      .kit-loading-banner-info {\n        display: flex;\n        align-items: center;\n        gap: 0.5rem;\n      }\n\n      .kit-loading-banner-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        background: var(--kit-primary);\n        flex-shrink: 0;\n        animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;\n      }\n\n      .kit-loading-banner-track {\n        width: 100%;\n        height: 4px;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-highest);\n        overflow: hidden;\n      }\n\n      .kit-loading-banner-fill {\n        height: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-primary);\n        transition: width 180ms ease-out;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-loading-banner,\n        .kit-loading-banner * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitLoadingBannerComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-loading-banner',
-                standalone: true,
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-loading-banner', standalone: true, encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     @if (shouldShow()) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">
         <div class="kit-banner-collapse-inner">
@@ -594,7 +701,6 @@ export class KitLoadingBannerComponent {
         </div>
       </div>
     }
-  `,
-            }]
+  `, styles: ["\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--kit-duration-medium, 260ms)\n        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n", "\n      @keyframes kitLoadingBannerPulse {\n        0%,\n        100% {\n          opacity: 0.45;\n        }\n        50% {\n          opacity: 1;\n        }\n      }\n\n      .kit-loading-banner {\n        display: flex;\n        flex-direction: column;\n        gap: 0.4rem;\n        margin-bottom: 0.75rem;\n        padding: 0.5rem 0.875rem;\n        background: var(--kit-surface-container-high);\n        border: 1px solid var(--kit-outline-variant);\n        border-radius: var(--kit-radius-md);\n        font-size: 0.8125rem;\n        color: var(--kit-on-surface-variant);\n        animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n      }\n\n      .kit-loading-banner.closing {\n        animation: kitBannerOut 200ms\n          var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n      }\n\n      .kit-loading-banner-info {\n        display: flex;\n        align-items: center;\n        gap: 0.5rem;\n      }\n\n      .kit-loading-banner-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        background: var(--kit-primary);\n        flex-shrink: 0;\n        animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;\n      }\n\n      .kit-loading-banner-track {\n        width: 100%;\n        height: 4px;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-highest);\n        overflow: hidden;\n      }\n\n      .kit-loading-banner-fill {\n        height: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-primary);\n        transition: width 180ms ease-out;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-loading-banner,\n        .kit-loading-banner * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "] }]
     }], () => [], { active: [{ type: i0.Input, args: [{ isSignal: true, alias: "active", required: false }] }], message: [{ type: i0.Input, args: [{ isSignal: true, alias: "message", required: false }] }], percent: [{ type: i0.Input, args: [{ isSignal: true, alias: "percent", required: false }] }], showProgress: [{ type: i0.Input, args: [{ isSignal: true, alias: "showProgress", required: false }] }], testId: [{ type: i0.Input, args: [{ isSignal: true, alias: "testId", required: false }] }], exitDurationMs: [{ type: i0.Input, args: [{ isSignal: true, alias: "exitDurationMs", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitLoadingBannerComponent, { className: "KitLoadingBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 417 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitLoadingBannerComponent, { className: "KitLoadingBannerComponent", filePath: "status-feedback.component.ts", lineNumber: 719 }); })();

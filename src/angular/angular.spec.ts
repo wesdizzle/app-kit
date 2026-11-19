@@ -713,12 +713,12 @@ describe('@wesdizzle/app-kit/angular', () => {
       expect(bar.showDrawer()).toBe(true);
 
       const specDir = dirname(fileURLToPath(import.meta.url));
-      const tokensSource = readFileSync(
-        join(specDir, '..', '..', 'styles', 'tokens.css'),
+      const filterStylesSource = readFileSync(
+        join(specDir, 'filter-primitives.styles.ts'),
         'utf8',
       );
-      expect(tokensSource).toContain('grid-template-rows: 0fr');
-      expect(tokensSource).not.toMatch(
+      expect(filterStylesSource).toContain('grid-template-rows: 0fr');
+      expect(filterStylesSource).not.toMatch(
         /\.secondary-filters-drawer\.drawer-collapsed\s*\{[^}]*display:\s*none/,
       );
 
@@ -957,19 +957,15 @@ describe('@wesdizzle/app-kit/angular', () => {
 
   it('uses shared --kit-* semantic surface tokens in .kit-command-palette styles without bare --m3-* dependencies', () => {
     const specDir = dirname(fileURLToPath(import.meta.url));
-    const tokensCss = readFileSync(
-      join(specDir, '../../styles/tokens.css'),
+    const paletteSource = readFileSync(
+      join(specDir, 'command-palette.component.ts'),
       'utf8',
     );
-    const startIdx = tokensCss.indexOf(
-      '/* Shared Command Palette (Dialog + Bottom Sheet) */',
-    );
-    const endIdx = tokensCss.indexOf(
-      '/* Accessible Focus Rings Across Shared Kit Components */',
-    );
+    const startIdx = paletteSource.indexOf('.kit-command-palette {');
+    const endIdx = paletteSource.indexOf('template: `');
     expect(startIdx).toBeGreaterThan(-1);
     expect(endIdx).toBeGreaterThan(startIdx);
-    const paletteSection = tokensCss.slice(startIdx, endIdx);
+    const paletteSection = paletteSource.slice(startIdx, endIdx);
 
     expect(paletteSection).toMatch(
       /background:\s*var\(--kit-surface-container-high\)/,
@@ -980,7 +976,7 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(paletteSection).not.toMatch(/var\(--m3-primary/);
   });
 
-  it('does not trigger navigator.vibrate when dismissing KitCommandPaletteComponent via drag handle and avoids forwards/both entrance animation locks in tokens.css', () => {
+  it('does not trigger navigator.vibrate when dismissing KitCommandPaletteComponent via drag handle and avoids forwards/both entrance animation locks in component styles', () => {
     const vibrateSpy = vi.fn();
     vi.stubGlobal('navigator', { vibrate: vibrateSpy });
 
@@ -1004,15 +1000,39 @@ describe('@wesdizzle/app-kit/angular', () => {
       expect(vibrateSpy).not.toHaveBeenCalled();
 
       const specDir = dirname(fileURLToPath(import.meta.url));
-      const tokensCss = readFileSync(
-        join(specDir, '../../styles/tokens.css'),
+      const dialogKeyframesCss = readFileSync(
+        join(specDir, 'dialog-keyframes.styles.ts'),
         'utf8',
       );
-      expect(tokensCss).not.toMatch(/kitModalSpringIn[^;]*\b(both|forwards)\b/);
-      expect(tokensCss).not.toMatch(/kitSheetSlideUp[^;]*\b(both|forwards)\b/);
-      expect(tokensCss).toMatch(/\.kit-profile-dialog\.dragging\s*\{/);
-      expect(tokensCss).toMatch(/\.kit-dialog-sheet-panel\.dragging\s*\{/);
-      expect(tokensCss).toMatch(/\.kit-degraded-banner\s*\{/);
+      const profileModalSource = readFileSync(
+        join(specDir, 'profile-modal.component.ts'),
+        'utf8',
+      );
+      const dialogSheetSource = readFileSync(
+        join(specDir, 'dialog-sheet.component.ts'),
+        'utf8',
+      );
+      const statusFeedbackSource = readFileSync(
+        join(specDir, 'status-feedback.component.ts'),
+        'utf8',
+      );
+      for (const cssSource of [
+        dialogKeyframesCss,
+        profileModalSource,
+        dialogSheetSource,
+      ]) {
+        expect(cssSource).not.toMatch(
+          /kitModalSpringIn[^;]*\b(both|forwards)\b/,
+        );
+        expect(cssSource).not.toMatch(
+          /kitSheetSlideUp[^;]*\b(both|forwards)\b/,
+        );
+      }
+      expect(profileModalSource).toMatch(/\.kit-profile-dialog\.dragging\s*\{/);
+      expect(dialogSheetSource).toMatch(
+        /\.kit-dialog-sheet-panel\.dragging\s*\{/,
+      );
+      expect(statusFeedbackSource).toMatch(/\.kit-degraded-banner\s*\{/);
     } finally {
       vi.unstubAllGlobals();
     }
@@ -1053,6 +1073,10 @@ describe('@wesdizzle/app-kit/angular', () => {
       join(specDir, '..', '..', 'styles', 'tokens.css'),
       'utf8',
     );
+    const statusFeedbackSource = readFileSync(
+      join(specDir, 'status-feedback.component.ts'),
+      'utf8',
+    );
 
     expect(headerSource).not.toMatch(/class="nav-item state-layer"/);
     expect(headerSource).toMatch(/\.kit-header-bar \.nav-item::after\s*\{/);
@@ -1060,9 +1084,9 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(tokensCss).toMatch(
       /@media\s*\(hover:\s*hover\)\s*\{\s*\.state-layer:hover::after/,
     );
-    expect(tokensCss).toMatch(/\.kit-banner-collapse\s*\{/);
-    expect(tokensCss).toMatch(/\.kit-banner-collapse\.closing\s*\{/);
-    expect(tokensCss).toMatch(/\.kit-loading-banner\s*\{/);
+    expect(statusFeedbackSource).toMatch(/\.kit-banner-collapse\s*\{/);
+    expect(statusFeedbackSource).toMatch(/\.kit-banner-collapse\.closing\s*\{/);
+    expect(statusFeedbackSource).toMatch(/\.kit-loading-banner\s*\{/);
   });
 
   it('animates KitDegradedBannerComponent, KitStatusBannerComponent, and KitLoadingBannerComponent through closing before unmounting', () => {
@@ -1221,16 +1245,16 @@ describe('@wesdizzle/app-kit/angular', () => {
     modal.ngOnDestroy();
   });
 
-  it('prevents flex shrink clipping on .public-sharing-card in tokens.css and hardens KitAuthService displayName/cache self-healing', async () => {
+  it('prevents flex shrink clipping on .public-sharing-card in profile-modal styles and hardens KitAuthService displayName/cache self-healing', async () => {
     const specDir = dirname(fileURLToPath(import.meta.url));
-    const tokensCss = readFileSync(
-      join(specDir, '..', '..', 'styles', 'tokens.css'),
+    const profileModalSource = readFileSync(
+      join(specDir, 'profile-modal.component.ts'),
       'utf8',
     );
-    expect(tokensCss).toMatch(
+    expect(profileModalSource).toMatch(
       /\.kit-profile-dialog\s+\.modal-body\s*>\s*\*\s*\{[^}]*flex-shrink:\s*0/,
     );
-    expect(tokensCss).toMatch(
+    expect(profileModalSource).toMatch(
       /\.kit-profile-dialog\s+\.public-sharing-card\s*\{[^}]*flex-shrink:\s*0/,
     );
 
@@ -1520,12 +1544,12 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(chart.renderedBars().length).toBe(2);
 
     const specDir = dirname(fileURLToPath(import.meta.url));
-    const tokensSource = readFileSync(
-      join(specDir, '..', '..', 'styles', 'tokens.css'),
+    const chartSource = readFileSync(
+      join(specDir, 'time-series-chart.component.ts'),
       'utf8',
     );
-    expect(tokensSource).toContain('.kit-ts-chart');
-    expect(tokensSource).toContain('.kit-ts-tooltip');
+    expect(chartSource).toContain('.kit-ts-chart');
+    expect(chartSource).toContain('.kit-ts-tooltip');
   });
 
   it('KitDetailShellComponent supports back link interception and keyboard prev/next navigation guards', () => {
@@ -1755,17 +1779,32 @@ describe('@wesdizzle/app-kit/angular', () => {
     }
 
     const specDir = dirname(fileURLToPath(import.meta.url));
+    expect(
+      readFileSync(join(specDir, 'detail-shell.component.ts'), 'utf8'),
+    ).toContain('.kit-detail-shell');
+    expect(readFileSync(join(specDir, 'tabs.component.ts'), 'utf8')).toContain(
+      '.kit-tabs',
+    );
+    const sectionCardSource = readFileSync(
+      join(specDir, 'section-card.component.ts'),
+      'utf8',
+    );
+    expect(sectionCardSource).toContain('.kit-section-card');
+    expect(sectionCardSource).toContain('.kit-kv-grid');
+    expect(
+      readFileSync(join(specDir, 'stat-bar.component.ts'), 'utf8'),
+    ).toContain('.kit-stat-bar-list');
+    expect(
+      readFileSync(join(specDir, 'data-table.component.ts'), 'utf8'),
+    ).toContain('.kit-data-table');
+    expect(
+      readFileSync(join(specDir, 'audio-button.component.ts'), 'utf8'),
+    ).toContain('.kit-audio-btn');
     const tokensSource = readFileSync(
       join(specDir, '..', '..', 'styles', 'tokens.css'),
       'utf8',
     );
-    expect(tokensSource).toContain('.kit-detail-shell');
-    expect(tokensSource).toContain('.kit-tabs');
-    expect(tokensSource).toContain('.kit-section-card');
-    expect(tokensSource).toContain('.kit-kv-grid');
-    expect(tokensSource).toContain('.kit-stat-bar-list');
-    expect(tokensSource).toContain('.kit-data-table');
-    expect(tokensSource).toContain('.kit-audio-btn');
+    expect(Buffer.byteLength(tokensSource, 'utf8')).toBeLessThan(12_288);
     expect(ICON_CATALOG['arrow-left']).toBeDefined();
     expect(ICON_CATALOG['volume']).toBeDefined();
     expect(ICON_CATALOG['external-link']).toBeDefined();

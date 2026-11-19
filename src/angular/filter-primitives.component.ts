@@ -10,6 +10,12 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import {
+  KIT_COMBOBOX_CSS,
+  KIT_FILTER_DROPDOWN_BASE_CSS,
+  KIT_MULTISELECT_CSS,
+  KIT_SELECT_CSS,
+} from './filter-primitives.styles.js';
 
 export interface KitSelectOption<T = unknown> {
   value: T;
@@ -34,6 +40,7 @@ export function closeAllKitDropdowns(): void {
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [KIT_FILTER_DROPDOWN_BASE_CSS, KIT_SELECT_CSS],
   template: `
     @if (variant() === 'compact-sort') {
       <div class="quick-sort-wrapper">
@@ -373,6 +380,7 @@ export class KitSelectComponent {
   imports: [FormsModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [KIT_FILTER_DROPDOWN_BASE_CSS, KIT_COMBOBOX_CSS],
   template: `
     <div class="filter-group">
       <div
@@ -615,6 +623,7 @@ export class KitComboboxComponent implements OnDestroy {
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [KIT_FILTER_DROPDOWN_BASE_CSS, KIT_MULTISELECT_CSS],
   template: `
     <div class="filter-group" [class]="containerClass()">
       @if (label()) {

@@ -14,6 +14,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { BaseUserProfile } from './auth.service.js';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
+import { KIT_DIALOG_KEYFRAMES_CSS } from './dialog-keyframes.styles.js';
 import { canAnimateKitDialogExit } from './dialog-sheet.component.js';
 
 export interface ProfileSavePayload {
@@ -28,6 +29,791 @@ export interface ProfileSavePayload {
   imports: [FormsModule],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    KIT_DIALOG_KEYFRAMES_CSS,
+    `
+      .kit-profile-dialog:not([open]) {
+        display: none;
+      }
+
+      .kit-profile-dialog {
+        padding: 0;
+        border: 1px solid var(--kit-outline-variant);
+        border-radius: 20px;
+        background: var(--kit-surface);
+        color: var(--kit-on-surface);
+        width: min(92vw, 480px);
+        max-height: 90vh;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+        margin: auto;
+        animation: kitModalSpringIn var(--kit-duration-medium)
+          var(--kit-ease-spring) backwards;
+      }
+
+      .kit-profile-dialog.dragging {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .kit-profile-dialog.closing {
+        animation: kitModalSpringOut 170ms var(--kit-ease-exit) forwards;
+        pointer-events: none;
+      }
+
+      .kit-profile-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        animation: kitBackdropFadeIn 200ms var(--kit-ease-standard) both;
+      }
+
+      .kit-profile-dialog.closing::backdrop {
+        animation: kitBackdropFadeOut 170ms var(--kit-ease-exit) forwards;
+      }
+
+      .kit-profile-dialog .profile-view-panel {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1 1 auto;
+      }
+
+      .kit-profile-dialog .view-enter-subview {
+        animation: kitSubviewSlideIn 220ms var(--kit-ease-smooth) both;
+      }
+
+      .kit-profile-dialog .view-enter-profile {
+        animation: kitSubviewSlideBack 220ms var(--kit-ease-smooth) both;
+      }
+
+      .kit-profile-dialog .modal-card {
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+      }
+
+      .kit-profile-dialog .sheet-drag-area {
+        display: none;
+      }
+
+      .kit-profile-dialog .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--kit-outline-variant);
+      }
+
+      .kit-profile-dialog .header-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .kit-profile-dialog .subview-back-btn {
+        background: transparent;
+        border: none;
+        color: var(--kit-on-surface-variant);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        margin-left: -6px;
+        flex-shrink: 0;
+        transition:
+          background-color 0.15s,
+          color 0.15s;
+      }
+
+      .kit-profile-dialog .subview-back-btn:hover {
+        background: var(--kit-surface-highest);
+        color: var(--kit-on-surface);
+      }
+
+      .kit-profile-dialog .header-icon {
+        color: var(--kit-primary);
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .kit-profile-dialog .modal-header h2 {
+        margin: 0;
+        font-family: var(--kit-font-heading);
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .kit-profile-dialog .close-btn {
+        background: transparent;
+        border: none;
+        color: var(--kit-on-surface-muted);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background-color 0.15s,
+          color 0.15s;
+      }
+
+      .kit-profile-dialog .close-btn:hover {
+        background: var(--kit-surface-highest);
+        color: var(--kit-on-surface);
+      }
+
+      .kit-profile-dialog .modal-body {
+        padding: 16px 20px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .kit-profile-dialog .modal-body > * {
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .identity-banner {
+        background: var(--kit-surface-high);
+        border: 1px solid var(--kit-outline-variant);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .identity-top-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .kit-profile-dialog .identity-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--kit-primary);
+        color: var(--kit-on-primary);
+        font-weight: 800;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .identity-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .kit-profile-dialog .identity-primary {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .kit-profile-dialog .identity-display-name {
+        font-weight: 700;
+        font-size: 0.98rem;
+        color: var(--kit-on-surface);
+      }
+
+      .kit-profile-dialog .username-tag {
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: var(--kit-primary);
+      }
+
+      .kit-profile-dialog .role-badge {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: var(--kit-primary-container);
+        color: var(--kit-on-primary-container);
+      }
+
+      .kit-profile-dialog .identity-email {
+        font-size: 0.82rem;
+        color: var(--kit-on-surface-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .kit-profile-dialog .identity-edit-btn {
+        margin-left: auto;
+        padding: 5px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container);
+        color: var(--kit-on-surface);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition:
+          background-color 0.15s,
+          border-color 0.15s;
+      }
+
+      .kit-profile-dialog .identity-edit-btn:hover {
+        border-color: var(--kit-primary);
+        background: var(--kit-surface-container-highest);
+      }
+
+      .kit-profile-dialog .identity-bio-preview {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--kit-on-surface-muted);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+      }
+
+      .kit-profile-dialog .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .kit-profile-dialog .field-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .kit-profile-dialog .field-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--kit-on-surface);
+      }
+
+      .kit-profile-dialog .char-hint {
+        font-size: 0.75rem;
+        color: var(--kit-on-surface-muted);
+      }
+
+      .kit-profile-dialog .text-input,
+      .kit-profile-dialog .select-input {
+        background: var(--kit-surface-container);
+        border: 1px solid var(--kit-outline-variant);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--kit-on-surface);
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: border-color 0.15s;
+      }
+
+      .kit-profile-dialog .text-input:focus,
+      .kit-profile-dialog .select-input:focus {
+        border-color: var(--kit-primary);
+      }
+
+      .kit-profile-dialog .bio-input {
+        resize: vertical;
+        min-height: 68px;
+      }
+
+      .kit-profile-dialog .field-hint {
+        font-size: 0.76rem;
+        color: var(--kit-on-surface-muted);
+      }
+
+      .kit-profile-dialog .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--kit-surface-container);
+        border: 1px solid var(--kit-outline-variant);
+        cursor: pointer;
+      }
+
+      .kit-profile-dialog .toggle-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .kit-profile-dialog .toggle-title {
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      .kit-profile-dialog .toggle-desc {
+        font-size: 0.78rem;
+        color: var(--kit-on-surface-muted);
+      }
+
+      .kit-profile-dialog .switch-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .sr-only-checkbox {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .kit-profile-dialog .sr-only-checkbox:focus-visible + .switch-track {
+        outline: 2px solid var(--kit-primary);
+        outline-offset: 2px;
+      }
+
+      .kit-profile-dialog .switch-track {
+        width: 44px;
+        height: 24px;
+        background: var(--kit-surface-highest);
+        border: 1px solid var(--kit-outline);
+        border-radius: 999px;
+        position: relative;
+        transition:
+          background-color 0.2s,
+          border-color 0.2s;
+      }
+
+      .kit-profile-dialog .switch-track.checked {
+        background: var(--kit-primary);
+        border-color: var(--kit-primary);
+      }
+
+      .kit-profile-dialog .switch-thumb {
+        width: 18px;
+        height: 18px;
+        background: var(--kit-on-surface);
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        transition:
+          transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+          background-color 0.2s;
+      }
+
+      .kit-profile-dialog .switch-track.checked .switch-thumb {
+        transform: translateX(20px);
+        background: var(--kit-on-primary);
+      }
+
+      .kit-profile-dialog .public-sharing-card {
+        border-radius: 12px;
+        background: var(--kit-surface-container);
+        border: 1px solid var(--kit-outline-variant);
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .public-sharing-card .toggle-row {
+        border: none;
+        border-radius: 0;
+        padding: 11px 14px;
+        background: transparent;
+      }
+
+      .kit-profile-dialog .share-inline-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--kit-surface-container-low);
+        border-top: 1px solid var(--kit-outline-variant);
+      }
+
+      .kit-profile-dialog .share-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--kit-surface-high);
+        border: 1px dashed var(--kit-outline);
+      }
+
+      .kit-profile-dialog .share-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--kit-on-surface-muted);
+      }
+
+      .kit-profile-dialog .share-url-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .kit-profile-dialog .share-url {
+        flex: 1;
+        min-width: 0;
+        font-family: var(--kit-font-mono);
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: var(--kit-surface);
+        color: var(--kit-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .kit-profile-dialog .copy-btn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-highest);
+        color: var(--kit-on-surface);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .share-open-link {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--kit-primary);
+        text-decoration: none;
+        margin-top: 2px;
+      }
+
+      .kit-profile-dialog .share-inline-bar .share-open-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        margin-top: 0;
+        border-radius: 8px;
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-highest);
+        color: var(--kit-primary);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .share-open-link:hover {
+        text-decoration: underline;
+      }
+
+      .kit-profile-dialog .share-inline-bar .share-open-link:hover {
+        text-decoration: none;
+        border-color: var(--kit-primary);
+      }
+
+      .kit-profile-dialog .kit-nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .kit-profile-dialog .kit-nav-group-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--kit-on-surface-muted);
+        padding: 2px 4px 0;
+      }
+
+      .kit-profile-dialog .kit-nav-group-list {
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container);
+        overflow: hidden;
+      }
+
+      .kit-profile-dialog .nav-section-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--kit-surface-container);
+        border: 1px solid var(--kit-outline-variant);
+        color: var(--kit-on-surface);
+        text-align: left;
+        text-decoration: none;
+        box-sizing: border-box;
+        cursor: pointer;
+        transition:
+          background-color 0.15s,
+          border-color 0.15s;
+      }
+
+      .kit-profile-dialog .nav-section-btn:hover {
+        background: var(--kit-surface-high);
+        border-color: var(--kit-primary);
+      }
+
+      .kit-profile-dialog .kit-nav-group-list .nav-section-btn {
+        border: none;
+        border-radius: 0;
+        padding: 10px 14px;
+        background: transparent;
+      }
+
+      .kit-profile-dialog
+        .kit-nav-group-list
+        .nav-section-btn
+        + .nav-section-btn {
+        border-top: 1px solid var(--kit-outline-variant);
+      }
+
+      .kit-profile-dialog .kit-nav-group-list .nav-section-btn:hover {
+        background: var(--kit-surface-high);
+      }
+
+      .kit-profile-dialog .nav-section-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .kit-profile-dialog .nav-section-icon {
+        color: var(--kit-primary);
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .kit-profile-dialog .nav-section-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .kit-profile-dialog .nav-section-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .kit-profile-dialog .nav-section-desc {
+        font-size: 0.76rem;
+        color: var(--kit-on-surface-muted);
+        line-height: 1.35;
+      }
+
+      .kit-profile-dialog .nav-section-chevron {
+        color: var(--kit-on-surface-muted);
+        flex-shrink: 0;
+      }
+
+      .kit-profile-dialog .guest-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 18px 16px;
+        border-radius: 14px;
+        background: var(--kit-surface-high);
+        border: 1px solid var(--kit-outline-variant);
+        gap: 10px;
+      }
+
+      .kit-profile-dialog .guest-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--kit-primary-container);
+        color: var(--kit-on-primary-container);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .kit-profile-dialog .guest-title {
+        margin: 4px 0 0;
+        font-family: var(--kit-font-heading);
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .kit-profile-dialog .guest-desc {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        color: var(--kit-on-surface-muted);
+      }
+
+      .kit-profile-dialog .signin-cta-btn {
+        margin-top: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 11px 18px;
+        border-radius: 9999px;
+        background: var(--kit-primary);
+        color: var(--kit-on-primary);
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        box-sizing: border-box;
+      }
+
+      .kit-profile-dialog .status-msg {
+        margin: 0;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: var(--kit-success);
+      }
+
+      .kit-profile-dialog .status-msg.error {
+        color: var(--kit-danger);
+      }
+
+      .kit-profile-dialog .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-top: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container);
+      }
+
+      .kit-profile-dialog .footer-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .kit-profile-dialog .signout-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--kit-danger);
+        background: transparent;
+        border: none;
+        padding: 4px 6px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .kit-profile-dialog .signout-link:hover {
+        text-decoration: underline;
+      }
+
+      .kit-profile-dialog .cancel-btn {
+        padding: 9px 16px;
+        border-radius: 9999px;
+        border: 1px solid var(--kit-outline-variant);
+        background: transparent;
+        color: var(--kit-on-surface);
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+      }
+
+      .kit-profile-dialog .save-btn {
+        padding: 9px 18px;
+        border-radius: 9999px;
+        border: none;
+        background: var(--kit-primary);
+        color: var(--kit-on-primary);
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+      }
+
+      .kit-profile-dialog .save-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      @media (max-width: 768px) {
+        .kit-profile-dialog {
+          width: 100vw;
+          max-width: 100vw;
+          margin: auto 0 0 0;
+          border-radius: 24px 24px 0 0;
+          border-bottom: none;
+          animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) backwards;
+        }
+
+        .kit-profile-dialog.closing {
+          animation: kitSheetSlideDown 170ms var(--kit-ease-exit) forwards;
+        }
+
+        .kit-profile-dialog .sheet-drag-area {
+          display: flex;
+          justify-content: center;
+          padding: 10px 0 2px;
+          touch-action: none;
+          user-select: none;
+          cursor: grab;
+        }
+
+        .kit-profile-dialog .modal-header {
+          touch-action: none;
+          user-select: none;
+          cursor: grab;
+        }
+
+        .kit-profile-dialog .modal-header button,
+        .kit-profile-dialog .modal-header a {
+          touch-action: manipulation;
+          cursor: pointer;
+        }
+
+        .kit-profile-dialog .sheet-handle {
+          width: 36px;
+          height: 4px;
+          border-radius: 999px;
+          background: var(--kit-outline);
+          opacity: 0.5;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-profile-dialog,
+        .kit-profile-dialog * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `,
+  ],
   template: `
     <dialog
       #dialogEl

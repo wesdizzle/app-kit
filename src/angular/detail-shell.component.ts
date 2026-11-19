@@ -76,6 +76,168 @@ export function shouldHandleDetailShellKeyNav(
   host: {
     '(document:keydown)': 'onDocumentKeydown($event)',
   },
+  styles: [
+    `
+      .kit-detail-shell {
+        width: 100%;
+        max-width: var(--kit-detail-max-width, 1200px);
+        margin: 0 auto;
+      }
+
+      .kit-detail-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 10px 14px;
+        border-radius: var(--kit-radius-md);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container);
+      }
+
+      .kit-detail-nav-left,
+      .kit-detail-nav-right,
+      .kit-detail-nav-center {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .kit-detail-nav-right {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .kit-detail-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border-radius: var(--kit-radius-full);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+        color: var(--kit-on-surface);
+        font-family: var(--kit-font-sans);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .kit-detail-back:hover {
+        border-color: var(--kit-primary);
+        color: var(--kit-primary);
+      }
+
+      .kit-detail-nav-code {
+        font-family: var(--kit-font-mono);
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--kit-on-surface-variant);
+      }
+
+      .kit-detail-nav-title {
+        font-family: var(--kit-font-heading);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--kit-on-surface);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .kit-detail-pager {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .kit-detail-pager-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border-radius: var(--kit-radius-full);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+        color: var(--kit-on-surface);
+        font-family: var(--kit-font-sans);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .kit-detail-pager-btn:hover {
+        border-color: var(--kit-primary);
+        color: var(--kit-primary);
+      }
+
+      .kit-detail-back:focus-visible,
+      .kit-detail-pager-btn:focus-visible {
+        outline: 2.5px solid var(--kit-primary);
+        outline-offset: 2px;
+      }
+
+      .kit-detail-hero {
+        margin-bottom: 20px;
+      }
+
+      .kit-detail-hero:empty {
+        display: none;
+      }
+
+      .kit-detail-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+
+      .kit-detail-body:has(.kit-detail-sidebar:not(:empty)) {
+        grid-template-columns: minmax(0, 1fr) 340px;
+      }
+
+      .kit-detail-main {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+
+      .kit-detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+
+      .kit-detail-sidebar:empty {
+        display: none;
+      }
+
+      @media (max-width: 960px) {
+        .kit-detail-body:has(.kit-detail-sidebar:not(:empty)) {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .kit-detail-nav {
+          padding: 8px 10px;
+        }
+        .kit-detail-pager-label {
+          max-width: 96px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    `,
+  ],
   template: `
     <div class="kit-detail-shell" [style.--kit-detail-max-width]="maxWidth()">
       <nav class="kit-detail-nav" aria-label="Detail navigation">

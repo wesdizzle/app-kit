@@ -10,6 +10,10 @@ import {
   output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import {
+  KIT_FILTER_BAR_CSS,
+  KIT_FILTER_DROPDOWN_BASE_CSS,
+} from './filter-primitives.styles.js';
 import { IconName, KitIconComponent } from './icon.component.js';
 
 export interface KitFilterPill {
@@ -49,6 +53,7 @@ export const DEFAULT_KIT_VIEW_MODES: readonly KitFilterViewModeOption[] = [
   imports: [FormsModule, DatePipe, KitIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [KIT_FILTER_DROPDOWN_BASE_CSS, KIT_FILTER_BAR_CSS],
   template: `
     <div
       class="kit-filter-bar filter-wrapper animate-expressive animate-stagger-1"

@@ -11,6 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
+import { KIT_DIALOG_KEYFRAMES_CSS } from './dialog-keyframes.styles.js';
 import { isKitReducedMotionPreferred } from './theme.service.js';
 
 export function canAnimateKitDialogExit(
@@ -36,6 +37,113 @@ export function canAnimateKitDialogExit(
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    KIT_DIALOG_KEYFRAMES_CSS,
+    `
+      .kit-dialog-sheet:not([open]) {
+        display: none;
+      }
+
+      .kit-dialog-sheet {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        margin: 0;
+        padding: 16px;
+        border: 0;
+        background: rgba(0, 0, 0, 0.58);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: kitBackdropFadeIn 200ms var(--kit-ease-standard) both;
+      }
+
+      .kit-dialog-sheet::backdrop {
+        background: transparent;
+      }
+
+      .kit-dialog-sheet.closing {
+        animation: kitBackdropFadeOut 170ms var(--kit-ease-exit) forwards;
+        pointer-events: none;
+      }
+
+      .kit-dialog-sheet-panel {
+        width: 100%;
+        background: var(--kit-surface);
+        color: var(--kit-on-surface);
+        border: 1px solid var(--kit-outline-variant);
+        border-radius: 24px;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+        animation: kitModalSpringIn var(--kit-duration-medium)
+          var(--kit-ease-spring) backwards;
+      }
+
+      .kit-dialog-sheet-panel.dragging {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .kit-dialog-sheet.closing .kit-dialog-sheet-panel {
+        animation: kitModalSpringOut 170ms var(--kit-ease-exit) forwards;
+      }
+
+      .kit-dialog-sheet .sheet-drag-area {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .kit-dialog-sheet {
+          align-items: flex-end;
+          padding: 0;
+        }
+
+        .kit-dialog-sheet-panel {
+          max-width: 100% !important;
+          border-radius: 24px 24px 0 0;
+          border-bottom: none;
+          max-height: 92dvh;
+          overflow-y: auto;
+          animation: kitSheetSlideUp 260ms var(--kit-ease-smooth) backwards;
+        }
+
+        .kit-dialog-sheet.closing .kit-dialog-sheet-panel {
+          animation: kitSheetSlideDown 170ms var(--kit-ease-exit) forwards;
+        }
+
+        .kit-dialog-sheet .sheet-drag-area {
+          display: flex;
+          justify-content: center;
+          padding: 10px 0 4px;
+          touch-action: none;
+          user-select: none;
+          cursor: grab;
+        }
+
+        .kit-dialog-sheet .sheet-handle {
+          width: 36px;
+          height: 4px;
+          border-radius: 999px;
+          background: var(--kit-outline);
+          opacity: 0.5;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-dialog-sheet,
+        .kit-dialog-sheet * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `,
+  ],
   template: `
     <dialog
       #dialogEl

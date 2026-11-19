@@ -55,6 +55,50 @@ export function stopActiveKitAudio(): void {
   imports: [KitIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      .kit-audio-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 13px;
+        border-radius: var(--kit-radius-full);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+        color: var(--kit-on-surface);
+        font-family: var(--kit-font-sans);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .kit-audio-btn:hover:not(:disabled) {
+        border-color: var(--kit-primary);
+        color: var(--kit-primary);
+      }
+
+      .kit-audio-btn.playing {
+        background: var(--kit-primary-container);
+        color: var(--kit-on-primary-container);
+        border-color: color-mix(in srgb, var(--kit-primary) 45%, transparent);
+      }
+
+      .kit-audio-btn.error {
+        border-color: var(--kit-danger-border);
+        color: var(--kit-danger);
+      }
+
+      .kit-audio-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .kit-audio-btn:focus-visible {
+        outline: 2.5px solid var(--kit-primary);
+        outline-offset: 2px;
+      }
+    `,
+  ],
   template: `
     @if (src() && (isSupported() || !hideIfUnsupported())) {
       <button

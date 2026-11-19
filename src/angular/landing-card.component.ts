@@ -217,6 +217,14 @@ import {
       .kit-landing-container .sign-in-btn:active {
         transform: scale(0.98);
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-landing-container * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     `,
   ],
 })

@@ -24,6 +24,136 @@ export function canAnimateKitBannerExit(): boolean {
 
 export type KitSyncPhase = 'idle' | 'saving' | 'saved';
 
+const KIT_BANNER_COLLAPSE_CSS = `
+  @keyframes kitBannerIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes kitBannerOut {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+  }
+
+  .kit-banner-collapse {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition:
+      grid-template-rows var(--kit-duration-medium, 260ms)
+        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+
+  @starting-style {
+    .kit-banner-collapse {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+  }
+
+  .kit-banner-collapse.closing {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),
+      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));
+  }
+
+  .kit-banner-collapse-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-banner-collapse {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+`;
+
+const KIT_STATUS_BANNER_CSS = `
+  @keyframes kitErrorShake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-6px);
+    }
+    40% {
+      transform: translateX(5px);
+    }
+    60% {
+      transform: translateX(-3px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+  }
+
+  .kit-status-banner {
+    padding: 12px 16px;
+    border-radius: var(--kit-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid var(--kit-outline-variant);
+    background: var(--kit-surface-container-high);
+    color: var(--kit-on-surface);
+    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;
+  }
+
+  .kit-status-banner.variant-error {
+    background: var(--kit-danger-subtle);
+    border-color: var(--kit-danger-border);
+    color: var(--kit-danger);
+    animation:
+      kitBannerIn 200ms var(--kit-ease-emphasized) both,
+      kitErrorShake 360ms var(--kit-ease-standard) both;
+  }
+
+  .kit-status-banner.variant-success {
+    background: var(--kit-success-subtle);
+    border-color: var(--kit-success-border);
+    color: var(--kit-success);
+  }
+
+  .kit-status-banner.variant-warning {
+    background: var(--kit-warning-subtle);
+    border-color: var(--kit-warning-border);
+    color: var(--kit-warning);
+  }
+
+  .kit-status-banner.closing,
+  .kit-status-banner.variant-error.closing {
+    animation: kitBannerOut 200ms
+      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-status-banner {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+`;
+
 /**
  * Header-friendly sync pill that morphs from a spinning indicator into a
  * checkmark confirmation before lingering briefly and fading out.
@@ -33,6 +163,79 @@ export type KitSyncPhase = 'idle' | 'saving' | 'saved';
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      @keyframes kitSyncSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes kitSyncPopIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px) scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes kitCheckDraw {
+        from {
+          stroke-dashoffset: 24;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      .kit-sync-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 11px;
+        border-radius: var(--kit-radius-full);
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-high);
+        color: var(--kit-on-surface-variant);
+        animation: kitSyncPopIn 200ms var(--kit-ease-spring) both;
+      }
+
+      .kit-sync-indicator.saving {
+        border-color: var(--kit-primary);
+        color: var(--kit-primary);
+        background: var(--kit-primary-container);
+      }
+
+      .kit-sync-indicator.saved {
+        border-color: var(--kit-success-border);
+        color: var(--kit-success);
+        background: var(--kit-success-subtle);
+      }
+
+      .kit-sync-spinner {
+        animation: kitSyncSpin 0.85s linear infinite;
+      }
+
+      .kit-sync-check path {
+        stroke-dasharray: 24;
+        animation: kitCheckDraw 240ms var(--kit-ease-emphasized) both;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-sync-indicator,
+        .kit-sync-indicator * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `,
+  ],
   template: `
     @if (phase() !== 'idle') {
       <div
@@ -138,6 +341,7 @@ export type KitStatusBannerVariant = 'error' | 'success' | 'info' | 'warning';
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [KIT_BANNER_COLLAPSE_CSS, KIT_STATUS_BANNER_CSS],
   template: `
     @if (effectiveMessage(); as activeMessage) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">
@@ -254,6 +458,32 @@ export function formatKitDegradedTimestamp(
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    KIT_BANNER_COLLAPSE_CSS,
+    KIT_STATUS_BANNER_CSS,
+    `
+      .kit-degraded-banner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        margin-bottom: 16px;
+        line-height: 1.4;
+      }
+
+      .kit-degraded-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .kit-degraded-message {
+        font-weight: 500;
+      }
+    `,
+  ],
   template: `
     @if (effectiveMode(); as activeMode) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">
@@ -374,6 +604,78 @@ export class KitDegradedBannerComponent implements OnDestroy {
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    KIT_BANNER_COLLAPSE_CSS,
+    `
+      @keyframes kitLoadingBannerPulse {
+        0%,
+        100% {
+          opacity: 0.45;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .kit-loading-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.875rem;
+        background: var(--kit-surface-container-high);
+        border: 1px solid var(--kit-outline-variant);
+        border-radius: var(--kit-radius-md);
+        font-size: 0.8125rem;
+        color: var(--kit-on-surface-variant);
+        animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;
+      }
+
+      .kit-loading-banner.closing {
+        animation: kitBannerOut 200ms
+          var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;
+      }
+
+      .kit-loading-banner-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .kit-loading-banner-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--kit-primary);
+        flex-shrink: 0;
+        animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;
+      }
+
+      .kit-loading-banner-track {
+        width: 100%;
+        height: 4px;
+        border-radius: var(--kit-radius-full);
+        background: var(--kit-surface-container-highest);
+        overflow: hidden;
+      }
+
+      .kit-loading-banner-fill {
+        height: 100%;
+        border-radius: var(--kit-radius-full);
+        background: var(--kit-primary);
+        transition: width 180ms ease-out;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-loading-banner,
+        .kit-loading-banner * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `,
+  ],
   template: `
     @if (shouldShow()) {
       <div class="kit-banner-collapse" [class.closing]="isClosing()">

@@ -92,6 +92,106 @@ export function sortKitTableRows<T>(
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      .kit-data-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: var(--kit-radius-sm);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+      }
+
+      .kit-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+      }
+
+      .kit-data-table thead th {
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--kit-on-surface-variant);
+        background: var(--kit-surface-container);
+        border-bottom: 1.5px solid var(--kit-outline-variant);
+        white-space: nowrap;
+      }
+
+      .kit-data-table-sticky thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      .kit-data-table th.align-center,
+      .kit-data-table td.align-center {
+        text-align: center;
+      }
+
+      .kit-data-table th.align-right,
+      .kit-data-table td.align-right {
+        text-align: right;
+      }
+
+      .kit-sort-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .kit-sort-btn:hover,
+      .kit-sort-btn.active {
+        color: var(--kit-primary);
+      }
+
+      .kit-sort-btn:focus-visible {
+        outline: 2.5px solid var(--kit-primary);
+        outline-offset: 2px;
+      }
+
+      .kit-sort-indicator {
+        font-size: 0.68rem;
+        opacity: 0.75;
+      }
+
+      .kit-data-table tbody td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--kit-outline-variant);
+        color: var(--kit-on-surface);
+        vertical-align: middle;
+      }
+
+      .kit-data-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .kit-data-table tbody tr:hover td {
+        background: color-mix(in srgb, var(--kit-primary) 5%, transparent);
+      }
+
+      .kit-data-table-empty {
+        padding: 20px;
+        text-align: center;
+        border-radius: var(--kit-radius-sm);
+        border: 1px dashed var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+        color: var(--kit-on-surface-variant);
+        font-size: 0.86rem;
+      }
+    `,
+  ],
   template: `
     @if (rows().length === 0) {
       <div class="kit-data-table-empty" role="status">

@@ -24,6 +24,42 @@ export interface KitMeterSegment {
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      .kit-segmented-meter {
+        display: block;
+        width: 100%;
+      }
+
+      .kit-meter-track {
+        display: flex;
+        width: 100%;
+        border-radius: var(--kit-radius-full);
+        background: var(--kit-surface-container-low);
+        border: 1px solid var(--kit-outline-variant);
+        overflow: hidden;
+      }
+
+      .kit-meter-segment {
+        height: 100%;
+        transition: width 550ms var(--kit-ease-smooth);
+      }
+
+      @starting-style {
+        .kit-meter-segment {
+          width: 0% !important;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-segmented-meter * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `,
+  ],
   template: `
     <div
       class="kit-segmented-meter"

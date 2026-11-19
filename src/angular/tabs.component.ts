@@ -53,6 +53,113 @@ export function getNextEnabledTabId(
   imports: [KitIconComponent],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      .kit-tabs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px;
+        border-radius: var(--kit-radius-full);
+        border: 1px solid var(--kit-outline-variant);
+        background: var(--kit-surface-container-low);
+        overflow-x: auto;
+        scrollbar-width: none;
+        max-width: 100%;
+      }
+
+      .kit-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .kit-tabs.kit-tabs-underline {
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--kit-outline-variant);
+        background: transparent;
+        padding: 0;
+        gap: 4px;
+      }
+
+      .kit-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 14px;
+        border-radius: var(--kit-radius-full);
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--kit-on-surface-variant);
+        font-family: var(--kit-font-sans);
+        font-size: 0.84rem;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          background-color var(--kit-duration-fast) ease,
+          color var(--kit-duration-fast) ease,
+          border-color var(--kit-duration-fast) ease;
+      }
+
+      .kit-tab:hover:not(:disabled) {
+        color: var(--kit-on-surface);
+        background: var(--kit-surface-container-high);
+      }
+
+      .kit-tab.active {
+        background: var(--kit-primary-container);
+        color: var(--kit-on-primary-container);
+        border-color: color-mix(in srgb, var(--kit-primary) 35%, transparent);
+      }
+
+      .kit-tabs-underline .kit-tab {
+        border-radius: var(--kit-radius-xs) var(--kit-radius-xs) 0 0;
+        border: none;
+        border-bottom: 2.5px solid transparent;
+        padding: 9px 14px;
+      }
+
+      .kit-tabs-underline .kit-tab.active {
+        background: transparent;
+        color: var(--kit-primary);
+        border-bottom-color: var(--kit-primary);
+      }
+
+      .kit-tab:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .kit-tab:focus-visible {
+        outline: 2.5px solid var(--kit-primary);
+        outline-offset: 2px;
+      }
+
+      .kit-tab-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1px 7px;
+        border-radius: var(--kit-radius-full);
+        background: var(--kit-surface-container);
+        color: var(--kit-on-surface-variant);
+        font-family: var(--kit-font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .kit-tab.active .kit-tab-badge {
+        background: color-mix(in srgb, var(--kit-primary) 18%, transparent);
+        color: inherit;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .kit-tab {
+          transition: none;
+        }
+      }
+    `,
+  ],
   template: `
     <div
       class="kit-tabs"

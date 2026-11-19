@@ -40,16 +40,11 @@ export class KitSegmentedMeterComponent {
             i0.ɵɵstyleProp("height", ctx.heightPx(), "px");
             i0.ɵɵadvance();
             i0.ɵɵrepeater(ctx.segments());
-        } }, encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      .kit-segmented-meter {\n        display: block;\n        width: 100%;\n      }\n\n      .kit-meter-track {\n        display: flex;\n        width: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-low);\n        border: 1px solid var(--kit-outline-variant);\n        overflow: hidden;\n      }\n\n      .kit-meter-segment {\n        height: 100%;\n        transition: width 550ms var(--kit-ease-smooth);\n      }\n\n      @starting-style {\n        .kit-meter-segment {\n          width: 0% !important;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-segmented-meter * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSegmentedMeterComponent, [{
         type: Component,
-        args: [{
-                selector: 'kit-segmented-meter',
-                standalone: true,
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                template: `
+        args: [{ selector: 'kit-segmented-meter', standalone: true, encapsulation: ViewEncapsulation.None, changeDetection: ChangeDetectionStrategy.OnPush, template: `
     <div
       class="kit-segmented-meter"
       role="progressbar"
@@ -70,7 +65,6 @@ export class KitSegmentedMeterComponent {
         }
       </div>
     </div>
-  `,
-            }]
+  `, styles: ["\n      .kit-segmented-meter {\n        display: block;\n        width: 100%;\n      }\n\n      .kit-meter-track {\n        display: flex;\n        width: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-low);\n        border: 1px solid var(--kit-outline-variant);\n        overflow: hidden;\n      }\n\n      .kit-meter-segment {\n        height: 100%;\n        transition: width 550ms var(--kit-ease-smooth);\n      }\n\n      @starting-style {\n        .kit-meter-segment {\n          width: 0% !important;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-segmented-meter * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "] }]
     }], null, { segments: [{ type: i0.Input, args: [{ isSignal: true, alias: "segments", required: true }] }], heightPx: [{ type: i0.Input, args: [{ isSignal: true, alias: "heightPx", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSegmentedMeterComponent, { className: "KitSegmentedMeterComponent", filePath: "segmented-meter.component.ts", lineNumber: 50 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitSegmentedMeterComponent, { className: "KitSegmentedMeterComponent", filePath: "segmented-meter.component.ts", lineNumber: 86 }); })();
