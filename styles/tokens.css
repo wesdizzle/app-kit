@@ -2112,6 +2112,9 @@
   display: block;
   position: relative;
   z-index: 20;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .kit-filter-bar .flex {
@@ -2150,6 +2153,10 @@
   position: relative;
   z-index: 20;
   padding: var(--spacing-16, 16px) var(--spacing-24, 24px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .kit-filter-bar .filter-group {
@@ -2163,6 +2170,8 @@
   display: flex;
   align-items: center;
   min-height: 20px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .kit-filter-bar .m3-label {
@@ -2180,6 +2189,8 @@
   display: flex;
   align-items: center;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .kit-filter-bar .dropdown-wrapper.active-wrapper,
@@ -2204,6 +2215,8 @@
     background-color 0.2s ease,
     box-shadow 0.2s ease;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .kit-filter-bar .m3-input:hover:not(:disabled) {
@@ -2288,6 +2301,8 @@
   padding-right: 2.75rem;
   position: relative;
   user-select: none;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .kit-filter-bar .trigger-text {
@@ -2658,8 +2673,16 @@
   line-height: 1;
 }
 
-.kit-filter-bar .quick-sort-wrapper {
+.kit-filter-bar .quick-toolbar > kit-select {
+  display: block;
   min-width: 170px;
+  flex: 0 1 190px;
+  max-width: 100%;
+}
+
+.kit-filter-bar .quick-sort-wrapper {
+  width: 100%;
+  min-width: 0;
   flex: 0 1 190px;
 }
 
@@ -2740,6 +2763,7 @@
 
 .kit-filter-bar .secondary-filters-drawer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 1fr;
   width: 100%;
   margin-top: 16px;
@@ -2758,6 +2782,8 @@
 
 .kit-filter-bar .secondary-filters-drawer-inner {
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   overflow: visible;
 }
 
@@ -2796,6 +2822,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
@@ -2871,6 +2899,17 @@
   flex-wrap: wrap;
   gap: 16px;
   align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.kit-filter-bar .secondary-filters-grid > kit-select,
+.kit-filter-bar .secondary-filters-grid > kit-combobox,
+.kit-filter-bar .secondary-filters-grid > kit-multiselect {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -2882,6 +2921,8 @@
   }
   .kit-filter-bar .quick-search-box {
     flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
   }
   .kit-filter-bar .segmented-status-group {
     display: flex;
@@ -2917,13 +2958,33 @@
     color: #ffffff;
     border-color: #dc2626;
   }
+  .kit-filter-bar .quick-toolbar > kit-select {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
   .kit-filter-bar .quick-sort-wrapper {
     flex: 1 1 0;
     min-width: 0;
+    width: 100%;
+  }
+  .kit-filter-bar .secondary-filters-grid > kit-select,
+  .kit-filter-bar .secondary-filters-grid > kit-combobox,
+  .kit-filter-bar .secondary-filters-grid > kit-multiselect,
+  .kit-filter-bar .secondary-filters-grid > .filter-group {
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 calc(50% - 8px);
   }
   .kit-filter-bar .filter-group {
     min-width: 0;
+    max-width: 100%;
+    width: 100%;
     flex: 1 1 calc(50% - 8px);
+  }
+  .kit-filter-bar .secondary-filters-grid .dropdown-list,
+  .kit-filter-bar .secondary-filters-grid .dropdown-list.animate-expressive {
+    max-width: 100%;
   }
   .kit-filter-bar .toolbar-auxiliary-row {
     flex-wrap: wrap;
@@ -2932,8 +2993,18 @@
 }
 
 @media (max-width: 480px) {
+  .kit-filter-bar .secondary-filters-grid > kit-select,
+  .kit-filter-bar .secondary-filters-grid > kit-combobox,
+  .kit-filter-bar .secondary-filters-grid > kit-multiselect,
+  .kit-filter-bar .secondary-filters-grid > .filter-group,
   .kit-filter-bar .filter-group {
     flex: 1 1 100%;
+    width: 100%;
+  }
+  .kit-filter-bar .secondary-filters-grid .dropdown-list,
+  .kit-filter-bar .secondary-filters-grid .dropdown-list.animate-expressive {
+    width: 100%;
+    max-width: 100%;
   }
   .kit-filter-bar .toolbar-auxiliary-row {
     flex-direction: column;
