@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v1.4.0`)
+# `@wesdizzle/app-kit` (`v1.5.0`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
 
@@ -33,8 +33,9 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - `KitIconComponent` / `IconComponent` (`<kit-icon>`, `<app-icon>`) & `ICON_CATALOG`
   - `KitConfirmationDialogComponent` / `ConfirmationDialogComponent` (`<kit-confirmation-dialog>`, `<app-confirmation-dialog>`)
   - `KitSegmentedMeterComponent` (`<kit-segmented-meter>`)
+  - `KitTimeSeriesChartComponent` (`<kit-time-series-chart>`), `KitChartPoint`, `KitChartSeries`, `KitChartDiffBand`, `KitChartTooltipContext`, `computeNiceAxisTicks`
   - `KitSyncIndicatorComponent` (`<kit-sync-indicator>`), `KitStatusBannerComponent` (`<kit-status-banner>`)
   - `createAnimatedNumber`, `interpolateNumber`
   - `KitOfflineStore<T>`, `getScopedStorageKey`
 - **`@wesdizzle/app-kit/styles/tokens.css`**:
-  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-motion-*`), interactive state-layer & stagger/shake/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared component styles (`<kit-public-banner>`, `<kit-filter-bar>`, `<kit-dialog-sheet>`, `<kit-command-palette>`, `<kit-segmented-meter>`, `<kit-sync-indicator>`, `<kit-status-banner>`), `:focus-visible`, and `prefers-reduced-motion` rules.
+  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-motion-*`), interactive state-layer & stagger/shake/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared component styles (`<kit-public-banner>`, `<kit-filter-bar>`, `<kit-dialog-sheet>`, `<kit-command-palette>`, `<kit-segmented-meter>`, `<kit-time-series-chart>`, `<kit-sync-indicator>`, `<kit-status-banner>`), `:focus-visible`, and `prefers-reduced-motion` rules.

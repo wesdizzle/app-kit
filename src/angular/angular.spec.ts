@@ -36,6 +36,16 @@ import { KitThemeToggleComponent } from './theme-toggle.component.js';
 import { interpolateNumber } from './animated-number.js';
 import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
 import {
+  KitTimeSeriesChartComponent,
+  type KitChartPoint,
+  type KitChartSeries,
+  buildDiffBandSegments,
+  buildSeriesAreaPath,
+  buildSeriesLinePath,
+  computeNiceAxisTicks,
+  computeXLabelStep,
+} from './time-series-chart.component.js';
+import {
   KitDegradedBannerComponent,
   KitLoadingBannerComponent,
   KitStatusBannerComponent,
@@ -1333,5 +1343,164 @@ describe('@wesdizzle/app-kit/angular', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it('computes nice ticks, SVG paths, crossover diff bands, and KitTimeSeriesChartComponent interactions', () => {
+    expect(computeNiceAxisTicks(0)).toEqual({ max: 1, ticks: [0, 1] });
+    expect(computeNiceAxisTicks(-25)).toEqual({ max: 1, ticks: [0, 1] });
+    expect(computeNiceAxisTicks(Number.NaN)).toEqual({ max: 1, ticks: [0, 1] });
+    expect(computeNiceAxisTicks(95, 5)).toEqual({
+      max: 100,
+      ticks: [0, 25, 50, 75, 100],
+    });
+    expect(computeNiceAxisTicks(1450, 5)).toEqual({
+      max: 1500,
+      ticks: [0, 500, 1000, 1500],
+    });
+    expect(computeNiceAxisTicks(1700, 5)).toEqual({
+      max: 2000,
+      ticks: [0, 500, 1000, 1500, 2000],
+    });
+
+    expect(computeXLabelStep(4, 8)).toBe(1);
+    expect(computeXLabelStep(24, 8)).toBe(3);
+
+    expect(
+      buildSeriesLinePath([
+        { x: 10, y: 100 },
+        { x: 50, y: 80 },
+        null,
+        { x: 90, y: 40 },
+        { x: 130, y: 20 },
+      ]),
+    ).toBe('M 10 100 L 50 80 M 90 40 L 130 20');
+
+    expect(
+      buildSeriesAreaPath(
+        [{ x: 10, y: 100 }, { x: 50, y: 80 }, null, { x: 90, y: 40 }],
+        200,
+      ),
+    ).toBe('M 10 200 L 10 100 L 50 80 L 50 200 Z');
+
+    // Crossover: starts below (upperY 120 > lowerY 100), crosses at x=50,y=100, ends above (upperY 80 < lowerY 100)
+    const diffSegs = buildDiffBandSegments([
+      { x: 0, upperY: 120, lowerY: 100 },
+      { x: 100, upperY: 80, lowerY: 100 },
+    ]);
+    expect(diffSegs).toHaveLength(2);
+    expect(diffSegs[0].positive).toBe(false);
+    expect(diffSegs[0].path).toContain('50 100');
+    expect(diffSegs[1].positive).toBe(true);
+    expect(diffSegs[1].path).toContain('M 50 100');
+
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const chart = runInInjectionContext(
+      injector,
+      () => new KitTimeSeriesChartComponent(),
+    );
+
+    const ptsSignal = signal<readonly KitChartPoint[]>([
+      {
+        key: '2024',
+        label: '2024',
+        values: { cost: 120, current: 150, items: 5 },
+      },
+      {
+        key: '2025',
+        label: '2025',
+        values: { cost: 200, current: 280, items: 9 },
+      },
+    ]);
+    const seriesSignal = signal<readonly KitChartSeries[]>([
+      {
+        id: 'cost',
+        label: 'Purchase Price',
+        axis: 'left',
+        color: '#818cf8',
+        areaFill: true,
+      },
+      {
+        id: 'current',
+        label: 'Current Value',
+        axis: 'left',
+        color: '#22c55e',
+      },
+      {
+        id: 'items',
+        label: 'Items',
+        axis: 'right',
+        color: '#38bdf8',
+      },
+      {
+        id: 'locked',
+        label: 'Locked',
+        axis: 'left',
+        color: '#999',
+        disabled: true,
+        disabledHint: 'Unavailable',
+      },
+    ]);
+    Object.defineProperty(chart, 'points', { value: ptsSignal });
+    Object.defineProperty(chart, 'series', { value: seriesSignal });
+    Object.defineProperty(chart, 'diffBand', {
+      value: signal({ upperSeriesId: 'current', lowerSeriesId: 'cost' }),
+    });
+
+    expect(chart.visibleSeries().map((s) => s.id)).toEqual([
+      'cost',
+      'current',
+      'items',
+    ]);
+    expect(chart.renderedLineSeries()).toHaveLength(3);
+    expect(chart.renderedDiffBand()).toHaveLength(1);
+    expect(chart.hitColumns()).toHaveLength(2);
+
+    // Toggling series updates visibleSeries and guards against hiding the last active series or toggling disabled ones
+    const visibilityEvents: string[][] = [];
+    chart.visibleSeriesChange.subscribe((ids) => visibilityEvents.push(ids));
+    chart.toggleSeries('locked');
+    expect(visibilityEvents).toHaveLength(0);
+    chart.toggleSeries('current');
+    chart.toggleSeries('items');
+    expect(chart.visibleSeries().map((s) => s.id)).toEqual(['cost']);
+    // Cannot hide the last visible series
+    chart.toggleSeries('cost');
+    expect(chart.visibleSeries().map((s) => s.id)).toEqual(['cost']);
+
+    // Keyboard navigation and click drill-down
+    const clicked: KitChartPoint[] = [];
+    const activeChanges: Array<KitChartPoint | null> = [];
+    chart.pointClick.subscribe((pt) => clicked.push(pt));
+    chart.activePointChange.subscribe((pt) => activeChanges.push(pt));
+
+    const makeKey = (key: string) =>
+      ({ key, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
+
+    chart.setActiveIndex(0);
+    chart.onHitKeydown(makeKey('ArrowRight'), 0);
+    expect(chart.activeIndex()).toBe(1);
+    chart.onHitKeydown(makeKey('Enter'), 1);
+    expect(clicked.map((p) => p.key)).toEqual(['2025']);
+    chart.onHitKeydown(makeKey('Home'), 1);
+    expect(chart.activeIndex()).toBe(0);
+    chart.onHitKeydown(makeKey('End'), 0);
+    expect(chart.activeIndex()).toBe(1);
+    chart.onHitKeydown(makeKey('Escape'), 1);
+    expect(chart.activeIndex()).toBeNull();
+    expect(activeChanges.at(-1)).toBeNull();
+
+    // Bar mode rendering
+    Object.defineProperty(chart, 'mode', { value: signal('bar') });
+    expect(chart.renderedBars().length).toBe(2);
+
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const tokensSource = readFileSync(
+      join(specDir, '..', '..', 'styles', 'tokens.css'),
+      'utf8',
+    );
+    expect(tokensSource).toContain('.kit-ts-chart');
+    expect(tokensSource).toContain('.kit-ts-tooltip');
   });
 });

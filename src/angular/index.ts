@@ -4,6 +4,7 @@ export * from './bottom-sheet-drag.js';
 export * from './command-palette.component.js';
 export * from './dialog-sheet.component.js';
 export * from './segmented-meter.component.js';
+export * from './time-series-chart.component.js';
 export * from './status-feedback.component.js';
 export * from './theme.service.js';
 export * from './theme-toggle.component.js';
