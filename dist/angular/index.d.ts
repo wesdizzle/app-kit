@@ -13,6 +13,7 @@ export * from './tabs.component.js';
 export * from './time-series-chart.component.js';
 export * from './status-feedback.component.js';
 export * from './theme.service.js';
+export * from './view-transition.js';
 export * from './theme-toggle.component.js';
 export * from './profile-modal.component.js';
 export * from './public-banner.component.js';

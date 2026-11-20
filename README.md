@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v1.7.0`)
+# `@wesdizzle/app-kit` (`v1.8.0`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
 
@@ -21,6 +21,7 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
 - **`@wesdizzle/app-kit/angular`**:
   - `KitAuthService`, `sanitizeClientReturnToPath`, `checkUpstreamOidcStatus`
   - `KitThemeService`, `KIT_THEME_CONFIG`, `KitUserPreferences`, `normalizeKitUserPreferences`, `updateUpstreamPreferences`, `runKitViewTransition`, `isKitReducedMotionPreferred` (`light` / `dark` / `auto` mode with custom `theme-color`, View Transitions API helpers, & cross-app OIDC Account Server preference sync)
+  - `createKitViewTransitionHandler`, `getKitLeafRouteSnapshot`, `KIT_VT_MEDIA_CLASS`, `KIT_VT_MEDIA_ATTR`, `KIT_VT_RADIUS_FROM_VAR`, `KIT_VT_RADIUS_TO_VAR`, `KitRouteSnapshotLike`, `KitViewTransitionLike`, `KitRouterViewTransitionInfo`, `KitMediaRadiusMorph`, `KitMediaViewTransitionOptions` (Angular Router View Transition helper with reduced-motion skipping and `--kit-vt-radius-from` / `--kit-vt-radius-to` media radius morphing)
   - `KitThemeToggleComponent` (`<kit-theme-toggle>`)
   - `BottomSheetDragController`, `KitDialogSheetComponent` (`<kit-dialog-sheet>`), `canAnimateKitDialogExit`
   - `KitCommandPaletteComponent` (`<kit-command-palette>`), `tokenizeKitCommandQuery`, `matchesKitCommandTokens`, `filterAndGroupKitCommands`
@@ -44,4 +45,4 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - `createAnimatedNumber`, `interpolateNumber`
   - `KitOfflineStore<T>`, `getScopedStorageKey`
 - **`@wesdizzle/app-kit/styles/tokens.css`**:
-  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-ease-*`, `--kit-duration-*`), interactive `.state-layer` & stagger/skeleton utilities, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared `:focus-visible` focus rings, and global reduced-motion rules. Component-specific styles are co-located directly on each standalone Angular component (`ViewEncapsulation.None`) so unused components contribute zero CSS bytes.
+  - Unified Material 3 Expressive Dark & Light `--kit-*` tokens, M3 Expressive motion duration/easing tokens (`--kit-ease-*`, `--kit-duration-*`), interactive `.state-layer` & stagger/skeleton utilities, `.kit-vt-media` shared-element View Transition border-radius morphing, WCAG 2.1 AA status tokens, typography (`Outfit`, `Inter`, `JetBrains Mono`), shared `:focus-visible` focus rings, and global reduced-motion rules (including root and named View Transition pseudo-elements). Component-specific styles are co-located directly on each standalone Angular component (`ViewEncapsulation.None`) so unused components contribute zero CSS bytes.

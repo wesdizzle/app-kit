@@ -249,6 +249,49 @@
   animation-timing-function: var(--kit-ease-emphasized);
 }
 
+/* Shared-element media border-radius morphing (`view-transition-class: kit-vt-media`) */
+::view-transition-group(.kit-vt-media) {
+  animation-duration: var(
+    --kit-vt-media-duration,
+    var(--kit-duration-medium, 260ms)
+  );
+  animation-timing-function: var(
+    --kit-vt-media-easing,
+    var(--kit-ease-emphasized, cubic-bezier(0.2, 0, 0, 1))
+  );
+}
+
+::view-transition-image-pair(.kit-vt-media) {
+  overflow: hidden;
+}
+
+::view-transition-old(.kit-vt-media),
+::view-transition-new(.kit-vt-media) {
+  height: 100%;
+}
+
+@keyframes kitVtMediaRadius {
+  from {
+    border-radius: var(--kit-vt-radius-from, 0px);
+  }
+  to {
+    border-radius: var(--kit-vt-radius-to, 0px);
+  }
+}
+
+:root[data-kit-vt-media='morph']::view-transition-image-pair(.kit-vt-media) {
+  animation-name: kitVtMediaRadius;
+  animation-duration: var(
+    --kit-vt-media-duration,
+    var(--kit-duration-medium, 260ms)
+  );
+  animation-timing-function: var(
+    --kit-vt-media-easing,
+    var(--kit-ease-emphasized, cubic-bezier(0.2, 0, 0, 1))
+  );
+  animation-fill-mode: both;
+}
+
 @keyframes kitThemeIconMorph {
   from {
     opacity: 0;
@@ -304,8 +347,13 @@
     transition-duration: 0.01ms !important;
   }
 
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

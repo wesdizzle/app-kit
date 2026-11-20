@@ -32,6 +32,15 @@ import {
   writeCachedKitAuthSnapshot,
 } from './auth.service.js';
 import { KitThemeService, runKitViewTransition } from './theme.service.js';
+import {
+  KIT_VT_MEDIA_ATTR,
+  KIT_VT_MEDIA_CLASS,
+  KIT_VT_RADIUS_FROM_VAR,
+  KIT_VT_RADIUS_TO_VAR,
+  type KitRouteSnapshotLike,
+  createKitViewTransitionHandler,
+  getKitLeafRouteSnapshot,
+} from './view-transition.js';
 import { KitThemeToggleComponent } from './theme-toggle.component.js';
 import { interpolateNumber } from './animated-number.js';
 import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
@@ -1805,8 +1814,147 @@ describe('@wesdizzle/app-kit/angular', () => {
       'utf8',
     );
     expect(Buffer.byteLength(tokensSource, 'utf8')).toBeLessThan(12_288);
+    expect(tokensSource).toContain(`.${KIT_VT_MEDIA_CLASS}`);
+    expect(tokensSource).toContain('kitVtMediaRadius');
+    expect(tokensSource).toContain('::view-transition-group(*)');
+    expect(tokensSource).toContain('::view-transition-image-pair(*)');
+    expect(tokensSource).toContain('::view-transition-old(*)');
+    expect(tokensSource).toContain('::view-transition-new(*)');
     expect(ICON_CATALOG['arrow-left']).toBeDefined();
     expect(ICON_CATALOG['volume']).toBeDefined();
     expect(ICON_CATALOG['external-link']).toBeDefined();
+  });
+
+  it('walks leaf route snapshots and coordinates shared-element media radius morphs in createKitViewTransitionHandler()', async () => {
+    const rootSnapshot: KitRouteSnapshotLike = {
+      routeConfig: { path: '' },
+      firstChild: {
+        routeConfig: { path: 'collection' },
+        firstChild: {
+          routeConfig: { path: ':type/:id' },
+          params: { type: 'game', id: 'super-metroid' },
+          firstChild: null,
+        },
+      },
+    };
+    const leaf = getKitLeafRouteSnapshot(rootSnapshot);
+    expect(leaf.routeConfig?.path).toBe(':type/:id');
+    expect(leaf.params?.['type']).toBe('game');
+
+    const attrs = new Map<string, string>();
+    const styles = new Map<string, string>();
+    const mockDoc = {
+      documentElement: {
+        setAttribute: (k: string, v: string) => attrs.set(k, v),
+        removeAttribute: (k: string) => attrs.delete(k),
+        style: {
+          setProperty: (k: string, v: string) => styles.set(k, v),
+          removeProperty: (k: string) => styles.delete(k),
+        },
+      },
+    } as unknown as Document;
+
+    let reduced = true;
+    vi.stubGlobal('window', {
+      matchMedia: vi.fn((query: string) => ({
+        matches: query.includes('prefers-reduced-motion: reduce')
+          ? reduced
+          : false,
+      })),
+    });
+
+    try {
+      const handler = createKitViewTransitionHandler({
+        documentRef: mockDoc,
+        resolveMediaRadius: (fromLeaf, toLeaf) => {
+          if (
+            fromLeaf.routeConfig?.path === 'games' &&
+            toLeaf.routeConfig?.path === ':type/:id'
+          ) {
+            return { from: '15px 15px 0 0', to: 'var(--radius-lg)' };
+          }
+          return null;
+        },
+      });
+
+      const skippedTransition = {
+        skipTransition: vi.fn(),
+        finished: Promise.resolve(),
+      };
+      attrs.set(KIT_VT_MEDIA_ATTR, 'morph');
+      handler({
+        transition: skippedTransition,
+        from: { routeConfig: { path: 'games' } },
+        to: { routeConfig: { path: ':type/:id' } },
+      });
+      expect(skippedTransition.skipTransition).toHaveBeenCalledTimes(1);
+      expect(attrs.has(KIT_VT_MEDIA_ATTR)).toBe(false);
+
+      reduced = false;
+      let resolveFirst!: () => void;
+      const firstFinished = new Promise<void>((res) => {
+        resolveFirst = res;
+      });
+      const firstTransition = {
+        skipTransition: vi.fn(),
+        finished: firstFinished,
+      };
+      handler({
+        transition: firstTransition,
+        from: {
+          routeConfig: { path: 'collection' },
+          firstChild: { routeConfig: { path: 'games' } },
+        },
+        to: {
+          routeConfig: { path: '' },
+          firstChild: { routeConfig: { path: ':type/:id' } },
+        },
+      });
+      expect(firstTransition.skipTransition).not.toHaveBeenCalled();
+      expect(attrs.get(KIT_VT_MEDIA_ATTR)).toBe('morph');
+      expect(styles.get(KIT_VT_RADIUS_FROM_VAR)).toBe('15px 15px 0 0');
+      expect(styles.get(KIT_VT_RADIUS_TO_VAR)).toBe('var(--radius-lg)');
+
+      // Overlapping second transition must not have its state wiped by the first finishing
+      let resolveSecond!: () => void;
+      const secondFinished = new Promise<void>((res) => {
+        resolveSecond = res;
+      });
+      const secondTransition = {
+        skipTransition: vi.fn(),
+        finished: secondFinished,
+      };
+      handler({
+        transition: secondTransition,
+        from: { routeConfig: { path: 'games' } },
+        to: { routeConfig: { path: ':type/:id' } },
+      });
+
+      resolveFirst();
+      await firstFinished;
+      await Promise.resolve();
+      expect(attrs.get(KIT_VT_MEDIA_ATTR)).toBe('morph');
+      expect(styles.get(KIT_VT_RADIUS_FROM_VAR)).toBe('15px 15px 0 0');
+
+      resolveSecond();
+      await secondFinished;
+      await Promise.resolve();
+      expect(attrs.has(KIT_VT_MEDIA_ATTR)).toBe(false);
+      expect(styles.has(KIT_VT_RADIUS_FROM_VAR)).toBe(false);
+      expect(styles.has(KIT_VT_RADIUS_TO_VAR)).toBe(false);
+
+      // Non-matching routes clear any stale attributes immediately
+      attrs.set(KIT_VT_MEDIA_ATTR, 'morph');
+      styles.set(KIT_VT_RADIUS_FROM_VAR, '10px');
+      handler({
+        transition: { skipTransition: vi.fn(), finished: Promise.resolve() },
+        from: { routeConfig: { path: 'insights' } },
+        to: { routeConfig: { path: ':type/:id' } },
+      });
+      expect(attrs.has(KIT_VT_MEDIA_ATTR)).toBe(false);
+      expect(styles.has(KIT_VT_RADIUS_FROM_VAR)).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
