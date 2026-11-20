@@ -351,25 +351,44 @@ export async function checkUpstreamOidcStatus(oidcIssuer, oidcClientId) {
 }
 export class KitAuthService {
     constructor() {
-        this.currentUser = signal(null, ...(ngDevMode ? [{ debugName: "currentUser" }] : /* istanbul ignore next */ []));
-        this.authInitialized = signal(false, ...(ngDevMode ? [{ debugName: "authInitialized" }] : /* istanbul ignore next */ []));
-        this.isAutoSigningIn = signal(false, ...(ngDevMode ? [{ debugName: "isAutoSigningIn" }] : /* istanbul ignore next */ []));
-        this.isProvisioned = signal(true, ...(ngDevMode ? [{ debugName: "isProvisioned" }] : /* istanbul ignore next */ []));
-        this.unprovisionedEmail = signal(null, ...(ngDevMode ? [{ debugName: "unprovisionedEmail" }] : /* istanbul ignore next */ []));
-        this.accountHubUrl = signal(null, ...(ngDevMode ? [{ debugName: "accountHubUrl" }] : /* istanbul ignore next */ []));
-        this.oidcIssuer = signal(null, ...(ngDevMode ? [{ debugName: "oidcIssuer" }] : /* istanbul ignore next */ []));
-        this.oidcClientId = signal(null, ...(ngDevMode ? [{ debugName: "oidcClientId" }] : /* istanbul ignore next */ []));
-        this.isDegraded = signal(false, ...(ngDevMode ? [{ debugName: "isDegraded" }] : /* istanbul ignore next */ []));
-        this.degradedMode = signal(null, ...(ngDevMode ? [{ debugName: "degradedMode" }] : /* istanbul ignore next */ []));
-        this.degradedSnapshotTimestamp = signal(null, ...(ngDevMode ? [{ debugName: "degradedSnapshotTimestamp" }] : /* istanbul ignore next */ []));
-        this.isLoading = computed(() => !this.authInitialized() || this.isAutoSigningIn(), ...(ngDevMode ? [{ debugName: "isLoading" }] : /* istanbul ignore next */ []));
-        this.isAuthenticated = computed(() => this.currentUser() !== null, ...(ngDevMode ? [{ debugName: "isAuthenticated" }] : /* istanbul ignore next */ []));
-        this.isAdmin = computed(() => this.currentUser()?.role === 'admin', ...(ngDevMode ? [{ debugName: "isAdmin" }] : /* istanbul ignore next */ []));
-        this.userEmail = computed(() => this.currentUser()?.email ?? null, ...(ngDevMode ? [{ debugName: "userEmail" }] : /* istanbul ignore next */ []));
-        this.username = computed(() => this.currentUser()?.username ?? null, ...(ngDevMode ? [{ debugName: "username" }] : /* istanbul ignore next */ []));
-        this.displayName = computed(() => this.currentUser()?.displayName || this.currentUser()?.username || null, ...(ngDevMode ? [{ debugName: "displayName" }] : /* istanbul ignore next */ []));
-        this.bio = computed(() => this.currentUser()?.bio ?? null, ...(ngDevMode ? [{ debugName: "bio" }] : /* istanbul ignore next */ []));
-        this.isPublic = computed(() => this.currentUser()?.isPublic ?? false, ...(ngDevMode ? [{ debugName: "isPublic" }] : /* istanbul ignore next */ []));
+        this.currentUser = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "currentUser" }] : /* istanbul ignore next */ []));
+        this.authInitialized = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "authInitialized" }] : /* istanbul ignore next */ []));
+        this.isAutoSigningIn = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isAutoSigningIn" }] : /* istanbul ignore next */ []));
+        this.isProvisioned = signal(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isProvisioned" }] : /* istanbul ignore next */ []));
+        this.unprovisionedEmail = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "unprovisionedEmail" }] : /* istanbul ignore next */ []));
+        this.accountHubUrl = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "accountHubUrl" }] : /* istanbul ignore next */ []));
+        this.oidcIssuer = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "oidcIssuer" }] : /* istanbul ignore next */ []));
+        this.oidcClientId = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "oidcClientId" }] : /* istanbul ignore next */ []));
+        this.isDegraded = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isDegraded" }] : /* istanbul ignore next */ []));
+        this.degradedMode = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "degradedMode" }] : /* istanbul ignore next */ []));
+        this.degradedSnapshotTimestamp = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "degradedSnapshotTimestamp" }] : /* istanbul ignore next */ []));
+        this.isLoading = computed(() => !this.authInitialized() || this.isAutoSigningIn(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isLoading" }] : /* istanbul ignore next */ []));
+        this.isAuthenticated = computed(() => this.currentUser() !== null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isAuthenticated" }] : /* istanbul ignore next */ []));
+        this.isAdmin = computed(() => this.currentUser()?.role === 'admin', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isAdmin" }] : /* istanbul ignore next */ []));
+        this.userEmail = computed(() => this.currentUser()?.email ?? null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "userEmail" }] : /* istanbul ignore next */ []));
+        this.username = computed(() => this.currentUser()?.username ?? null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "username" }] : /* istanbul ignore next */ []));
+        this.displayName = computed(() => this.currentUser()?.displayName || this.currentUser()?.username || null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "displayName" }] : /* istanbul ignore next */ []));
+        this.bio = computed(() => this.currentUser()?.bio ?? null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "bio" }] : /* istanbul ignore next */ []));
+        this.isPublic = computed(() => this.currentUser()?.isPublic ?? false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isPublic" }] : /* istanbul ignore next */ []));
         this.authLoadPromise = null;
         this.lastUpstreamCheckMs = 0;
         this.sessionEpoch = 0;

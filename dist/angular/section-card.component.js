@@ -76,23 +76,35 @@ function KitKvGridComponent_For_2_Template(rf, ctx) { if (rf & 1) {
  */
 export class KitSectionCardComponent {
     constructor() {
-        this.title = input.required(...(ngDevMode ? [{ debugName: "title" }] : /* istanbul ignore next */ []));
-        this.subtitle = input(null, ...(ngDevMode ? [{ debugName: "subtitle" }] : /* istanbul ignore next */ []));
-        this.icon = input(null, ...(ngDevMode ? [{ debugName: "icon" }] : /* istanbul ignore next */ []));
-        this.collapsible = input(false, ...(ngDevMode ? [{ debugName: "collapsible" }] : /* istanbul ignore next */ []));
-        this.expanded = input(true, ...(ngDevMode ? [{ debugName: "expanded" }] : /* istanbul ignore next */ []));
-        this.collapseLabel = input('Collapse', ...(ngDevMode ? [{ debugName: "collapseLabel" }] : /* istanbul ignore next */ []));
-        this.expandLabel = input('Expand', ...(ngDevMode ? [{ debugName: "expandLabel" }] : /* istanbul ignore next */ []));
-        this.toggleTestId = input(null, ...(ngDevMode ? [{ debugName: "toggleTestId" }] : /* istanbul ignore next */ []));
-        this.testId = input(null, ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
-        this.compact = input(false, ...(ngDevMode ? [{ debugName: "compact" }] : /* istanbul ignore next */ []));
+        this.title = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "title" }] : /* istanbul ignore next */ []));
+        this.subtitle = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "subtitle" }] : /* istanbul ignore next */ []));
+        this.icon = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "icon" }] : /* istanbul ignore next */ []));
+        this.collapsible = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "collapsible" }] : /* istanbul ignore next */ []));
+        this.expanded = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "expanded" }] : /* istanbul ignore next */ []));
+        this.collapseLabel = input('Collapse', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "collapseLabel" }] : /* istanbul ignore next */ []));
+        this.expandLabel = input('Expand', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "expandLabel" }] : /* istanbul ignore next */ []));
+        this.toggleTestId = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "toggleTestId" }] : /* istanbul ignore next */ []));
+        this.testId = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
+        this.compact = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "compact" }] : /* istanbul ignore next */ []));
         this.expandedChange = output();
-        this.toggledState = signal(null, ...(ngDevMode ? [{ debugName: "toggledState" }] : /* istanbul ignore next */ []));
+        this.toggledState = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "toggledState" }] : /* istanbul ignore next */ []));
         this.isExpanded = computed(() => {
             const base = this.expanded();
             const toggled = this.toggledState();
             return toggled && toggled.base === base ? toggled.value : base;
-        }, ...(ngDevMode ? [{ debugName: "isExpanded" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isExpanded" }] : /* istanbul ignore next */ []));
     }
     toggleExpanded() {
         if (!this.collapsible())
@@ -131,7 +143,7 @@ export class KitSectionCardComponent {
             i0.ɵɵconditional(ctx.collapsible() ? 10 : -1);
             i0.ɵɵadvance();
             i0.ɵɵconditional(!ctx.collapsible() || ctx.isExpanded() ? 11 : -1);
-        } }, dependencies: [KitIconComponent], styles: ["\n      .kit-section-card {\n        background: var(--kit-surface-container);\n        border: 1.5px solid var(--kit-outline-variant);\n        border-radius: var(--kit-radius-lg);\n        padding: 20px;\n        min-width: 0;\n      }\n\n      .kit-section-card.kit-section-card-compact {\n        padding: 16px;\n      }\n\n      .kit-section-card-header {\n        display: flex;\n        align-items: flex-start;\n        justify-content: space-between;\n        flex-wrap: wrap;\n        gap: 12px;\n        margin-bottom: 16px;\n      }\n\n      .kit-section-card-collapsed .kit-section-card-header {\n        margin-bottom: 0;\n      }\n\n      .kit-section-card-titles {\n        min-width: 0;\n        flex: 1 1 200px;\n      }\n\n      .kit-section-card-title {\n        margin: 0;\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        font-family: var(--kit-font-heading);\n        font-size: 1.05rem;\n        font-weight: 800;\n        color: var(--kit-on-surface);\n        line-height: 1.3;\n      }\n\n      .kit-section-card-subtitle {\n        margin: 4px 0 0;\n        font-size: 0.82rem;\n        color: var(--kit-on-surface-variant);\n        line-height: 1.4;\n      }\n\n      .kit-section-card-actions {\n        display: flex;\n        align-items: center;\n        flex-wrap: wrap;\n        gap: 8px;\n      }\n\n      .kit-section-collapse-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 5px;\n        padding: 5px 11px;\n        border-radius: var(--kit-radius-full);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        color: var(--kit-on-surface);\n        font-family: var(--kit-font-sans);\n        font-size: 0.78rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-section-collapse-btn:hover {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n      }\n\n      .kit-section-collapse-btn:focus-visible {\n        outline: 2.5px solid var(--kit-primary);\n        outline-offset: 2px;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [KitIconComponent], styles: ["\n      .kit-section-card {\n        background: var(--%NS%kit-surface-container);\n        border: 1.5px solid var(--%NS%kit-outline-variant);\n        border-radius: var(--%NS%kit-radius-lg);\n        padding: 20px;\n        min-width: 0;\n      }\n\n      .kit-section-card.kit-section-card-compact {\n        padding: 16px;\n      }\n\n      .kit-section-card-header {\n        display: flex;\n        align-items: flex-start;\n        justify-content: space-between;\n        flex-wrap: wrap;\n        gap: 12px;\n        margin-bottom: 16px;\n      }\n\n      .kit-section-card-collapsed .kit-section-card-header {\n        margin-bottom: 0;\n      }\n\n      .kit-section-card-titles {\n        min-width: 0;\n        flex: 1 1 200px;\n      }\n\n      .kit-section-card-title {\n        margin: 0;\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        font-family: var(--%NS%kit-font-heading);\n        font-size: 1.05rem;\n        font-weight: 800;\n        color: var(--%NS%kit-on-surface);\n        line-height: 1.3;\n      }\n\n      .kit-section-card-subtitle {\n        margin: 4px 0 0;\n        font-size: 0.82rem;\n        color: var(--%NS%kit-on-surface-variant);\n        line-height: 1.4;\n      }\n\n      .kit-section-card-actions {\n        display: flex;\n        align-items: center;\n        flex-wrap: wrap;\n        gap: 8px;\n      }\n\n      .kit-section-collapse-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 5px;\n        padding: 5px 11px;\n        border-radius: var(--%NS%kit-radius-full);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n        color: var(--%NS%kit-on-surface);\n        font-family: var(--%NS%kit-font-sans);\n        font-size: 0.78rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-section-collapse-btn:hover {\n        border-color: var(--%NS%kit-primary);\n        color: var(--%NS%kit-primary);\n      }\n\n      .kit-section-collapse-btn:focus-visible {\n        outline: 2.5px solid var(--%NS%kit-primary);\n        outline-offset: 2px;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSectionCardComponent, [{
         type: Component,
@@ -189,9 +201,12 @@ export class KitSectionCardComponent {
  */
 export class KitKvGridComponent {
     constructor() {
-        this.items = input.required(...(ngDevMode ? [{ debugName: "items" }] : /* istanbul ignore next */ []));
-        this.density = input('comfortable', ...(ngDevMode ? [{ debugName: "density" }] : /* istanbul ignore next */ []));
-        this.layout = input('grid', ...(ngDevMode ? [{ debugName: "layout" }] : /* istanbul ignore next */ []));
+        this.items = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "items" }] : /* istanbul ignore next */ []));
+        this.density = input('comfortable', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "density" }] : /* istanbul ignore next */ []));
+        this.layout = input('grid', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "layout" }] : /* istanbul ignore next */ []));
     }
     static { this.ɵfac = function KitKvGridComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitKvGridComponent)(); }; }
     static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitKvGridComponent, selectors: [["kit-kv-grid"]], inputs: { items: [1, "items"], density: [1, "density"], layout: [1, "layout"] }, decls: 3, vars: 4, consts: [[1, "kit-kv-grid"], [1, "kit-kv-item"], [1, "kit-kv-label"], [1, "kit-kv-value"], [1, "kit-kv-hint"]], template: function KitKvGridComponent_Template(rf, ctx) { if (rf & 1) {
@@ -202,7 +217,7 @@ export class KitKvGridComponent {
             i0.ɵɵclassProp("kit-kv-compact", ctx.density() === "compact")("kit-kv-list", ctx.layout() === "list");
             i0.ɵɵadvance();
             i0.ɵɵrepeater(ctx.items());
-        } }, styles: ["\n      .kit-kv-grid {\n        margin: 0;\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));\n        gap: 12px;\n      }\n\n      .kit-kv-grid.kit-kv-compact {\n        grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));\n        gap: 8px;\n      }\n\n      .kit-kv-grid.kit-kv-list {\n        grid-template-columns: minmax(0, 1fr);\n        gap: 8px;\n      }\n\n      .kit-kv-grid.kit-kv-list .kit-kv-item {\n        display: flex;\n        align-items: baseline;\n        justify-content: space-between;\n        gap: 12px;\n        padding: 8px 12px;\n      }\n\n      .kit-kv-item {\n        padding: 10px 12px;\n        border-radius: var(--kit-radius-sm);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        min-width: 0;\n      }\n\n      .kit-kv-label {\n        font-size: 0.72rem;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n        color: var(--kit-on-surface-variant);\n      }\n\n      .kit-kv-value {\n        margin: 4px 0 0;\n        font-size: 0.92rem;\n        font-weight: 700;\n        color: var(--kit-on-surface);\n        word-break: break-word;\n      }\n\n      .kit-kv-list .kit-kv-value {\n        margin: 0;\n        text-align: right;\n      }\n\n      .kit-kv-value.kit-kv-mono {\n        font-family: var(--kit-font-mono);\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-kv-value[data-tone='muted'] {\n        color: var(--kit-on-surface-variant);\n        font-weight: 500;\n      }\n      .kit-kv-value[data-tone='primary'] {\n        color: var(--kit-primary);\n      }\n      .kit-kv-value[data-tone='success'] {\n        color: var(--kit-success);\n      }\n      .kit-kv-value[data-tone='warning'] {\n        color: var(--kit-warning);\n      }\n      .kit-kv-value[data-tone='danger'] {\n        color: var(--kit-danger);\n      }\n\n      .kit-kv-hint {\n        margin: 2px 0 0;\n        font-size: 0.74rem;\n        color: var(--kit-on-surface-variant);\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      .kit-kv-grid {\n        margin: 0;\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));\n        gap: 12px;\n      }\n\n      .kit-kv-grid.kit-kv-compact {\n        grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));\n        gap: 8px;\n      }\n\n      .kit-kv-grid.kit-kv-list {\n        grid-template-columns: minmax(0, 1fr);\n        gap: 8px;\n      }\n\n      .kit-kv-grid.kit-kv-list .kit-kv-item {\n        display: flex;\n        align-items: baseline;\n        justify-content: space-between;\n        gap: 12px;\n        padding: 8px 12px;\n      }\n\n      .kit-kv-item {\n        padding: 10px 12px;\n        border-radius: var(--%NS%kit-radius-sm);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n        min-width: 0;\n      }\n\n      .kit-kv-label {\n        font-size: 0.72rem;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n        color: var(--%NS%kit-on-surface-variant);\n      }\n\n      .kit-kv-value {\n        margin: 4px 0 0;\n        font-size: 0.92rem;\n        font-weight: 700;\n        color: var(--%NS%kit-on-surface);\n        word-break: break-word;\n      }\n\n      .kit-kv-list .kit-kv-value {\n        margin: 0;\n        text-align: right;\n      }\n\n      .kit-kv-value.kit-kv-mono {\n        font-family: var(--%NS%kit-font-mono);\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-kv-value[data-tone='muted'] {\n        color: var(--%NS%kit-on-surface-variant);\n        font-weight: 500;\n      }\n      .kit-kv-value[data-tone='primary'] {\n        color: var(--%NS%kit-primary);\n      }\n      .kit-kv-value[data-tone='success'] {\n        color: var(--%NS%kit-success);\n      }\n      .kit-kv-value[data-tone='warning'] {\n        color: var(--%NS%kit-warning);\n      }\n      .kit-kv-value[data-tone='danger'] {\n        color: var(--%NS%kit-danger);\n      }\n\n      .kit-kv-hint {\n        margin: 2px 0 0;\n        font-size: 0.74rem;\n        color: var(--%NS%kit-on-surface-variant);\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitKvGridComponent, [{
         type: Component,

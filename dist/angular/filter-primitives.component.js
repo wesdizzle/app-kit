@@ -18,7 +18,7 @@ function KitSelectComponent_Conditional_0_Conditional_11_For_2_Template(rf, ctx)
     i0.ɵɵdomElementStart(1, "span", 14);
     i0.ɵɵtext(2);
     i0.ɵɵdomElementEnd();
-    i0.ɵɵconditionalCreate(3, KitSelectComponent_Conditional_0_Conditional_11_For_2_Conditional_3_Template, 2, 0, ":svg:svg", 15);
+    i0.ɵɵconditionalCreate(3, KitSelectComponent_Conditional_0_Conditional_11_For_2_Conditional_3_Template, 2, 0, "svg", 15);
     i0.ɵɵdomElementEnd();
 } if (rf & 2) {
     const opt_r4 = ctx.$implicit;
@@ -98,7 +98,7 @@ function KitSelectComponent_Conditional_1_Conditional_9_Conditional_1_Template(r
     i0.ɵɵdomElementStart(1, "span", 14);
     i0.ɵɵtext(2);
     i0.ɵɵdomElementEnd();
-    i0.ɵɵconditionalCreate(3, KitSelectComponent_Conditional_1_Conditional_9_Conditional_1_Conditional_3_Template, 2, 0, ":svg:svg", 15);
+    i0.ɵɵconditionalCreate(3, KitSelectComponent_Conditional_1_Conditional_9_Conditional_1_Conditional_3_Template, 2, 0, "svg", 15);
     i0.ɵɵdomElementEnd();
 } if (rf & 2) {
     const allOpt_r7 = ctx;
@@ -129,7 +129,7 @@ function KitSelectComponent_Conditional_1_Conditional_9_For_3_Template(rf, ctx) 
     i0.ɵɵconditionalCreate(2, KitSelectComponent_Conditional_1_Conditional_9_For_3_Conditional_2_Template, 2, 0, "span", 22);
     i0.ɵɵtext(3);
     i0.ɵɵdomElementEnd();
-    i0.ɵɵconditionalCreate(4, KitSelectComponent_Conditional_1_Conditional_9_For_3_Conditional_4_Template, 2, 0, ":svg:svg", 15);
+    i0.ɵɵconditionalCreate(4, KitSelectComponent_Conditional_1_Conditional_9_For_3_Conditional_4_Template, 2, 0, "svg", 15);
     i0.ɵɵdomElementEnd();
 } if (rf & 2) {
     const opt_r9 = ctx.$implicit;
@@ -162,7 +162,7 @@ function KitSelectComponent_Conditional_1_Conditional_9_For_5_For_3_Template(rf,
     i0.ɵɵconditionalCreate(2, KitSelectComponent_Conditional_1_Conditional_9_For_5_For_3_Conditional_2_Template, 2, 0, "span", 22);
     i0.ɵɵtext(3);
     i0.ɵɵdomElementEnd();
-    i0.ɵɵconditionalCreate(4, KitSelectComponent_Conditional_1_Conditional_9_For_5_For_3_Conditional_4_Template, 2, 0, ":svg:svg", 15);
+    i0.ɵɵconditionalCreate(4, KitSelectComponent_Conditional_1_Conditional_9_For_5_For_3_Conditional_4_Template, 2, 0, "svg", 15);
     i0.ɵɵdomElementEnd();
 } if (rf & 2) {
     const opt_r11 = ctx.$implicit;
@@ -240,6 +240,7 @@ function KitSelectComponent_Conditional_1_Template(rf, ctx) { if (rf & 1) {
 function KitComboboxComponent_Conditional_4_Template(rf, ctx) { if (rf & 1) {
     const _r1 = i0.ɵɵgetCurrentView();
     i0.ɵɵelementStart(0, "label", 3)(1, "input", 11);
+    i0.ɵɵcontrolCreate();
     i0.ɵɵlistener("ngModelChange", function KitComboboxComponent_Conditional_4_Template_input_ngModelChange_1_listener($event) { i0.ɵɵrestoreView(_r1); const ctx_r1 = i0.ɵɵnextContext(); return i0.ɵɵresetView(ctx_r1.exactChange.emit(!!$event)); });
     i0.ɵɵelementEnd();
     i0.ɵɵelementStart(2, "span");
@@ -250,6 +251,7 @@ function KitComboboxComponent_Conditional_4_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵattribute("title", ctx_r1.exactTitle());
     i0.ɵɵadvance();
     i0.ɵɵproperty("ngModel", ctx_r1.exact());
+    i0.ɵɵcontrol();
 } }
 function KitComboboxComponent_Conditional_11_Conditional_4_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵnamespaceSVG();
@@ -270,7 +272,7 @@ function KitComboboxComponent_Conditional_11_For_6_Template(rf, ctx) { if (rf & 
     i0.ɵɵelementStart(1, "span", 13);
     i0.ɵɵtext(2);
     i0.ɵɵelementEnd();
-    i0.ɵɵconditionalCreate(3, KitComboboxComponent_Conditional_11_For_6_Conditional_3_Template, 2, 0, ":svg:svg", 14);
+    i0.ɵɵconditionalCreate(3, KitComboboxComponent_Conditional_11_For_6_Conditional_3_Template, 2, 0, "svg", 14);
     i0.ɵɵelementEnd();
 } if (rf & 2) {
     const item_r5 = ctx.$implicit;
@@ -298,7 +300,7 @@ function KitComboboxComponent_Conditional_11_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵelementStart(2, "span", 13);
     i0.ɵɵtext(3);
     i0.ɵɵelementEnd();
-    i0.ɵɵconditionalCreate(4, KitComboboxComponent_Conditional_11_Conditional_4_Template, 2, 0, ":svg:svg", 14);
+    i0.ɵɵconditionalCreate(4, KitComboboxComponent_Conditional_11_Conditional_4_Template, 2, 0, "svg", 14);
     i0.ɵɵelementEnd();
     i0.ɵɵrepeaterCreate(5, KitComboboxComponent_Conditional_11_For_6_Template, 4, 5, "button", 15, i0.ɵɵrepeaterTrackByIdentity);
     i0.ɵɵconditionalCreate(7, KitComboboxComponent_Conditional_11_Conditional_7_Template, 2, 2, "div", 16);
@@ -317,7 +319,7 @@ function KitComboboxComponent_Conditional_11_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵadvance(2);
     i0.ɵɵconditional(ctx_r1.filteredSuggestions().length === 0 && ctx_r1.value() ? 7 : -1);
 } }
-const _c0 = "\n  kit-select,\n  kit-combobox,\n  kit-multiselect {\n    display: block;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .flex {\n    display: flex;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .items-center {\n    align-items: center;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .justify-between {\n    justify-content: space-between;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .gap-xs {\n    gap: 6px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .gap-sm {\n    gap: 10px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .pr-xs {\n    padding-right: 4px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .filter-group {\n    display: flex;\n    flex-direction: column;\n    gap: var(--spacing-8, 8px);\n    min-width: 0;\n    max-width: 100%;\n    width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .filter-group-header {\n    display: flex;\n    align-items: center;\n    min-height: 20px;\n    gap: 8px;\n    flex-wrap: wrap;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .m3-label {\n    font-size: 0.75rem;\n    font-weight: 700;\n    color: var(--kit-primary);\n    margin-left: 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    line-height: 1;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper {\n    position: relative;\n    display: flex;\n    align-items: center;\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-wrapper.active-wrapper {\n    z-index: 60;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .m3-input {\n    box-sizing: border-box;\n    height: var(--kit-input-height, 46px);\n    background: var(--kit-surface-container-high);\n    border: 1px solid var(--kit-outline);\n    color: var(--kit-on-surface);\n    padding: 0 2.75rem 0 1rem;\n    border-radius: var(--kit-radius-sm);\n    font-family: var(--kit-font-sans);\n    font-size: var(--kit-input-font-size, 0.9375rem);\n    line-height: normal;\n    outline: none;\n    transition:\n      border-color 0.2s ease,\n      background-color 0.2s ease,\n      box-shadow 0.2s ease;\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:hover:not(:disabled) {\n    background: var(--kit-surface-container-highest);\n    border-color: var(--kit-outline);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:disabled {\n    opacity: 0.55;\n    cursor: not-allowed;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:focus,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger.open,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .list-input.open {\n    border-color: var(--kit-primary);\n    background: var(--kit-surface-container-highest);\n    box-shadow: 0 0 0 1px var(--kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-icon-wrapper {\n    position: absolute;\n    right: 1rem;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    pointer-events: none;\n    color: var(--kit-on-surface-variant);\n    transition: color 0.2s ease;\n    z-index: 1;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-chevron {\n    width: 18px;\n    height: 18px;\n    transition:\n      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n      color 0.2s ease;\n    flex-shrink: 0;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-chevron.open {\n    transform: rotate(180deg);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper:hover\n    .dropdown-icon-wrapper,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper:focus-within\n    .dropdown-icon-wrapper,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger.open\n    .dropdown-icon-wrapper {\n    color: var(--kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    cursor: pointer;\n    text-align: left;\n    padding-left: 1rem;\n    padding-right: 2.75rem;\n    position: relative;\n    user-select: none;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .trigger-text {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n\n  @keyframes kitDropdownEnter {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scaleY(0.92);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scaleY(1);\n    }\n  }\n\n  @keyframes kitCheckPop {\n    from {\n      opacity: 0;\n      transform: scale(0.5);\n    }\n    to {\n      opacity: 1;\n      transform: scale(1);\n    }\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-list,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-list.animate-expressive {\n    position: absolute;\n    top: calc(100% + 6px);\n    left: var(--kit-dropdown-left, 0);\n    right: var(--kit-dropdown-right, auto);\n    min-width: 100%;\n    width: var(--kit-dropdown-width, max-content);\n    max-width: var(--kit-dropdown-max-width, min(340px, calc(100vw - 48px)));\n    z-index: 100;\n    background: var(--kit-surface-container-high);\n    backdrop-filter: blur(20px) contrast(95%);\n    -webkit-backdrop-filter: blur(20px) contrast(95%);\n    border: 1px solid var(--kit-outline);\n    border-radius: var(--kit-radius-sm);\n    padding: 0.375rem 0;\n    max-height: 280px;\n    overflow-y: auto;\n    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);\n    scrollbar-width: thin;\n    scrollbar-color: var(--kit-outline-variant) transparent;\n    transform-origin: top center;\n    animation: kitDropdownEnter 180ms var(--kit-ease-spring) both;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    padding: 0.625rem 1rem;\n    cursor: pointer;\n    user-select: none;\n    background: transparent;\n    border: none;\n    font-family: var(--kit-font-sans);\n    font-size: 0.875rem;\n    color: var(--kit-on-surface);\n    text-align: left;\n    transition:\n      background-color 0.15s ease,\n      color 0.15s ease;\n    gap: 0.75rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item:hover {\n    background: var(--kit-surface-container-highest);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item.selected {\n    background: var(--m3-secondary-container, var(--kit-primary-container));\n    color: var(--m3-on-secondary-container, var(--kit-on-primary-container));\n    font-weight: 600;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item.selected\n    .selected-check {\n    color: var(--m3-on-secondary-container, var(--kit-on-primary-container));\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .selected-check {\n    color: var(--kit-primary);\n    flex-shrink: 0;\n    animation: kitCheckPop 180ms var(--kit-ease-spring) both;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .item-label {\n    font-size: 0.875rem;\n    color: inherit;\n    text-transform: none;\n    letter-spacing: normal;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-group-header {\n    padding: 0.6rem 1rem 0.25rem 1rem;\n    font-size: 0.7rem;\n    font-weight: 700;\n    color: var(--kit-primary);\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    pointer-events: none;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .child-platform {\n    padding-left: 1.75rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .sub-platform-arrow {\n    color: var(--kit-on-surface-variant);\n    margin-right: 0.35rem;\n    font-size: 0.85rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-empty {\n    padding: 0.75rem 1rem;\n    font-size: 0.85rem;\n    color: var(--kit-on-surface-variant);\n    text-align: center;\n  }\n";
+const _c0 = "\n  kit-select,\n  kit-combobox,\n  kit-multiselect {\n    display: block;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .flex {\n    display: flex;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .items-center {\n    align-items: center;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .justify-between {\n    justify-content: space-between;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .gap-xs {\n    gap: 6px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .gap-sm {\n    gap: 10px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .pr-xs {\n    padding-right: 4px;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .filter-group {\n    display: flex;\n    flex-direction: column;\n    gap: var(--%NS%spacing-8, 8px);\n    min-width: 0;\n    max-width: 100%;\n    width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .filter-group-header {\n    display: flex;\n    align-items: center;\n    min-height: 20px;\n    gap: 8px;\n    flex-wrap: wrap;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .m3-label {\n    font-size: 0.75rem;\n    font-weight: 700;\n    color: var(--%NS%kit-primary);\n    margin-left: 4px;\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    line-height: 1;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper {\n    position: relative;\n    display: flex;\n    align-items: center;\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-wrapper.active-wrapper {\n    z-index: 60;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .m3-input {\n    box-sizing: border-box;\n    height: var(--%NS%kit-input-height, 46px);\n    background: var(--%NS%kit-surface-container-high);\n    border: 1px solid var(--%NS%kit-outline);\n    color: var(--%NS%kit-on-surface);\n    padding: 0 2.75rem 0 1rem;\n    border-radius: var(--%NS%kit-radius-sm);\n    font-family: var(--%NS%kit-font-sans);\n    font-size: var(--%NS%kit-input-font-size, 0.9375rem);\n    line-height: normal;\n    outline: none;\n    transition:\n      border-color 0.2s ease,\n      background-color 0.2s ease,\n      box-shadow 0.2s ease;\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:hover:not(:disabled) {\n    background: var(--%NS%kit-surface-container-highest);\n    border-color: var(--%NS%kit-outline);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:disabled {\n    opacity: 0.55;\n    cursor: not-allowed;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .m3-input:focus,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger.open,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .list-input.open {\n    border-color: var(--%NS%kit-primary);\n    background: var(--%NS%kit-surface-container-highest);\n    box-shadow: 0 0 0 1px var(--%NS%kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-icon-wrapper {\n    position: absolute;\n    right: 1rem;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    pointer-events: none;\n    color: var(--%NS%kit-on-surface-variant);\n    transition: color 0.2s ease;\n    z-index: 1;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-chevron {\n    width: 18px;\n    height: 18px;\n    transition:\n      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n      color 0.2s ease;\n    flex-shrink: 0;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-chevron.open {\n    transform: rotate(180deg);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper:hover\n    .dropdown-icon-wrapper,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .input-wrapper:focus-within\n    .dropdown-icon-wrapper,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger.open\n    .dropdown-icon-wrapper {\n    color: var(--%NS%kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-trigger {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    cursor: pointer;\n    text-align: left;\n    padding-left: 1rem;\n    padding-right: 2.75rem;\n    position: relative;\n    user-select: none;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .trigger-text {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n\n  @keyframes kitDropdownEnter {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scaleY(0.92);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scaleY(1);\n    }\n  }\n\n  @keyframes kitCheckPop {\n    from {\n      opacity: 0;\n      transform: scale(0.5);\n    }\n    to {\n      opacity: 1;\n      transform: scale(1);\n    }\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-list,\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-list.animate-expressive {\n    position: absolute;\n    top: calc(100% + 6px);\n    left: var(--%NS%kit-dropdown-left, 0);\n    right: var(--%NS%kit-dropdown-right, auto);\n    min-width: 100%;\n    width: var(--%NS%kit-dropdown-width, max-content);\n    max-width: var(--%NS%kit-dropdown-max-width, min(340px, calc(100vw - 48px)));\n    z-index: 100;\n    background: var(--%NS%kit-surface-container-high);\n    backdrop-filter: blur(20px) contrast(95%);\n    -webkit-backdrop-filter: blur(20px) contrast(95%);\n    border: 1px solid var(--%NS%kit-outline);\n    border-radius: var(--%NS%kit-radius-sm);\n    padding: 0.375rem 0;\n    max-height: 280px;\n    overflow-y: auto;\n    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);\n    scrollbar-width: thin;\n    scrollbar-color: var(--%NS%kit-outline-variant) transparent;\n    transform-origin: top center;\n    animation: kitDropdownEnter 180ms var(--%NS%kit-ease-spring) both;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    padding: 0.625rem 1rem;\n    cursor: pointer;\n    user-select: none;\n    background: transparent;\n    border: none;\n    font-family: var(--%NS%kit-font-sans);\n    font-size: 0.875rem;\n    color: var(--%NS%kit-on-surface);\n    text-align: left;\n    transition:\n      background-color 0.15s ease,\n      color 0.15s ease;\n    gap: 0.75rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item:hover {\n    background: var(--%NS%kit-surface-container-highest);\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item.selected {\n    background: var(--%NS%m3-secondary-container, var(--%NS%kit-primary-container));\n    color: var(--%NS%m3-on-secondary-container, var(--%NS%kit-on-primary-container));\n    font-weight: 600;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-item.selected\n    .selected-check {\n    color: var(--%NS%m3-on-secondary-container, var(--%NS%kit-on-primary-container));\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .selected-check {\n    color: var(--%NS%kit-primary);\n    flex-shrink: 0;\n    animation: kitCheckPop 180ms var(--%NS%kit-ease-spring) both;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect) .item-label {\n    font-size: 0.875rem;\n    color: inherit;\n    text-transform: none;\n    letter-spacing: normal;\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-group-header {\n    padding: 0.6rem 1rem 0.25rem 1rem;\n    font-size: 0.7rem;\n    font-weight: 700;\n    color: var(--%NS%kit-primary);\n    text-transform: uppercase;\n    letter-spacing: 0.08em;\n    pointer-events: none;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .child-platform {\n    padding-left: 1.75rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .sub-platform-arrow {\n    color: var(--%NS%kit-on-surface-variant);\n    margin-right: 0.35rem;\n    font-size: 0.85rem;\n  }\n\n  :is(.kit-filter-bar, kit-select, kit-combobox, kit-multiselect)\n    .dropdown-empty {\n    padding: 0.75rem 1rem;\n    font-size: 0.85rem;\n    color: var(--%NS%kit-on-surface-variant);\n    text-align: center;\n  }\n";
 function KitMultiSelectComponent_Conditional_1_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵdomElementStart(0, "div", 1)(1, "label", 9);
     i0.ɵɵtext(2);
@@ -375,29 +377,44 @@ function KitMultiSelectComponent_Conditional_9_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵconditional(ctx_r0.options().length === 0 ? 5 : -1);
 } }
 let nextDropdownInstanceId = 1;
-export const activeKitDropdownId = signal(null, ...(ngDevMode ? [{ debugName: "activeKitDropdownId" }] : /* istanbul ignore next */ []));
+export const activeKitDropdownId = signal(null, /* @ts-ignore */
+...(ngDevMode ? [{ debugName: "activeKitDropdownId" }] : /* istanbul ignore next */ []));
 export function closeAllKitDropdowns() {
     activeKitDropdownId.set(null);
 }
 export class KitSelectComponent {
     constructor() {
         this.fallbackId = `kit-select-${nextDropdownInstanceId++}`;
-        this.label = input('', ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
-        this.labelTitle = input('', ...(ngDevMode ? [{ debugName: "labelTitle" }] : /* istanbul ignore next */ []));
-        this.triggerId = input('', ...(ngDevMode ? [{ debugName: "triggerId" }] : /* istanbul ignore next */ []));
-        this.dropdownName = input('', ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
-        this.value = input(undefined, ...(ngDevMode ? [{ debugName: "value" }] : /* istanbul ignore next */ []));
-        this.options = input([], ...(ngDevMode ? [{ debugName: "options" }] : /* istanbul ignore next */ []));
-        this.groups = input([], ...(ngDevMode ? [{ debugName: "groups" }] : /* istanbul ignore next */ []));
-        this.allOption = input(null, ...(ngDevMode ? [{ debugName: "allOption" }] : /* istanbul ignore next */ []));
-        this.placeholder = input('All', ...(ngDevMode ? [{ debugName: "placeholder" }] : /* istanbul ignore next */ []));
-        this.variant = input('default', ...(ngDevMode ? [{ debugName: "variant" }] : /* istanbul ignore next */ []));
-        this.disabled = input(false, ...(ngDevMode ? [{ debugName: "disabled" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input('', ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.label = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
+        this.labelTitle = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "labelTitle" }] : /* istanbul ignore next */ []));
+        this.triggerId = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "triggerId" }] : /* istanbul ignore next */ []));
+        this.dropdownName = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
+        this.value = input(undefined, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "value" }] : /* istanbul ignore next */ []));
+        this.options = input([], /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "options" }] : /* istanbul ignore next */ []));
+        this.groups = input([], /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "groups" }] : /* istanbul ignore next */ []));
+        this.allOption = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "allOption" }] : /* istanbul ignore next */ []));
+        this.placeholder = input('All', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "placeholder" }] : /* istanbul ignore next */ []));
+        this.variant = input('default', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "variant" }] : /* istanbul ignore next */ []));
+        this.disabled = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "disabled" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.valueChange = output();
-        this.dropdownKey = computed(() => this.dropdownName() || this.triggerId() || this.fallbackId, ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
-        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
+        this.dropdownKey = computed(() => this.dropdownName() || this.triggerId() || this.fallbackId, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
+        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
         this.selectedLabel = computed(() => {
             const val = this.value();
             const allOpt = this.allOption();
@@ -420,7 +437,8 @@ export class KitSelectComponent {
                 return allOpt.label;
             }
             return this.placeholder();
-        }, ...(ngDevMode ? [{ debugName: "selectedLabel" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "selectedLabel" }] : /* istanbul ignore next */ []));
     }
     isSelected(optionValue) {
         const current = this.value();
@@ -474,7 +492,7 @@ export class KitSelectComponent {
             i0.ɵɵconditionalCreate(0, KitSelectComponent_Conditional_0_Template, 12, 12, "div", 0)(1, KitSelectComponent_Conditional_1_Template, 10, 13, "div", 1);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.variant() === "compact-sort" ? 0 : 1);
-        } }, styles: [_c0, "\n  kit-select .quick-sort-wrapper {\n    width: 100%;\n    min-width: 0;\n    flex: 0 1 190px;\n  }\n\n  kit-select .quick-sort-trigger {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    gap: 6px;\n  }\n\n  kit-select .sort-icon-prefix {\n    display: inline-flex;\n    align-items: center;\n    color: var(--kit-on-surface-variant);\n    flex-shrink: 0;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-select * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, "\n  kit-select .quick-sort-wrapper {\n    width: 100%;\n    min-width: 0;\n    flex: 0 1 190px;\n  }\n\n  kit-select .quick-sort-trigger {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    gap: 6px;\n  }\n\n  kit-select .sort-icon-prefix {\n    display: inline-flex;\n    align-items: center;\n    color: var(--%NS%kit-on-surface-variant);\n    flex-shrink: 0;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-select * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSelectComponent, [{
         type: Component,
@@ -716,24 +734,40 @@ export class KitComboboxComponent {
     constructor() {
         this.fallbackId = `kit-combobox-${nextDropdownInstanceId++}`;
         this.debounceTimer = null;
-        this.label = input('', ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
-        this.inputId = input('', ...(ngDevMode ? [{ debugName: "inputId" }] : /* istanbul ignore next */ []));
-        this.dropdownName = input('', ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
-        this.value = input('', ...(ngDevMode ? [{ debugName: "value" }] : /* istanbul ignore next */ []));
-        this.suggestions = input([], ...(ngDevMode ? [{ debugName: "suggestions" }] : /* istanbul ignore next */ []));
-        this.placeholder = input('All', ...(ngDevMode ? [{ debugName: "placeholder" }] : /* istanbul ignore next */ []));
-        this.allOptionLabel = input('All', ...(ngDevMode ? [{ debugName: "allOptionLabel" }] : /* istanbul ignore next */ []));
-        this.emptyMessagePrefix = input('No matches for', ...(ngDevMode ? [{ debugName: "emptyMessagePrefix" }] : /* istanbul ignore next */ []));
-        this.toggleAriaLabel = input('Toggle suggestions', ...(ngDevMode ? [{ debugName: "toggleAriaLabel" }] : /* istanbul ignore next */ []));
-        this.showExactToggle = input(false, ...(ngDevMode ? [{ debugName: "showExactToggle" }] : /* istanbul ignore next */ []));
-        this.exact = input(false, ...(ngDevMode ? [{ debugName: "exact" }] : /* istanbul ignore next */ []));
-        this.exactTitle = input('Exact Normalized Match', ...(ngDevMode ? [{ debugName: "exactTitle" }] : /* istanbul ignore next */ []));
-        this.debounceMs = input(150, ...(ngDevMode ? [{ debugName: "debounceMs" }] : /* istanbul ignore next */ []));
-        this.maxSuggestions = input(100, ...(ngDevMode ? [{ debugName: "maxSuggestions" }] : /* istanbul ignore next */ []));
+        this.label = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
+        this.inputId = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "inputId" }] : /* istanbul ignore next */ []));
+        this.dropdownName = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
+        this.value = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "value" }] : /* istanbul ignore next */ []));
+        this.suggestions = input([], /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "suggestions" }] : /* istanbul ignore next */ []));
+        this.placeholder = input('All', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "placeholder" }] : /* istanbul ignore next */ []));
+        this.allOptionLabel = input('All', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "allOptionLabel" }] : /* istanbul ignore next */ []));
+        this.emptyMessagePrefix = input('No matches for', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "emptyMessagePrefix" }] : /* istanbul ignore next */ []));
+        this.toggleAriaLabel = input('Toggle suggestions', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "toggleAriaLabel" }] : /* istanbul ignore next */ []));
+        this.showExactToggle = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showExactToggle" }] : /* istanbul ignore next */ []));
+        this.exact = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "exact" }] : /* istanbul ignore next */ []));
+        this.exactTitle = input('Exact Normalized Match', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "exactTitle" }] : /* istanbul ignore next */ []));
+        this.debounceMs = input(150, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "debounceMs" }] : /* istanbul ignore next */ []));
+        this.maxSuggestions = input(100, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "maxSuggestions" }] : /* istanbul ignore next */ []));
         this.valueChange = output();
         this.exactChange = output();
-        this.dropdownKey = computed(() => this.dropdownName() || this.inputId() || this.fallbackId, ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
-        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
+        this.dropdownKey = computed(() => this.dropdownName() || this.inputId() || this.fallbackId, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
+        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
         this.filteredSuggestions = computed(() => {
             const query = (this.value() || '').trim().toLowerCase();
             const list = this.suggestions() || [];
@@ -744,7 +778,8 @@ export class KitComboboxComponent {
             return list
                 .filter((item) => item.toLowerCase().includes(query))
                 .slice(0, limit);
-        }, ...(ngDevMode ? [{ debugName: "filteredSuggestions" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "filteredSuggestions" }] : /* istanbul ignore next */ []));
     }
     ngOnDestroy() {
         if (this.debounceTimer) {
@@ -816,6 +851,7 @@ export class KitComboboxComponent {
             i0.ɵɵconditionalCreate(4, KitComboboxComponent_Conditional_4_Template, 4, 2, "label", 3);
             i0.ɵɵelementEnd();
             i0.ɵɵelementStart(5, "div", 4)(6, "input", 5);
+            i0.ɵɵcontrolCreate();
             i0.ɵɵlistener("ngModelChange", function KitComboboxComponent_Template_input_ngModelChange_6_listener($event) { return ctx.onTextInput($event); })("focus", function KitComboboxComponent_Template_input_focus_6_listener() { return ctx.open(); });
             i0.ɵɵelementEnd();
             i0.ɵɵelementStart(7, "button", 6);
@@ -842,13 +878,14 @@ export class KitComboboxComponent {
             i0.ɵɵclassProp("open", ctx.isOpen());
             i0.ɵɵproperty("ngModel", ctx.value());
             i0.ɵɵattribute("placeholder", ctx.placeholder())("id", ctx.inputId() || null);
+            i0.ɵɵcontrol();
             i0.ɵɵadvance();
             i0.ɵɵattribute("aria-label", ctx.toggleAriaLabel());
             i0.ɵɵadvance(2);
             i0.ɵɵclassProp("open", ctx.isOpen());
             i0.ɵɵadvance(2);
             i0.ɵɵconditional(ctx.isOpen() ? 11 : -1);
-        } }, dependencies: [FormsModule, i1.DefaultValueAccessor, i1.CheckboxControlValueAccessor, i1.NgControlStatus, i1.NgModel], styles: [_c0, "\n  :is(.kit-filter-bar, kit-combobox) .combobox-wrapper {\n    position: relative;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .combobox-wrapper.active-wrapper {\n    z-index: 60;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .list-input {\n    cursor: text;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .combobox-chevron-btn {\n    position: absolute;\n    right: 0;\n    top: 0;\n    bottom: 0;\n    width: 2.75rem;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background: transparent;\n    border: none;\n    cursor: pointer;\n    color: var(--kit-on-surface-variant);\n    z-index: 2;\n    padding: 0;\n  }\n\n  :is(.kit-filter-bar, kit-combobox)\n    .combobox-chevron-btn:hover\n    .dropdown-icon-wrapper {\n    color: var(--kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .m3-checkbox-label {\n    display: flex;\n    align-items: center;\n    gap: 4px;\n    font-size: 0.7rem;\n    font-weight: 600;\n    color: var(--kit-on-surface-variant);\n    cursor: pointer;\n    user-select: none;\n    text-transform: uppercase;\n    letter-spacing: 0.04em;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .m3-checkbox {\n    width: 14px;\n    height: 14px;\n    accent-color: var(--kit-primary);\n    cursor: pointer;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-combobox * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [FormsModule, i1.DefaultValueAccessor, i1.CheckboxControlValueAccessor, i1.NgControlStatus, i1.NgModel], styles: [_c0, "\n  :is(.kit-filter-bar, kit-combobox) .combobox-wrapper {\n    position: relative;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .combobox-wrapper.active-wrapper {\n    z-index: 60;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .list-input {\n    cursor: text;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .combobox-chevron-btn {\n    position: absolute;\n    right: 0;\n    top: 0;\n    bottom: 0;\n    width: 2.75rem;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background: transparent;\n    border: none;\n    cursor: pointer;\n    color: var(--%NS%kit-on-surface-variant);\n    z-index: 2;\n    padding: 0;\n  }\n\n  :is(.kit-filter-bar, kit-combobox)\n    .combobox-chevron-btn:hover\n    .dropdown-icon-wrapper {\n    color: var(--%NS%kit-primary);\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .m3-checkbox-label {\n    display: flex;\n    align-items: center;\n    gap: 4px;\n    font-size: 0.7rem;\n    font-weight: 600;\n    color: var(--%NS%kit-on-surface-variant);\n    cursor: pointer;\n    user-select: none;\n    text-transform: uppercase;\n    letter-spacing: 0.04em;\n  }\n\n  :is(.kit-filter-bar, kit-combobox) .m3-checkbox {\n    width: 14px;\n    height: 14px;\n    accent-color: var(--%NS%kit-primary);\n    cursor: pointer;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-combobox * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitComboboxComponent, [{
         type: Component,
@@ -985,18 +1022,29 @@ export class KitComboboxComponent {
 export class KitMultiSelectComponent {
     constructor() {
         this.fallbackId = `kit-multiselect-${nextDropdownInstanceId++}`;
-        this.label = input('', ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
-        this.triggerId = input('', ...(ngDevMode ? [{ debugName: "triggerId" }] : /* istanbul ignore next */ []));
-        this.dropdownName = input('', ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
-        this.selected = input([], ...(ngDevMode ? [{ debugName: "selected" }] : /* istanbul ignore next */ []));
-        this.options = input([], ...(ngDevMode ? [{ debugName: "options" }] : /* istanbul ignore next */ []));
-        this.allLabel = input('All Regions', ...(ngDevMode ? [{ debugName: "allLabel" }] : /* istanbul ignore next */ []));
-        this.clearLabel = input('Clear Selection', ...(ngDevMode ? [{ debugName: "clearLabel" }] : /* istanbul ignore next */ []));
-        this.emptyLabel = input('No regions found', ...(ngDevMode ? [{ debugName: "emptyLabel" }] : /* istanbul ignore next */ []));
-        this.containerClass = input('', ...(ngDevMode ? [{ debugName: "containerClass" }] : /* istanbul ignore next */ []));
+        this.label = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
+        this.triggerId = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "triggerId" }] : /* istanbul ignore next */ []));
+        this.dropdownName = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownName" }] : /* istanbul ignore next */ []));
+        this.selected = input([], /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "selected" }] : /* istanbul ignore next */ []));
+        this.options = input([], /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "options" }] : /* istanbul ignore next */ []));
+        this.allLabel = input('All Regions', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "allLabel" }] : /* istanbul ignore next */ []));
+        this.clearLabel = input('Clear Selection', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "clearLabel" }] : /* istanbul ignore next */ []));
+        this.emptyLabel = input('No regions found', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "emptyLabel" }] : /* istanbul ignore next */ []));
+        this.containerClass = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "containerClass" }] : /* istanbul ignore next */ []));
         this.selectedChange = output();
-        this.dropdownKey = computed(() => this.dropdownName() || this.triggerId() || this.fallbackId, ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
-        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
+        this.dropdownKey = computed(() => this.dropdownName() || this.triggerId() || this.fallbackId, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dropdownKey" }] : /* istanbul ignore next */ []));
+        this.isOpen = computed(() => activeKitDropdownId() === this.dropdownKey(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
         this.summaryLabel = computed(() => {
             const sel = this.selected() || [];
             if (sel.length === 0)
@@ -1004,7 +1052,8 @@ export class KitMultiSelectComponent {
             if (sel.length <= 2)
                 return sel.join(', ');
             return `${sel.length} Selected`;
-        }, ...(ngDevMode ? [{ debugName: "summaryLabel" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "summaryLabel" }] : /* istanbul ignore next */ []));
     }
     isSelected(item) {
         return (this.selected() || []).includes(item);
@@ -1079,7 +1128,7 @@ export class KitMultiSelectComponent {
             i0.ɵɵclassProp("open", ctx.isOpen());
             i0.ɵɵadvance(2);
             i0.ɵɵconditional(ctx.isOpen() ? 9 : -1);
-        } }, styles: [_c0, "\n  :is(.kit-filter-bar, kit-multiselect) .checkbox-item {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    gap: 12px;\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .dropdown-clear-btn {\n    display: block;\n    width: calc(100% - 1.5rem);\n    margin: 0.25rem 0.75rem 0.5rem 0.75rem;\n    padding: 0.55rem;\n    text-align: center;\n    background: var(--kit-primary-container);\n    color: var(--kit-on-primary-container);\n    border: none;\n    border-radius: var(--kit-radius-full);\n    font-family: var(--kit-font-sans);\n    font-size: 0.8rem;\n    font-weight: 700;\n    cursor: pointer;\n    text-transform: uppercase;\n    letter-spacing: 0.05em;\n    transition: all 0.2s ease;\n  }\n\n  :is(.kit-filter-bar, kit-multiselect)\n    .dropdown-clear-btn:hover:not(:disabled) {\n    background: var(--kit-primary);\n    color: var(--kit-on-primary);\n    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .dropdown-clear-btn:disabled {\n    opacity: 0.4;\n    cursor: not-allowed;\n    background: var(--kit-surface-container-highest);\n    color: var(--kit-on-surface-variant);\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .m3-checkbox {\n    width: 14px;\n    height: 14px;\n    accent-color: var(--kit-primary);\n    cursor: pointer;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-multiselect * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, "\n  :is(.kit-filter-bar, kit-multiselect) .checkbox-item {\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    gap: 12px;\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .dropdown-clear-btn {\n    display: block;\n    width: calc(100% - 1.5rem);\n    margin: 0.25rem 0.75rem 0.5rem 0.75rem;\n    padding: 0.55rem;\n    text-align: center;\n    background: var(--%NS%kit-primary-container);\n    color: var(--%NS%kit-on-primary-container);\n    border: none;\n    border-radius: var(--%NS%kit-radius-full);\n    font-family: var(--%NS%kit-font-sans);\n    font-size: 0.8rem;\n    font-weight: 700;\n    cursor: pointer;\n    text-transform: uppercase;\n    letter-spacing: 0.05em;\n    transition: all 0.2s ease;\n  }\n\n  :is(.kit-filter-bar, kit-multiselect)\n    .dropdown-clear-btn:hover:not(:disabled) {\n    background: var(--%NS%kit-primary);\n    color: var(--%NS%kit-on-primary);\n    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .dropdown-clear-btn:disabled {\n    opacity: 0.4;\n    cursor: not-allowed;\n    background: var(--%NS%kit-surface-container-highest);\n    color: var(--%NS%kit-on-surface-variant);\n  }\n\n  :is(.kit-filter-bar, kit-multiselect) .m3-checkbox {\n    width: 14px;\n    height: 14px;\n    accent-color: var(--%NS%kit-primary);\n    cursor: pointer;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    kit-multiselect * {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n"], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitMultiSelectComponent, [{
         type: Component,

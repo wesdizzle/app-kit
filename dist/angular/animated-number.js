@@ -16,7 +16,8 @@ export function createAnimatedNumber(source, options) {
     const durationMs = Math.max(0, options?.durationMs ?? 380);
     const decimals = Math.max(0, options?.decimals ?? 0);
     const initial = Number.isFinite(source()) ? source() : 0;
-    const display = signal(initial, ...(ngDevMode ? [{ debugName: "display" }] : /* istanbul ignore next */ []));
+    const display = signal(initial, /* @ts-ignore */
+    ...(ngDevMode ? [{ debugName: "display" }] : /* istanbul ignore next */ []));
     try {
         effect((onCleanup) => {
             const target = Number.isFinite(source()) ? source() : 0;

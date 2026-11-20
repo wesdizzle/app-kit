@@ -23,9 +23,12 @@ export class BottomSheetDragController {
         this.velocityY = 0;
         this.lastMoveDirectionY = 0;
         this.maxDragOffsetY = 0;
-        this.dragOffsetY = signal(0, ...(ngDevMode ? [{ debugName: "dragOffsetY" }] : /* istanbul ignore next */ []));
-        this.isDragging = signal(false, ...(ngDevMode ? [{ debugName: "isDragging" }] : /* istanbul ignore next */ []));
-        this.effectiveTransformY = computed(() => this.dragOffsetY(), ...(ngDevMode ? [{ debugName: "effectiveTransformY" }] : /* istanbul ignore next */ []));
+        this.dragOffsetY = signal(0, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "dragOffsetY" }] : /* istanbul ignore next */ []));
+        this.isDragging = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isDragging" }] : /* istanbul ignore next */ []));
+        this.effectiveTransformY = computed(() => this.dragOffsetY(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "effectiveTransformY" }] : /* istanbul ignore next */ []));
     }
     onTouchStart(event) {
         if (!event.touches || event.touches.length !== 1)

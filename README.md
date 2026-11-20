@@ -1,6 +1,6 @@
-# `@wesdizzle/app-kit` (`v1.8.0`)
+# `@wesdizzle/app-kit` (`v2.0.0`)
 
-Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 21 zoneless `OnPush` shell components.
+Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 22 zoneless `OnPush` shell components.
 
 ## Subpath Exports
 

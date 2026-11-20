@@ -79,8 +79,10 @@ export function notifyActiveThemeService(state) {
 }
 export class KitThemeService {
     constructor() {
-        this.theme = signal('auto', ...(ngDevMode ? [{ debugName: "theme" }] : /* istanbul ignore next */ []));
-        this.resolvedTheme = signal('dark', ...(ngDevMode ? [{ debugName: "resolvedTheme" }] : /* istanbul ignore next */ []));
+        this.theme = signal('auto', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "theme" }] : /* istanbul ignore next */ []));
+        this.resolvedTheme = signal('dark', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "resolvedTheme" }] : /* istanbul ignore next */ []));
         this.storageKey = 'app-theme';
         this.darkThemeColor = '#121214';
         this.lightThemeColor = '#f8fafc';

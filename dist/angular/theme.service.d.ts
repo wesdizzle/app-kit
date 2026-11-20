@@ -68,5 +68,5 @@ export declare class KitThemeService implements OnDestroy {
     runViewTransition(updateFn: () => void): void;
     private updateThemeColorMeta;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitThemeService, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<KitThemeService>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }

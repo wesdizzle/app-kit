@@ -69,8 +69,8 @@ function KitDegradedBannerComponent_Conditional_0_Template(rf, ctx) { if (rf & 1
     i0.ɵɵadvance(2);
     i0.ɵɵtextInterpolate(ctx_r0.resolvedMessage());
 } }
-const _c0 = "\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--kit-duration-medium, 260ms)\n        var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
-const _c1 = "\n  @keyframes kitErrorShake {\n    0%,\n    100% {\n      transform: translateX(0);\n    }\n    20% {\n      transform: translateX(-6px);\n    }\n    40% {\n      transform: translateX(5px);\n    }\n    60% {\n      transform: translateX(-3px);\n    }\n    80% {\n      transform: translateX(2px);\n    }\n  }\n\n  .kit-status-banner {\n    padding: 12px 16px;\n    border-radius: var(--kit-radius-sm);\n    font-size: 0.875rem;\n    font-weight: 600;\n    border: 1px solid var(--kit-outline-variant);\n    background: var(--kit-surface-container-high);\n    color: var(--kit-on-surface);\n    animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n  }\n\n  .kit-status-banner.variant-error {\n    background: var(--kit-danger-subtle);\n    border-color: var(--kit-danger-border);\n    color: var(--kit-danger);\n    animation:\n      kitBannerIn 200ms var(--kit-ease-emphasized) both,\n      kitErrorShake 360ms var(--kit-ease-standard) both;\n  }\n\n  .kit-status-banner.variant-success {\n    background: var(--kit-success-subtle);\n    border-color: var(--kit-success-border);\n    color: var(--kit-success);\n  }\n\n  .kit-status-banner.variant-warning {\n    background: var(--kit-warning-subtle);\n    border-color: var(--kit-warning-border);\n    color: var(--kit-warning);\n  }\n\n  .kit-status-banner.closing,\n  .kit-status-banner.variant-error.closing {\n    animation: kitBannerOut 200ms\n      var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-status-banner {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
+const _c0 = "\n  @keyframes kitBannerIn {\n    from {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n  }\n\n  @keyframes kitBannerOut {\n    from {\n      opacity: 1;\n      transform: translateY(0) scale(1);\n    }\n    to {\n      opacity: 0;\n      transform: translateY(-6px) scale(0.985);\n    }\n  }\n\n  .kit-banner-collapse {\n    display: grid;\n    grid-template-rows: 1fr;\n    opacity: 1;\n    transition:\n      grid-template-rows var(--%NS%kit-duration-medium, 260ms)\n        var(--%NS%kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),\n      opacity 200ms var(--%NS%kit-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));\n  }\n\n  @starting-style {\n    .kit-banner-collapse {\n      grid-template-rows: 0fr;\n      opacity: 0;\n    }\n  }\n\n  .kit-banner-collapse.closing {\n    grid-template-rows: 0fr;\n    opacity: 0;\n    pointer-events: none;\n    transition:\n      grid-template-rows 220ms var(--%NS%kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)),\n      opacity 180ms var(--%NS%kit-ease-exit, cubic-bezier(0.4, 0, 1, 1));\n  }\n\n  .kit-banner-collapse-inner {\n    min-height: 0;\n    overflow: hidden;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-banner-collapse {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
+const _c1 = "\n  @keyframes kitErrorShake {\n    0%,\n    100% {\n      transform: translateX(0);\n    }\n    20% {\n      transform: translateX(-6px);\n    }\n    40% {\n      transform: translateX(5px);\n    }\n    60% {\n      transform: translateX(-3px);\n    }\n    80% {\n      transform: translateX(2px);\n    }\n  }\n\n  .kit-status-banner {\n    padding: 12px 16px;\n    border-radius: var(--%NS%kit-radius-sm);\n    font-size: 0.875rem;\n    font-weight: 600;\n    border: 1px solid var(--%NS%kit-outline-variant);\n    background: var(--%NS%kit-surface-container-high);\n    color: var(--%NS%kit-on-surface);\n    animation: kitBannerIn 220ms var(--%NS%kit-ease-emphasized) both;\n  }\n\n  .kit-status-banner.variant-error {\n    background: var(--%NS%kit-danger-subtle);\n    border-color: var(--%NS%kit-danger-border);\n    color: var(--%NS%kit-danger);\n    animation:\n      kitBannerIn 200ms var(--%NS%kit-ease-emphasized) both,\n      kitErrorShake 360ms var(--%NS%kit-ease-standard) both;\n  }\n\n  .kit-status-banner.variant-success {\n    background: var(--%NS%kit-success-subtle);\n    border-color: var(--%NS%kit-success-border);\n    color: var(--%NS%kit-success);\n  }\n\n  .kit-status-banner.variant-warning {\n    background: var(--%NS%kit-warning-subtle);\n    border-color: var(--%NS%kit-warning-border);\n    color: var(--%NS%kit-warning);\n  }\n\n  .kit-status-banner.closing,\n  .kit-status-banner.variant-error.closing {\n    animation: kitBannerOut 200ms\n      var(--%NS%kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n  }\n\n  @media (prefers-reduced-motion: reduce) {\n    .kit-status-banner {\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n";
 const _c2 = ["*"];
 function KitLoadingBannerComponent_Conditional_0_Conditional_6_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵtext(0);
@@ -249,11 +249,16 @@ const KIT_STATUS_BANNER_CSS = `
  */
 export class KitSyncIndicatorComponent {
     constructor() {
-        this.isSaving = input(false, ...(ngDevMode ? [{ debugName: "isSaving" }] : /* istanbul ignore next */ []));
-        this.savingLabel = input('Saving...', ...(ngDevMode ? [{ debugName: "savingLabel" }] : /* istanbul ignore next */ []));
-        this.savedLabel = input('Saved', ...(ngDevMode ? [{ debugName: "savedLabel" }] : /* istanbul ignore next */ []));
-        this.lingerMs = input(1400, ...(ngDevMode ? [{ debugName: "lingerMs" }] : /* istanbul ignore next */ []));
-        this.phase = signal('idle', ...(ngDevMode ? [{ debugName: "phase" }] : /* istanbul ignore next */ []));
+        this.isSaving = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isSaving" }] : /* istanbul ignore next */ []));
+        this.savingLabel = input('Saving...', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "savingLabel" }] : /* istanbul ignore next */ []));
+        this.savedLabel = input('Saved', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "savedLabel" }] : /* istanbul ignore next */ []));
+        this.lingerMs = input(1400, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "lingerMs" }] : /* istanbul ignore next */ []));
+        this.phase = signal('idle', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "phase" }] : /* istanbul ignore next */ []));
         this.wasSaving = false;
         this.lingerTimer = null;
         try {
@@ -296,7 +301,7 @@ export class KitSyncIndicatorComponent {
             i0.ɵɵconditionalCreate(0, KitSyncIndicatorComponent_Conditional_0_Template, 3, 5, "div", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.phase() !== "idle" ? 0 : -1);
-        } }, styles: ["\n      @keyframes kitSyncSpin {\n        to {\n          transform: rotate(360deg);\n        }\n      }\n\n      @keyframes kitSyncPopIn {\n        from {\n          opacity: 0;\n          transform: translateY(-4px) scale(0.92);\n        }\n        to {\n          opacity: 1;\n          transform: translateY(0) scale(1);\n        }\n      }\n\n      @keyframes kitCheckDraw {\n        from {\n          stroke-dashoffset: 24;\n        }\n        to {\n          stroke-dashoffset: 0;\n        }\n      }\n\n      .kit-sync-indicator {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--kit-radius-full);\n        font-size: 0.78rem;\n        font-weight: 600;\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-high);\n        color: var(--kit-on-surface-variant);\n        animation: kitSyncPopIn 200ms var(--kit-ease-spring) both;\n      }\n\n      .kit-sync-indicator.saving {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n        background: var(--kit-primary-container);\n      }\n\n      .kit-sync-indicator.saved {\n        border-color: var(--kit-success-border);\n        color: var(--kit-success);\n        background: var(--kit-success-subtle);\n      }\n\n      .kit-sync-spinner {\n        animation: kitSyncSpin 0.85s linear infinite;\n      }\n\n      .kit-sync-check path {\n        stroke-dasharray: 24;\n        animation: kitCheckDraw 240ms var(--kit-ease-emphasized) both;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-sync-indicator,\n        .kit-sync-indicator * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      @keyframes kitSyncSpin {\n        to {\n          transform: rotate(360deg);\n        }\n      }\n\n      @keyframes kitSyncPopIn {\n        from {\n          opacity: 0;\n          transform: translateY(-4px) scale(0.92);\n        }\n        to {\n          opacity: 1;\n          transform: translateY(0) scale(1);\n        }\n      }\n\n      @keyframes kitCheckDraw {\n        from {\n          stroke-dashoffset: 24;\n        }\n        to {\n          stroke-dashoffset: 0;\n        }\n      }\n\n      .kit-sync-indicator {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--%NS%kit-radius-full);\n        font-size: 0.78rem;\n        font-weight: 600;\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-high);\n        color: var(--%NS%kit-on-surface-variant);\n        animation: kitSyncPopIn 200ms var(--%NS%kit-ease-spring) both;\n      }\n\n      .kit-sync-indicator.saving {\n        border-color: var(--%NS%kit-primary);\n        color: var(--%NS%kit-primary);\n        background: var(--%NS%kit-primary-container);\n      }\n\n      .kit-sync-indicator.saved {\n        border-color: var(--%NS%kit-success-border);\n        color: var(--%NS%kit-success);\n        background: var(--%NS%kit-success-subtle);\n      }\n\n      .kit-sync-spinner {\n        animation: kitSyncSpin 0.85s linear infinite;\n      }\n\n      .kit-sync-check path {\n        stroke-dasharray: 24;\n        animation: kitCheckDraw 240ms var(--%NS%kit-ease-emphasized) both;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-sync-indicator,\n        .kit-sync-indicator * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSyncIndicatorComponent, [{
         type: Component,
@@ -351,12 +356,18 @@ export class KitSyncIndicatorComponent {
  */
 export class KitStatusBannerComponent {
     constructor() {
-        this.message = input(null, ...(ngDevMode ? [{ debugName: "message" }] : /* istanbul ignore next */ []));
-        this.variant = input('info', ...(ngDevMode ? [{ debugName: "variant" }] : /* istanbul ignore next */ []));
-        this.exitDurationMs = input(220, ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
-        this.displayedMessage = signal(null, ...(ngDevMode ? [{ debugName: "displayedMessage" }] : /* istanbul ignore next */ []));
-        this.isClosing = signal(false, ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
-        this.effectiveMessage = computed(() => this.message() || this.displayedMessage(), ...(ngDevMode ? [{ debugName: "effectiveMessage" }] : /* istanbul ignore next */ []));
+        this.message = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "message" }] : /* istanbul ignore next */ []));
+        this.variant = input('info', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "variant" }] : /* istanbul ignore next */ []));
+        this.exitDurationMs = input(220, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
+        this.displayedMessage = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "displayedMessage" }] : /* istanbul ignore next */ []));
+        this.isClosing = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
+        this.effectiveMessage = computed(() => this.message() || this.displayedMessage(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "effectiveMessage" }] : /* istanbul ignore next */ []));
         this.closeTimer = null;
         try {
             effect(() => {
@@ -409,7 +420,7 @@ export class KitStatusBannerComponent {
         } if (rf & 2) {
             let tmp_0_0;
             i0.ɵɵconditional((tmp_0_0 = ctx.effectiveMessage()) ? 0 : -1, tmp_0_0);
-        } }, styles: [_c0, _c1], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, _c1], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitStatusBannerComponent, [{
         type: Component,
@@ -461,14 +472,22 @@ export function formatKitDegradedTimestamp(value) {
  */
 export class KitDegradedBannerComponent {
     constructor() {
-        this.mode = input(null, ...(ngDevMode ? [{ debugName: "mode" }] : /* istanbul ignore next */ []));
-        this.snapshotTimestamp = input(null, ...(ngDevMode ? [{ debugName: "snapshotTimestamp" }] : /* istanbul ignore next */ []));
-        this.customMessage = input(null, ...(ngDevMode ? [{ debugName: "customMessage" }] : /* istanbul ignore next */ []));
-        this.exitDurationMs = input(220, ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
-        this.displayedMode = signal(null, ...(ngDevMode ? [{ debugName: "displayedMode" }] : /* istanbul ignore next */ []));
-        this.displayedMessage = signal('', ...(ngDevMode ? [{ debugName: "displayedMessage" }] : /* istanbul ignore next */ []));
-        this.isClosing = signal(false, ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
-        this.effectiveMode = computed(() => this.mode() ?? this.displayedMode(), ...(ngDevMode ? [{ debugName: "effectiveMode" }] : /* istanbul ignore next */ []));
+        this.mode = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "mode" }] : /* istanbul ignore next */ []));
+        this.snapshotTimestamp = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "snapshotTimestamp" }] : /* istanbul ignore next */ []));
+        this.customMessage = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "customMessage" }] : /* istanbul ignore next */ []));
+        this.exitDurationMs = input(220, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
+        this.displayedMode = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "displayedMode" }] : /* istanbul ignore next */ []));
+        this.displayedMessage = signal('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "displayedMessage" }] : /* istanbul ignore next */ []));
+        this.isClosing = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
+        this.effectiveMode = computed(() => this.mode() ?? this.displayedMode(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "effectiveMode" }] : /* istanbul ignore next */ []));
         this.resolvedMessage = computed(() => {
             const custom = this.customMessage()?.trim();
             if (custom)
@@ -484,7 +503,8 @@ export class KitDegradedBannerComponent {
                 return `Showing locally cached data${syncedPart}. Editing is disabled until connection is restored.`;
             }
             return this.displayedMessage();
-        }, ...(ngDevMode ? [{ debugName: "resolvedMessage" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "resolvedMessage" }] : /* istanbul ignore next */ []));
         this.closeTimer = null;
         try {
             effect(() => {
@@ -540,7 +560,7 @@ export class KitDegradedBannerComponent {
         } if (rf & 2) {
             let tmp_0_0;
             i0.ɵɵconditional((tmp_0_0 = ctx.effectiveMode()) ? 0 : -1, tmp_0_0);
-        } }, styles: [_c0, _c1, "\n      .kit-degraded-banner {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px 12px;\n        margin-bottom: 16px;\n        line-height: 1.4;\n      }\n\n      .kit-degraded-badge {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        font-weight: 700;\n        white-space: nowrap;\n      }\n\n      .kit-degraded-message {\n        font-weight: 500;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, _c1, "\n      .kit-degraded-banner {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px 12px;\n        margin-bottom: 16px;\n        line-height: 1.4;\n      }\n\n      .kit-degraded-badge {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        font-weight: 700;\n        white-space: nowrap;\n      }\n\n      .kit-degraded-message {\n        font-weight: 500;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitDegradedBannerComponent, [{
         type: Component,
@@ -576,20 +596,32 @@ export class KitDegradedBannerComponent {
  */
 export class KitLoadingBannerComponent {
     constructor() {
-        this.active = input(false, ...(ngDevMode ? [{ debugName: "active" }] : /* istanbul ignore next */ []));
-        this.message = input('', ...(ngDevMode ? [{ debugName: "message" }] : /* istanbul ignore next */ []));
-        this.percent = input(null, ...(ngDevMode ? [{ debugName: "percent" }] : /* istanbul ignore next */ []));
-        this.showProgress = input(true, ...(ngDevMode ? [{ debugName: "showProgress" }] : /* istanbul ignore next */ []));
-        this.testId = input('kit-loading-banner', ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
-        this.exitDurationMs = input(220, ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
-        this.isRendered = signal(false, ...(ngDevMode ? [{ debugName: "isRendered" }] : /* istanbul ignore next */ []));
-        this.isClosing = signal(false, ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
-        this.lastMessage = signal('', ...(ngDevMode ? [{ debugName: "lastMessage" }] : /* istanbul ignore next */ []));
-        this.lastPercent = signal(null, ...(ngDevMode ? [{ debugName: "lastPercent" }] : /* istanbul ignore next */ []));
-        this.shouldShow = computed(() => this.active() || this.isRendered(), ...(ngDevMode ? [{ debugName: "shouldShow" }] : /* istanbul ignore next */ []));
+        this.active = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "active" }] : /* istanbul ignore next */ []));
+        this.message = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "message" }] : /* istanbul ignore next */ []));
+        this.percent = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "percent" }] : /* istanbul ignore next */ []));
+        this.showProgress = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showProgress" }] : /* istanbul ignore next */ []));
+        this.testId = input('kit-loading-banner', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
+        this.exitDurationMs = input(220, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "exitDurationMs" }] : /* istanbul ignore next */ []));
+        this.isRendered = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isRendered" }] : /* istanbul ignore next */ []));
+        this.isClosing = signal(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isClosing" }] : /* istanbul ignore next */ []));
+        this.lastMessage = signal('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "lastMessage" }] : /* istanbul ignore next */ []));
+        this.lastPercent = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "lastPercent" }] : /* istanbul ignore next */ []));
+        this.shouldShow = computed(() => this.active() || this.isRendered(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "shouldShow" }] : /* istanbul ignore next */ []));
         this.effectiveMessage = computed(() => this.isClosing()
             ? this.lastMessage() || this.message()
-            : this.message() || this.lastMessage(), ...(ngDevMode ? [{ debugName: "effectiveMessage" }] : /* istanbul ignore next */ []));
+            : this.message() || this.lastMessage(), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "effectiveMessage" }] : /* istanbul ignore next */ []));
         this.effectivePercent = computed(() => {
             const p = this.isClosing()
                 ? (this.lastPercent() ?? this.percent())
@@ -598,7 +630,8 @@ export class KitLoadingBannerComponent {
                 return Math.max(0, Math.min(100, p));
             }
             return null;
-        }, ...(ngDevMode ? [{ debugName: "effectivePercent" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "effectivePercent" }] : /* istanbul ignore next */ []));
         this.closeTimer = null;
         try {
             effect(() => {
@@ -659,7 +692,7 @@ export class KitLoadingBannerComponent {
             i0.ɵɵconditionalCreate(0, KitLoadingBannerComponent_Conditional_0_Template, 9, 7, "div", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.shouldShow() ? 0 : -1);
-        } }, styles: [_c0, "\n      @keyframes kitLoadingBannerPulse {\n        0%,\n        100% {\n          opacity: 0.45;\n        }\n        50% {\n          opacity: 1;\n        }\n      }\n\n      .kit-loading-banner {\n        display: flex;\n        flex-direction: column;\n        gap: 0.4rem;\n        margin-bottom: 0.75rem;\n        padding: 0.5rem 0.875rem;\n        background: var(--kit-surface-container-high);\n        border: 1px solid var(--kit-outline-variant);\n        border-radius: var(--kit-radius-md);\n        font-size: 0.8125rem;\n        color: var(--kit-on-surface-variant);\n        animation: kitBannerIn 220ms var(--kit-ease-emphasized) both;\n      }\n\n      .kit-loading-banner.closing {\n        animation: kitBannerOut 200ms\n          var(--kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n      }\n\n      .kit-loading-banner-info {\n        display: flex;\n        align-items: center;\n        gap: 0.5rem;\n      }\n\n      .kit-loading-banner-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        background: var(--kit-primary);\n        flex-shrink: 0;\n        animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;\n      }\n\n      .kit-loading-banner-track {\n        width: 100%;\n        height: 4px;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-highest);\n        overflow: hidden;\n      }\n\n      .kit-loading-banner-fill {\n        height: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-primary);\n        transition: width 180ms ease-out;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-loading-banner,\n        .kit-loading-banner * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: [_c0, "\n      @keyframes kitLoadingBannerPulse {\n        0%,\n        100% {\n          opacity: 0.45;\n        }\n        50% {\n          opacity: 1;\n        }\n      }\n\n      .kit-loading-banner {\n        display: flex;\n        flex-direction: column;\n        gap: 0.4rem;\n        margin-bottom: 0.75rem;\n        padding: 0.5rem 0.875rem;\n        background: var(--%NS%kit-surface-container-high);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        border-radius: var(--%NS%kit-radius-md);\n        font-size: 0.8125rem;\n        color: var(--%NS%kit-on-surface-variant);\n        animation: kitBannerIn 220ms var(--%NS%kit-ease-emphasized) both;\n      }\n\n      .kit-loading-banner.closing {\n        animation: kitBannerOut 200ms\n          var(--%NS%kit-ease-exit, cubic-bezier(0.4, 0, 1, 1)) forwards;\n      }\n\n      .kit-loading-banner-info {\n        display: flex;\n        align-items: center;\n        gap: 0.5rem;\n      }\n\n      .kit-loading-banner-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        background: var(--%NS%kit-primary);\n        flex-shrink: 0;\n        animation: kitLoadingBannerPulse 1.4s ease-in-out infinite;\n      }\n\n      .kit-loading-banner-track {\n        width: 100%;\n        height: 4px;\n        border-radius: var(--%NS%kit-radius-full);\n        background: var(--%NS%kit-surface-container-highest);\n        overflow: hidden;\n      }\n\n      .kit-loading-banner-fill {\n        height: 100%;\n        border-radius: var(--%NS%kit-radius-full);\n        background: var(--%NS%kit-primary);\n        transition: width 180ms ease-out;\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-loading-banner,\n        .kit-loading-banner * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitLoadingBannerComponent, [{
         type: Component,

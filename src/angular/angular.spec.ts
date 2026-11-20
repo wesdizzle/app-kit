@@ -42,6 +42,7 @@ import {
   getKitLeafRouteSnapshot,
 } from './view-transition.js';
 import { KitThemeToggleComponent } from './theme-toggle.component.js';
+import { KitHeaderBarComponent } from './header-bar.component.js';
 import { interpolateNumber } from './animated-number.js';
 import { KitSegmentedMeterComponent } from './segmented-meter.component.js';
 import {
@@ -62,7 +63,11 @@ import {
   canAnimateKitBannerExit,
   formatKitDegradedTimestamp,
 } from './status-feedback.component.js';
-import { ICON_CATALOG, KitIconComponent } from './icon.component.js';
+import {
+  ICON_CATALOG,
+  KitIconComponent,
+  buildKitIconSvgMarkup,
+} from './icon.component.js';
 import {
   KitSelectComponent,
   KitComboboxComponent,
@@ -1956,5 +1961,91 @@ describe('@wesdizzle/app-kit/angular', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it('passes through modifier and non-primary clicks in KitHeaderBarComponent.onTabClick and includes social/document icons in ICON_CATALOG', () => {
+    const injector = {
+      get: () => ({ onDestroy: () => () => {} }),
+    } as unknown as Injector;
+    const headerBar = runInInjectionContext(
+      injector,
+      () => new KitHeaderBarComponent(),
+    );
+    const selected: string[] = [];
+    headerBar.tabSelected.subscribe((id) => selected.push(id));
+
+    const tabWithHref = { id: 'resume', label: 'Resume', href: '/resume' };
+    const modifiers: Array<Partial<MouseEvent>> = [
+      { ctrlKey: true, button: 0 },
+      { metaKey: true, button: 0 },
+      { shiftKey: true, button: 0 },
+      { altKey: true, button: 0 },
+      { button: 1 },
+    ];
+    for (const mod of modifiers) {
+      const preventDefault = vi.fn();
+      headerBar.onTabClick(
+        {
+          ctrlKey: false,
+          metaKey: false,
+          shiftKey: false,
+          altKey: false,
+          button: 0,
+          ...mod,
+          preventDefault,
+        } as unknown as MouseEvent,
+        tabWithHref,
+      );
+      expect(preventDefault).not.toHaveBeenCalled();
+    }
+    expect(selected).toEqual([]);
+
+    const primaryPrevent = vi.fn();
+    headerBar.onTabClick(
+      {
+        ctrlKey: false,
+        metaKey: false,
+        shiftKey: false,
+        altKey: false,
+        button: 0,
+        preventDefault: primaryPrevent,
+      } as unknown as MouseEvent,
+      tabWithHref,
+    );
+    expect(primaryPrevent).toHaveBeenCalledTimes(1);
+    expect(selected).toEqual(['resume']);
+
+    for (const iconName of [
+      'github',
+      'linkedin',
+      'file-text',
+      'printer',
+    ] as const) {
+      expect(ICON_CATALOG[iconName]).toBeDefined();
+      expect(ICON_CATALOG[iconName].svgInner.length).toBeGreaterThan(0);
+    }
+
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const iconSource = readFileSync(join(specDir, 'icon.component.ts'), 'utf8');
+    expect(iconSource).toContain('ViewEncapsulation.None');
+    expect(iconSource).toContain('[innerHTML]="safeSvgMarkup()"');
+    expect(iconSource).not.toMatch(/<svg\b[^>]*\[innerHTML\]/);
+
+    const escapedSvg = buildKitIconSvgMarkup(
+      ICON_CATALOG['github'],
+      'repo-icon "test" <x>',
+      'Open "GitHub" & <Source>',
+    );
+    expect(escapedSvg).toContain(
+      'class="repo-icon &quot;test&quot; &lt;x&gt;"',
+    );
+    expect(escapedSvg).toContain(
+      'role="img" aria-label="Open &quot;GitHub&quot; &amp; &lt;Source&gt;"',
+    );
+    expect(escapedSvg).toContain(ICON_CATALOG['github'].svgInner);
+
+    const hiddenSvg = buildKitIconSvgMarkup(ICON_CATALOG['printer']);
+    expect(hiddenSvg).toContain('aria-hidden="true"');
+    expect(hiddenSvg).not.toContain('aria-label=');
   });
 });

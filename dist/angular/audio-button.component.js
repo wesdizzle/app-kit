@@ -60,14 +60,22 @@ export function stopActiveKitAudio() {
 export class KitAudioButtonComponent {
     constructor() {
         this.destroyRef = inject(DestroyRef, { optional: true });
-        this.src = input(null, ...(ngDevMode ? [{ debugName: "src" }] : /* istanbul ignore next */ []));
-        this.mimeType = input('audio/ogg', ...(ngDevMode ? [{ debugName: "mimeType" }] : /* istanbul ignore next */ []));
-        this.label = input('Play', ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input(null, ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
-        this.hideIfUnsupported = input(true, ...(ngDevMode ? [{ debugName: "hideIfUnsupported" }] : /* istanbul ignore next */ []));
-        this.testId = input(null, ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
-        this.playState = signal('idle', ...(ngDevMode ? [{ debugName: "playState" }] : /* istanbul ignore next */ []));
-        this.isSupported = computed(() => Boolean(this.src()) && canPlayKitAudioMime(this.mimeType()), ...(ngDevMode ? [{ debugName: "isSupported" }] : /* istanbul ignore next */ []));
+        this.src = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "src" }] : /* istanbul ignore next */ []));
+        this.mimeType = input('audio/ogg', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "mimeType" }] : /* istanbul ignore next */ []));
+        this.label = input('Play', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "label" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.hideIfUnsupported = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "hideIfUnsupported" }] : /* istanbul ignore next */ []));
+        this.testId = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "testId" }] : /* istanbul ignore next */ []));
+        this.playState = signal('idle', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "playState" }] : /* istanbul ignore next */ []));
+        this.isSupported = computed(() => Boolean(this.src()) && canPlayKitAudioMime(this.mimeType()), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "isSupported" }] : /* istanbul ignore next */ []));
         this.ownedAudio = null;
         this.destroyRef?.onDestroy(() => {
             if (this.ownedAudio && activeAudioEl === this.ownedAudio) {
@@ -146,7 +154,7 @@ export class KitAudioButtonComponent {
             i0.ɵɵconditionalCreate(0, KitAudioButtonComponent_Conditional_0_Template, 4, 12, "button", 0);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.src() && (ctx.isSupported() || !ctx.hideIfUnsupported()) ? 0 : -1);
-        } }, dependencies: [KitIconComponent], styles: ["\n      .kit-audio-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 6px 13px;\n        border-radius: var(--kit-radius-full);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        color: var(--kit-on-surface);\n        font-family: var(--kit-font-sans);\n        font-size: 0.8rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-audio-btn:hover:not(:disabled) {\n        border-color: var(--kit-primary);\n        color: var(--kit-primary);\n      }\n\n      .kit-audio-btn.playing {\n        background: var(--kit-primary-container);\n        color: var(--kit-on-primary-container);\n        border-color: color-mix(in srgb, var(--kit-primary) 45%, transparent);\n      }\n\n      .kit-audio-btn.error {\n        border-color: var(--kit-danger-border);\n        color: var(--kit-danger);\n      }\n\n      .kit-audio-btn:disabled {\n        opacity: 0.45;\n        cursor: not-allowed;\n      }\n\n      .kit-audio-btn:focus-visible {\n        outline: 2.5px solid var(--kit-primary);\n        outline-offset: 2px;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [KitIconComponent], styles: ["\n      .kit-audio-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 6px 13px;\n        border-radius: var(--%NS%kit-radius-full);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n        color: var(--%NS%kit-on-surface);\n        font-family: var(--%NS%kit-font-sans);\n        font-size: 0.8rem;\n        font-weight: 600;\n        cursor: pointer;\n      }\n\n      .kit-audio-btn:hover:not(:disabled) {\n        border-color: var(--%NS%kit-primary);\n        color: var(--%NS%kit-primary);\n      }\n\n      .kit-audio-btn.playing {\n        background: var(--%NS%kit-primary-container);\n        color: var(--%NS%kit-on-primary-container);\n        border-color: color-mix(in srgb, var(--%NS%kit-primary) 45%, transparent);\n      }\n\n      .kit-audio-btn.error {\n        border-color: var(--%NS%kit-danger-border);\n        color: var(--%NS%kit-danger);\n      }\n\n      .kit-audio-btn:disabled {\n        opacity: 0.45;\n        cursor: not-allowed;\n      }\n\n      .kit-audio-btn:focus-visible {\n        outline: 2.5px solid var(--%NS%kit-primary);\n        outline-offset: 2px;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitAudioButtonComponent, [{
         type: Component,

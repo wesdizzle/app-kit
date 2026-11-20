@@ -1,15 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import * as i0 from "@angular/core";
 function KitIconComponent_Conditional_0_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵnamespaceSVG();
-    i0.ɵɵdomElement(0, "svg", 1);
+    i0.ɵɵdomElement(0, "span", 1);
 } if (rf & 2) {
     const ctx_r0 = i0.ɵɵnextContext();
-    i0.ɵɵclassMap(ctx_r0.className());
     i0.ɵɵstyleProp("width", ctx_r0.pixelSize())("height", ctx_r0.pixelSize());
-    i0.ɵɵdomProperty("innerHTML", ctx_r0.safeSvgInner(), i0.ɵɵsanitizeHtml);
-    i0.ɵɵattribute("viewBox", ctx.viewBox)("aria-hidden", ctx_r0.ariaLabel() ? null : "true")("aria-label", ctx_r0.ariaLabel() || null)("role", ctx_r0.ariaLabel() ? "img" : null);
+    i0.ɵɵdomProperty("innerHTML", ctx_r0.safeSvgMarkup(), i0.ɵɵsanitizeHtml);
 } }
 export const ICON_CATALOG = {
     owned: {
@@ -288,52 +285,91 @@ export const ICON_CATALOG = {
         viewBox: '0 0 24 24',
         svgInner: `<polygon points="12 2 2 7 12 12 22 7 12 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
     },
+    github: {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="currentColor"/>`,
+    },
+    linkedin: {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" fill="currentColor"/>`,
+    },
+    'file-text': {
+        viewBox: '0 0 24 24',
+        svgInner: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="13" x2="8" y2="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="17" x2="8" y2="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="10 9 9 9 8 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
+    printer: {
+        viewBox: '0 0 24 24',
+        svgInner: `<polyline points="6 9 6 2 18 2 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect width="12" height="8" x="6" y="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    },
 };
+function escapeSvgAttr(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+export function buildKitIconSvgMarkup(def, className = '', ariaLabel = '') {
+    const cls = className.trim();
+    const clsAttr = cls ? ` class="${escapeSvgAttr(cls)}"` : '';
+    const label = ariaLabel.trim();
+    const ariaAttrs = label
+        ? ` role="img" aria-label="${escapeSvgAttr(label)}"`
+        : ' aria-hidden="true"';
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${escapeSvgAttr(def.viewBox)}" width="100%" height="100%"${clsAttr}${ariaAttrs} focusable="false">${def.svgInner}</svg>`;
+}
 export class KitIconComponent {
     constructor() {
         this.sanitizer = inject(DomSanitizer);
-        this.name = input.required(...(ngDevMode ? [{ debugName: "name" }] : /* istanbul ignore next */ []));
-        this.size = input(20, ...(ngDevMode ? [{ debugName: "size" }] : /* istanbul ignore next */ []));
-        this.className = input('', ...(ngDevMode ? [{ debugName: "className" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input('', ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.name = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "name" }] : /* istanbul ignore next */ []));
+        this.size = input(20, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "size" }] : /* istanbul ignore next */ []));
+        this.className = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "className" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
         this.iconDef = computed(() => {
             return ICON_CATALOG[this.name()] ?? null;
-        }, ...(ngDevMode ? [{ debugName: "iconDef" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "iconDef" }] : /* istanbul ignore next */ []));
         this.safeSvgInner = computed(() => {
             const def = this.iconDef();
             return def ? this.sanitizer.bypassSecurityTrustHtml(def.svgInner) : '';
-        }, ...(ngDevMode ? [{ debugName: "safeSvgInner" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "safeSvgInner" }] : /* istanbul ignore next */ []));
+        this.safeSvgMarkup = computed(() => {
+            const def = this.iconDef();
+            if (!def)
+                return '';
+            return this.sanitizer.bypassSecurityTrustHtml(buildKitIconSvgMarkup(def, this.className(), this.ariaLabel()));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "safeSvgMarkup" }] : /* istanbul ignore next */ []));
         this.pixelSize = computed(() => {
             const s = this.size();
             return typeof s === 'number' ? `${s}px` : s;
-        }, ...(ngDevMode ? [{ debugName: "pixelSize" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "pixelSize" }] : /* istanbul ignore next */ []));
     }
     static { this.ɵfac = function KitIconComponent_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || KitIconComponent)(); }; }
-    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitIconComponent, selectors: [["kit-icon"], ["app-icon"]], inputs: { name: [1, "name"], size: [1, "size"], className: [1, "className"], ariaLabel: [1, "ariaLabel"] }, decls: 1, vars: 1, consts: [["xmlns", "http://www.w3.org/2000/svg", "focusable", "false", 3, "width", "height", "class", "innerHTML"], ["xmlns", "http://www.w3.org/2000/svg", "focusable", "false", 3, "innerHTML"]], template: function KitIconComponent_Template(rf, ctx) { if (rf & 1) {
-            i0.ɵɵconditionalCreate(0, KitIconComponent_Conditional_0_Template, 1, 11, ":svg:svg", 0);
+    static { this.ɵcmp = /*@__PURE__*/ i0.ɵɵdefineComponent({ type: KitIconComponent, selectors: [["kit-icon"], ["app-icon"]], inputs: { name: [1, "name"], size: [1, "size"], className: [1, "className"], ariaLabel: [1, "ariaLabel"] }, decls: 1, vars: 1, consts: [[1, "kit-icon-wrap", 3, "width", "height", "innerHTML"], [1, "kit-icon-wrap", 3, "innerHTML"]], template: function KitIconComponent_Template(rf, ctx) { if (rf & 1) {
+            i0.ɵɵconditionalCreate(0, KitIconComponent_Conditional_0_Template, 1, 5, "span", 0);
         } if (rf & 2) {
-            let tmp_0_0;
-            i0.ɵɵconditional((tmp_0_0 = ctx.iconDef()) ? 0 : -1, tmp_0_0);
-        } }, styles: ["[_nghost-%COMP%] {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        vertical-align: middle;\n        line-height: 0;\n      }\n      svg[_ngcontent-%COMP%] {\n        display: block;\n        flex-shrink: 0;\n      }"], changeDetection: 0 }); }
+            i0.ɵɵconditional(ctx.iconDef() ? 0 : -1);
+        } }, styles: ["\n      kit-icon,\n      app-icon {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        vertical-align: middle;\n        line-height: 0;\n      }\n      .kit-icon-wrap {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        flex-shrink: 0;\n      }\n      .kit-icon-wrap > svg {\n        display: block;\n        width: 100%;\n        height: 100%;\n        flex-shrink: 0;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitIconComponent, [{
         type: Component,
-        args: [{ selector: 'kit-icon, app-icon', standalone: true, template: `
-    @if (iconDef(); as def) {
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        [attr.viewBox]="def.viewBox"
+        args: [{ selector: 'kit-icon, app-icon', standalone: true, encapsulation: ViewEncapsulation.None, template: `
+    @if (iconDef()) {
+      <span
+        class="kit-icon-wrap"
         [style.width]="pixelSize()"
         [style.height]="pixelSize()"
-        [class]="className()"
-        [attr.aria-hidden]="ariaLabel() ? null : 'true'"
-        [attr.aria-label]="ariaLabel() || null"
-        [attr.role]="ariaLabel() ? 'img' : null"
-        focusable="false"
-        [innerHTML]="safeSvgInner()"
-      ></svg>
+        [innerHTML]="safeSvgMarkup()"
+      ></span>
     }
-  `, changeDetection: ChangeDetectionStrategy.OnPush, styles: ["\n      :host {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        vertical-align: middle;\n        line-height: 0;\n      }\n      svg {\n        display: block;\n        flex-shrink: 0;\n      }\n    "] }]
+  `, changeDetection: ChangeDetectionStrategy.OnPush, styles: ["\n      kit-icon,\n      app-icon {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        vertical-align: middle;\n        line-height: 0;\n      }\n      .kit-icon-wrap {\n        display: inline-flex;\n        align-items: center;\n        justify-content: center;\n        flex-shrink: 0;\n      }\n      .kit-icon-wrap > svg {\n        display: block;\n        width: 100%;\n        height: 100%;\n        flex-shrink: 0;\n      }\n    "] }]
     }], null, { name: [{ type: i0.Input, args: [{ isSignal: true, alias: "name", required: true }] }], size: [{ type: i0.Input, args: [{ isSignal: true, alias: "size", required: false }] }], className: [{ type: i0.Input, args: [{ isSignal: true, alias: "className", required: false }] }], ariaLabel: [{ type: i0.Input, args: [{ isSignal: true, alias: "ariaLabel", required: false }] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitIconComponent, { className: "KitIconComponent", filePath: "icon.component.ts", lineNumber: 401 }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitIconComponent, { className: "KitIconComponent", filePath: "icon.component.ts", lineNumber: 448 }); })();
 export { KitIconComponent as IconComponent };

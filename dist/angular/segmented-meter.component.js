@@ -16,13 +16,17 @@ function KitSegmentedMeterComponent_For_3_Template(rf, ctx) { if (rf & 1) {
  */
 export class KitSegmentedMeterComponent {
     constructor() {
-        this.segments = input.required(...(ngDevMode ? [{ debugName: "segments" }] : /* istanbul ignore next */ []));
-        this.heightPx = input(12, ...(ngDevMode ? [{ debugName: "heightPx" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input('Completion progress', ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.segments = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "segments" }] : /* istanbul ignore next */ []));
+        this.heightPx = input(12, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "heightPx" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input('Completion progress', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
         this.totalPct = computed(() => {
             const sum = this.segments().reduce((acc, seg) => acc + this.clampPct(seg.pct), 0);
             return Math.min(100, Math.round(sum));
-        }, ...(ngDevMode ? [{ debugName: "totalPct" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "totalPct" }] : /* istanbul ignore next */ []));
     }
     clampPct(val) {
         if (!Number.isFinite(val))
@@ -40,7 +44,7 @@ export class KitSegmentedMeterComponent {
             i0.ɵɵstyleProp("height", ctx.heightPx(), "px");
             i0.ɵɵadvance();
             i0.ɵɵrepeater(ctx.segments());
-        } }, styles: ["\n      .kit-segmented-meter {\n        display: block;\n        width: 100%;\n      }\n\n      .kit-meter-track {\n        display: flex;\n        width: 100%;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-surface-container-low);\n        border: 1px solid var(--kit-outline-variant);\n        overflow: hidden;\n      }\n\n      .kit-meter-segment {\n        height: 100%;\n        transition: width 550ms var(--kit-ease-smooth);\n      }\n\n      @starting-style {\n        .kit-meter-segment {\n          width: 0% !important;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-segmented-meter * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      .kit-segmented-meter {\n        display: block;\n        width: 100%;\n      }\n\n      .kit-meter-track {\n        display: flex;\n        width: 100%;\n        border-radius: var(--%NS%kit-radius-full);\n        background: var(--%NS%kit-surface-container-low);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        overflow: hidden;\n      }\n\n      .kit-meter-segment {\n        height: 100%;\n        transition: width 550ms var(--%NS%kit-ease-smooth);\n      }\n\n      @starting-style {\n        .kit-meter-segment {\n          width: 0% !important;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-segmented-meter * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitSegmentedMeterComponent, [{
         type: Component,

@@ -438,6 +438,15 @@ export class KitHeaderBarComponent {
 
   onTabClick(event: MouseEvent, tab: KitHeaderTab): void {
     if (tab.href) {
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button !== 0
+      ) {
+        return;
+      }
       event.preventDefault();
     }
     this.tabSelected.emit(tab.id);

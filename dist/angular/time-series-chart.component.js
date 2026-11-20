@@ -88,7 +88,7 @@ function KitTimeSeriesChartComponent_Conditional_3_For_5_Conditional_0_Template(
     i0.ɵɵattribute("stop-color", s_r5.color);
 } }
 function KitTimeSeriesChartComponent_Conditional_3_For_5_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_For_5_Conditional_0_Template, 3, 3, ":svg:linearGradient", 25);
+    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_For_5_Conditional_0_Template, 3, 3, "linearGradient", 25);
 } if (rf & 2) {
     const s_r5 = ctx.$implicit;
     const ctx_r2 = i0.ɵɵnextContext(2);
@@ -128,8 +128,8 @@ function KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Conditional_3_T
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵnamespaceSVG();
     i0.ɵɵelementStart(0, "g", 17);
-    i0.ɵɵrepeaterCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_For_2_Template, 2, 3, ":svg:text", 28, _forTrack1);
-    i0.ɵɵconditionalCreate(3, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Conditional_3_Template, 2, 2, ":svg:text", 29);
+    i0.ɵɵrepeaterCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_For_2_Template, 2, 3, "text", 28, _forTrack1);
+    i0.ɵɵconditionalCreate(3, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Conditional_3_Template, 2, 2, "text", 29);
     i0.ɵɵelementEnd();
 } if (rf & 2) {
     const ctx_r2 = i0.ɵɵnextContext(2);
@@ -166,8 +166,8 @@ function KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Conditional_3_
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵnamespaceSVG();
     i0.ɵɵelementStart(0, "g", 18);
-    i0.ɵɵrepeaterCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_For_2_Template, 2, 5, ":svg:text", 30, _forTrack1);
-    i0.ɵɵconditionalCreate(3, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Conditional_3_Template, 2, 4, ":svg:text", 31);
+    i0.ɵɵrepeaterCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_For_2_Template, 2, 5, "text", 30, _forTrack1);
+    i0.ɵɵconditionalCreate(3, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Conditional_3_Template, 2, 4, "text", 31);
     i0.ɵɵelementEnd();
 } if (rf & 2) {
     const ctx_r2 = i0.ɵɵnextContext(2);
@@ -209,15 +209,15 @@ function KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_For_3_Co
     i0.ɵɵattribute("cx", pt_r11.x)("cy", pt_r11.y)("r", ctx_r2.activeIndex() === pt_r11.index ? 5 : 3)("fill", render_r10.series.color);
 } }
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_For_3_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_For_3_Conditional_0_Template, 1, 6, ":svg:circle", 37);
+    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_For_3_Conditional_0_Template, 1, 6, "circle", 37);
 } if (rf & 2) {
     const pt_r11 = ctx.$implicit;
     const ctx_r2 = i0.ɵɵnextContext(4);
     i0.ɵɵconditional(ctx_r2.showAllDots() || ctx_r2.activeIndex() === pt_r11.index ? 0 : -1);
 } }
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Conditional_0_Template, 1, 2, ":svg:path", 35);
-    i0.ɵɵconditionalCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Conditional_1_Template, 1, 3, ":svg:path", 36);
+    i0.ɵɵconditionalCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Conditional_0_Template, 1, 2, "path", 35);
+    i0.ɵɵconditionalCreate(1, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Conditional_1_Template, 1, 3, "path", 36);
     i0.ɵɵrepeaterCreate(2, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_For_3_Template, 1, 1, null, null, _forTrack2);
 } if (rf & 2) {
     const render_r10 = ctx.$implicit;
@@ -228,7 +228,7 @@ function KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Template
     i0.ɵɵrepeater(render_r10.dots);
 } }
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_11_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵrepeaterCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_1_Template, 1, 2, ":svg:path", 34, i0.ɵɵrepeaterTrackByIndex);
+    i0.ɵɵrepeaterCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_1_Template, 1, 2, "path", 34, i0.ɵɵrepeaterTrackByIndex);
     i0.ɵɵrepeaterCreate(2, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_For_3_Template, 4, 2, null, null, _forTrack3);
 } if (rf & 2) {
     const ctx_r2 = i0.ɵɵnextContext(2);
@@ -246,7 +246,7 @@ function KitTimeSeriesChartComponent_Conditional_3_Conditional_12_For_1_Template
     i0.ɵɵattribute("x", bar_r12.x)("y", bar_r12.y)("width", bar_r12.width)("height", bar_r12.height)("fill", bar_r12.color);
 } }
 function KitTimeSeriesChartComponent_Conditional_3_Conditional_12_Template(rf, ctx) { if (rf & 1) {
-    i0.ɵɵrepeaterCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_12_For_1_Template, 1, 7, ":svg:rect", 39, _forTrack4);
+    i0.ɵɵrepeaterCreate(0, KitTimeSeriesChartComponent_Conditional_3_Conditional_12_For_1_Template, 1, 7, "rect", 39, _forTrack4);
 } if (rf & 2) {
     const ctx_r2 = i0.ɵɵnextContext(2);
     i0.ɵɵrepeater(ctx_r2.renderedBars());
@@ -345,17 +345,17 @@ function KitTimeSeriesChartComponent_Conditional_3_Template(rf, ctx) { if (rf & 
     i0.ɵɵrepeaterCreate(4, KitTimeSeriesChartComponent_Conditional_3_For_5_Template, 1, 1, null, null, _forTrack0);
     i0.ɵɵelementEnd();
     i0.ɵɵelementStart(6, "g", 15);
-    i0.ɵɵrepeaterCreate(7, KitTimeSeriesChartComponent_Conditional_3_For_8_Template, 1, 4, ":svg:line", 16, _forTrack1);
+    i0.ɵɵrepeaterCreate(7, KitTimeSeriesChartComponent_Conditional_3_For_8_Template, 1, 4, "line", 16, _forTrack1);
     i0.ɵɵelementEnd();
-    i0.ɵɵconditionalCreate(9, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Template, 4, 1, ":svg:g", 17);
-    i0.ɵɵconditionalCreate(10, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Template, 4, 1, ":svg:g", 18);
+    i0.ɵɵconditionalCreate(9, KitTimeSeriesChartComponent_Conditional_3_Conditional_9_Template, 4, 1, "g", 17);
+    i0.ɵɵconditionalCreate(10, KitTimeSeriesChartComponent_Conditional_3_Conditional_10_Template, 4, 1, "g", 18);
     i0.ɵɵconditionalCreate(11, KitTimeSeriesChartComponent_Conditional_3_Conditional_11_Template, 4, 0)(12, KitTimeSeriesChartComponent_Conditional_3_Conditional_12_Template, 2, 0);
-    i0.ɵɵconditionalCreate(13, KitTimeSeriesChartComponent_Conditional_3_Conditional_13_Template, 1, 4, ":svg:line", 19);
+    i0.ɵɵconditionalCreate(13, KitTimeSeriesChartComponent_Conditional_3_Conditional_13_Template, 1, 4, "line", 19);
     i0.ɵɵelementStart(14, "g", 20);
-    i0.ɵɵrepeaterCreate(15, KitTimeSeriesChartComponent_Conditional_3_For_16_Template, 2, 5, ":svg:text", 21, _forTrack2);
+    i0.ɵɵrepeaterCreate(15, KitTimeSeriesChartComponent_Conditional_3_For_16_Template, 2, 5, "text", 21, _forTrack2);
     i0.ɵɵelementEnd();
     i0.ɵɵelementStart(17, "g", 22);
-    i0.ɵɵrepeaterCreate(18, KitTimeSeriesChartComponent_Conditional_3_For_19_Template, 1, 8, ":svg:rect", 23, _forTrack2);
+    i0.ɵɵrepeaterCreate(18, KitTimeSeriesChartComponent_Conditional_3_For_19_Template, 1, 8, "rect", 23, _forTrack2);
     i0.ɵɵelementEnd()();
     i0.ɵɵconditionalCreate(20, KitTimeSeriesChartComponent_Conditional_3_Conditional_20_Template, 3, 5, "div", 24);
     i0.ɵɵelementEnd();
@@ -576,32 +576,52 @@ export class KitTimeSeriesChartComponent {
         this.chartUid = ++KitTimeSeriesChartComponent.nextInstanceId;
         this.padTop = PAD_TOP;
         this.padBottom = PAD_BOTTOM;
-        this.points = input.required(...(ngDevMode ? [{ debugName: "points" }] : /* istanbul ignore next */ []));
-        this.series = input.required(...(ngDevMode ? [{ debugName: "series" }] : /* istanbul ignore next */ []));
-        this.mode = input('line', ...(ngDevMode ? [{ debugName: "mode" }] : /* istanbul ignore next */ []));
-        this.diffBand = input(null, ...(ngDevMode ? [{ debugName: "diffBand" }] : /* istanbul ignore next */ []));
-        this.leftAxisFormatter = input((v) => String(Math.round(v)), ...(ngDevMode ? [{ debugName: "leftAxisFormatter" }] : /* istanbul ignore next */ []));
-        this.rightAxisFormatter = input((v) => String(Math.round(v)), ...(ngDevMode ? [{ debugName: "rightAxisFormatter" }] : /* istanbul ignore next */ []));
-        this.leftAxisLabel = input('', ...(ngDevMode ? [{ debugName: "leftAxisLabel" }] : /* istanbul ignore next */ []));
-        this.rightAxisLabel = input('', ...(ngDevMode ? [{ debugName: "rightAxisLabel" }] : /* istanbul ignore next */ []));
-        this.heightPx = input(300, ...(ngDevMode ? [{ debugName: "heightPx" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input('Time series chart', ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
-        this.emptyTitle = input('No timeline data yet', ...(ngDevMode ? [{ debugName: "emptyTitle" }] : /* istanbul ignore next */ []));
-        this.emptyMessage = input('', ...(ngDevMode ? [{ debugName: "emptyMessage" }] : /* istanbul ignore next */ []));
-        this.showLegend = input(true, ...(ngDevMode ? [{ debugName: "showLegend" }] : /* istanbul ignore next */ []));
-        this.interactive = input(true, ...(ngDevMode ? [{ debugName: "interactive" }] : /* istanbul ignore next */ []));
-        this.tooltipTemplate = input(null, ...(ngDevMode ? [{ debugName: "tooltipTemplate" }] : /* istanbul ignore next */ []));
+        this.points = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "points" }] : /* istanbul ignore next */ []));
+        this.series = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "series" }] : /* istanbul ignore next */ []));
+        this.mode = input('line', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "mode" }] : /* istanbul ignore next */ []));
+        this.diffBand = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "diffBand" }] : /* istanbul ignore next */ []));
+        this.leftAxisFormatter = input((v) => String(Math.round(v)), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "leftAxisFormatter" }] : /* istanbul ignore next */ []));
+        this.rightAxisFormatter = input((v) => String(Math.round(v)), /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "rightAxisFormatter" }] : /* istanbul ignore next */ []));
+        this.leftAxisLabel = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "leftAxisLabel" }] : /* istanbul ignore next */ []));
+        this.rightAxisLabel = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "rightAxisLabel" }] : /* istanbul ignore next */ []));
+        this.heightPx = input(300, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "heightPx" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input('Time series chart', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.emptyTitle = input('No timeline data yet', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "emptyTitle" }] : /* istanbul ignore next */ []));
+        this.emptyMessage = input('', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "emptyMessage" }] : /* istanbul ignore next */ []));
+        this.showLegend = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showLegend" }] : /* istanbul ignore next */ []));
+        this.interactive = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "interactive" }] : /* istanbul ignore next */ []));
+        this.tooltipTemplate = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "tooltipTemplate" }] : /* istanbul ignore next */ []));
         this.pointClick = output();
         this.activePointChange = output();
         this.visibleSeriesChange = output();
-        this.stageWidth = signal(DEFAULT_STAGE_WIDTH, ...(ngDevMode ? [{ debugName: "stageWidth" }] : /* istanbul ignore next */ []));
-        this.visibilityOverrides = signal({}, ...(ngDevMode ? [{ debugName: "visibilityOverrides" }] : /* istanbul ignore next */ []));
-        this.activeIndex = signal(null, ...(ngDevMode ? [{ debugName: "activeIndex" }] : /* istanbul ignore next */ []));
+        this.stageWidth = signal(DEFAULT_STAGE_WIDTH, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "stageWidth" }] : /* istanbul ignore next */ []));
+        this.visibilityOverrides = signal({}, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "visibilityOverrides" }] : /* istanbul ignore next */ []));
+        this.activeIndex = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "activeIndex" }] : /* istanbul ignore next */ []));
         this.visibleSeries = computed(() => {
             const overrides = this.visibilityOverrides();
             return this.series().filter((s) => this.resolveVisibility(s, overrides));
-        }, ...(ngDevMode ? [{ debugName: "visibleSeries" }] : /* istanbul ignore next */ []));
-        this.showAllDots = computed(() => this.points().length <= 24, ...(ngDevMode ? [{ debugName: "showAllDots" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "visibleSeries" }] : /* istanbul ignore next */ []));
+        this.showAllDots = computed(() => this.points().length <= 24, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showAllDots" }] : /* istanbul ignore next */ []));
         this.geometry = computed(() => {
             const width = Math.max(280, this.stageWidth());
             const height = Math.max(180, this.heightPx());
@@ -654,7 +674,8 @@ export class KitTimeSeriesChartComponent {
                 primaryTicks,
                 primaryAxisMax,
             };
-        }, ...(ngDevMode ? [{ debugName: "geometry" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "geometry" }] : /* istanbul ignore next */ []));
         this.pointXPositions = computed(() => {
             const pts = this.points();
             const geom = this.geometry();
@@ -669,14 +690,16 @@ export class KitTimeSeriesChartComponent {
                 return pts.map((_, i) => geom.padLeft + (i + 0.5) * slot);
             }
             return pts.map((_, i) => geom.padLeft + (i / (n - 1)) * geom.plotWidth);
-        }, ...(ngDevMode ? [{ debugName: "pointXPositions" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "pointXPositions" }] : /* istanbul ignore next */ []));
         this.gridLines = computed(() => {
             const geom = this.geometry();
             return geom.primaryTicks.map((value) => ({
                 value,
                 y: roundFloat(geom.baselineY - (value / geom.primaryAxisMax) * geom.plotHeight),
             }));
-        }, ...(ngDevMode ? [{ debugName: "gridLines" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "gridLines" }] : /* istanbul ignore next */ []));
         this.leftAxisLabels = computed(() => {
             const geom = this.geometry();
             if (!geom.hasLeftAxis)
@@ -687,7 +710,8 @@ export class KitTimeSeriesChartComponent {
                 y: roundFloat(geom.baselineY - (value / geom.leftAxis.max) * geom.plotHeight),
                 text: fmt(value),
             }));
-        }, ...(ngDevMode ? [{ debugName: "leftAxisLabels" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "leftAxisLabels" }] : /* istanbul ignore next */ []));
         this.rightAxisLabels = computed(() => {
             const geom = this.geometry();
             if (!geom.hasRightAxis)
@@ -698,11 +722,13 @@ export class KitTimeSeriesChartComponent {
                 y: roundFloat(geom.baselineY - (value / geom.rightAxis.max) * geom.plotHeight),
                 text: fmt(value),
             }));
-        }, ...(ngDevMode ? [{ debugName: "rightAxisLabels" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "rightAxisLabels" }] : /* istanbul ignore next */ []));
         this.rightAxisTint = computed(() => {
             const vis = this.visibleSeries().filter((s) => s.axis === 'right');
             return vis.length === 1 ? vis[0].color : null;
-        }, ...(ngDevMode ? [{ debugName: "rightAxisTint" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "rightAxisTint" }] : /* istanbul ignore next */ []));
         this.renderedLineSeries = computed(() => {
             if (this.mode() !== 'line')
                 return [];
@@ -727,7 +753,8 @@ export class KitTimeSeriesChartComponent {
                 const dots = coords.filter((c) => c !== null);
                 return { series: s, linePath, areaPath, dots };
             });
-        }, ...(ngDevMode ? [{ debugName: "renderedLineSeries" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "renderedLineSeries" }] : /* istanbul ignore next */ []));
         this.renderedDiffBand = computed(() => {
             const band = this.diffBand();
             if (!band || this.mode() !== 'line')
@@ -760,7 +787,8 @@ export class KitTimeSeriesChartComponent {
                 path: seg.path,
                 color: seg.positive ? posColor : negColor,
             }));
-        }, ...(ngDevMode ? [{ debugName: "renderedDiffBand" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "renderedDiffBand" }] : /* istanbul ignore next */ []));
         this.renderedBars = computed(() => {
             if (this.mode() !== 'bar')
                 return [];
@@ -800,7 +828,8 @@ export class KitTimeSeriesChartComponent {
                 }
             }
             return bars;
-        }, ...(ngDevMode ? [{ debugName: "renderedBars" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "renderedBars" }] : /* istanbul ignore next */ []));
         this.xAxisLabels = computed(() => {
             const pts = this.points();
             const xs = this.pointXPositions();
@@ -821,7 +850,8 @@ export class KitTimeSeriesChartComponent {
                 }
             }
             return out;
-        }, ...(ngDevMode ? [{ debugName: "xAxisLabels" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "xAxisLabels" }] : /* istanbul ignore next */ []));
         this.hitColumns = computed(() => {
             const pts = this.points();
             const xs = this.pointXPositions();
@@ -848,14 +878,16 @@ export class KitTimeSeriesChartComponent {
                     ariaLabel: `${pt.label}${summaryParts.length ? ` — ${summaryParts.join(', ')}` : ''}`,
                 };
             });
-        }, ...(ngDevMode ? [{ debugName: "hitColumns" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "hitColumns" }] : /* istanbul ignore next */ []));
         this.activeCrosshairX = computed(() => {
             const idx = this.activeIndex();
             if (idx === null)
                 return null;
             const xs = this.pointXPositions();
             return idx >= 0 && idx < xs.length ? roundFloat(xs[idx]) : null;
-        }, ...(ngDevMode ? [{ debugName: "activeCrosshairX" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "activeCrosshairX" }] : /* istanbul ignore next */ []));
         this.activeTooltipData = computed(() => {
             const idx = this.activeIndex();
             const pts = this.points();
@@ -886,7 +918,8 @@ export class KitTimeSeriesChartComponent {
                 flipLeft: xPct > 56,
                 rows,
             };
-        }, ...(ngDevMode ? [{ debugName: "activeTooltipData" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "activeTooltipData" }] : /* istanbul ignore next */ []));
     }
     static { this.nextInstanceId = 0; }
     ngAfterViewInit() {
@@ -1015,7 +1048,7 @@ export class KitTimeSeriesChartComponent {
             i0.ɵɵconditional(ctx.showLegend() && ctx.series().length > 0 ? 1 : -1);
             i0.ɵɵadvance();
             i0.ɵɵconditional(ctx.points().length === 0 ? 2 : 3);
-        } }, dependencies: [NgTemplateOutlet], styles: ["\n      .kit-ts-chart {\n        display: flex;\n        flex-direction: column;\n        gap: 12px;\n        width: 100%;\n        min-width: 0;\n      }\n\n      .kit-ts-legend {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px;\n      }\n\n      .kit-ts-legend-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--kit-radius-full);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-high);\n        color: var(--kit-on-surface-variant);\n        font-family: inherit;\n        font-size: 0.78rem;\n        font-weight: 600;\n        cursor: pointer;\n        opacity: 0.58;\n        transition:\n          opacity var(--kit-duration-fast) ease,\n          border-color var(--kit-duration-fast) ease,\n          background-color var(--kit-duration-fast) ease,\n          color var(--kit-duration-fast) ease;\n      }\n\n      .kit-ts-legend-btn.active {\n        opacity: 1;\n        color: var(--kit-on-surface);\n        border-color: var(--kit-outline);\n      }\n\n      .kit-ts-legend-btn:hover:not(:disabled) {\n        background: var(--kit-surface-container-highest);\n      }\n\n      .kit-ts-legend-btn.disabled,\n      .kit-ts-legend-btn:disabled {\n        opacity: 0.5;\n        cursor: not-allowed;\n      }\n\n      .kit-ts-legend-swatch {\n        width: 10px;\n        height: 10px;\n        border-radius: 50%;\n        flex-shrink: 0;\n      }\n\n      .kit-ts-legend-swatch.dashed {\n        width: 14px;\n        height: 0;\n        border-radius: 0;\n        border-top: 2px dashed;\n        background: transparent;\n      }\n\n      .kit-ts-legend-hint {\n        font-size: 0.72rem;\n        font-weight: 500;\n        color: var(--kit-on-surface-variant);\n      }\n\n      .kit-ts-stage {\n        position: relative;\n        width: 100%;\n        min-width: 0;\n      }\n\n      .kit-ts-svg {\n        display: block;\n        width: 100%;\n        overflow: visible;\n        user-select: none;\n      }\n\n      .kit-ts-grid-line {\n        stroke: var(--kit-outline-variant);\n        stroke-width: 1;\n        stroke-dasharray: 3 4;\n        opacity: 0.65;\n      }\n\n      .kit-ts-axis-text {\n        fill: var(--kit-on-surface-variant);\n        font-family: var(--kit-font-sans);\n        font-size: 11px;\n        font-weight: 500;\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-ts-axis-text.active {\n        fill: var(--kit-on-surface);\n        font-weight: 700;\n      }\n\n      .kit-ts-axis-caption {\n        fill: var(--kit-on-surface-variant);\n        font-family: var(--kit-font-sans);\n        font-size: 10px;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n      }\n\n      .kit-ts-line {\n        transition: opacity var(--kit-duration-fast) ease;\n      }\n\n      .kit-ts-dot {\n        stroke: var(--kit-surface-container);\n        stroke-width: 1.5;\n        transition: r var(--kit-duration-fast) ease;\n      }\n\n      .kit-ts-bar {\n        opacity: 0.88;\n        transition: opacity var(--kit-duration-fast) ease;\n      }\n\n      .kit-ts-bar.active {\n        opacity: 1;\n      }\n\n      .kit-ts-crosshair {\n        stroke: var(--kit-outline);\n        stroke-width: 1.25;\n        stroke-dasharray: 4 3;\n        pointer-events: none;\n      }\n\n      .kit-ts-hit-rect {\n        fill: transparent;\n        outline: none;\n      }\n\n      .kit-ts-hit-rect.clickable {\n        cursor: pointer;\n      }\n\n      .kit-ts-hit-rect:focus-visible {\n        fill: color-mix(in srgb, var(--kit-primary) 8%, transparent);\n      }\n\n      .kit-ts-tooltip {\n        position: absolute;\n        top: 8px;\n        z-index: 15;\n        transform: translateX(10px);\n        min-width: 185px;\n        max-width: 270px;\n        padding: 10px 12px;\n        border-radius: var(--kit-radius-sm);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-highest);\n        color: var(--kit-on-surface);\n        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);\n        pointer-events: none;\n        font-size: 0.78rem;\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-ts-tooltip.align-right {\n        transform: translateX(calc(-100% - 10px));\n      }\n\n      .kit-ts-tooltip-title {\n        font-weight: 700;\n        color: var(--kit-on-surface);\n        margin-bottom: 6px;\n      }\n\n      .kit-ts-tooltip-rows {\n        display: flex;\n        flex-direction: column;\n        gap: 4px;\n      }\n\n      .kit-ts-tooltip-row {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        gap: 12px;\n      }\n\n      .kit-ts-tooltip-key {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        color: var(--kit-on-surface-variant);\n      }\n\n      .kit-ts-tooltip-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        flex-shrink: 0;\n      }\n\n      .kit-ts-tooltip-val {\n        color: var(--kit-on-surface);\n        font-weight: 700;\n      }\n\n      .kit-ts-empty {\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: center;\n        text-align: center;\n        padding: 24px;\n        border-radius: var(--kit-radius-sm);\n        border: 1px dashed var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n      }\n\n      .kit-ts-empty-title {\n        margin: 0 0 4px 0;\n        font-size: 0.92rem;\n        font-weight: 600;\n        color: var(--kit-on-surface);\n      }\n\n      .kit-ts-empty-message {\n        margin: 0;\n        font-size: 0.8rem;\n        color: var(--kit-on-surface-variant);\n        max-width: 440px;\n      }\n\n      @media (max-width: 600px) {\n        .kit-ts-tooltip {\n          position: static;\n          transform: none !important;\n          max-width: 100%;\n          margin-top: 8px;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-ts-chart * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [NgTemplateOutlet], styles: ["\n      .kit-ts-chart {\n        display: flex;\n        flex-direction: column;\n        gap: 12px;\n        width: 100%;\n        min-width: 0;\n      }\n\n      .kit-ts-legend {\n        display: flex;\n        flex-wrap: wrap;\n        align-items: center;\n        gap: 8px;\n      }\n\n      .kit-ts-legend-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 5px 11px;\n        border-radius: var(--%NS%kit-radius-full);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-high);\n        color: var(--%NS%kit-on-surface-variant);\n        font-family: inherit;\n        font-size: 0.78rem;\n        font-weight: 600;\n        cursor: pointer;\n        opacity: 0.58;\n        transition:\n          opacity var(--%NS%kit-duration-fast) ease,\n          border-color var(--%NS%kit-duration-fast) ease,\n          background-color var(--%NS%kit-duration-fast) ease,\n          color var(--%NS%kit-duration-fast) ease;\n      }\n\n      .kit-ts-legend-btn.active {\n        opacity: 1;\n        color: var(--%NS%kit-on-surface);\n        border-color: var(--%NS%kit-outline);\n      }\n\n      .kit-ts-legend-btn:hover:not(:disabled) {\n        background: var(--%NS%kit-surface-container-highest);\n      }\n\n      .kit-ts-legend-btn.disabled,\n      .kit-ts-legend-btn:disabled {\n        opacity: 0.5;\n        cursor: not-allowed;\n      }\n\n      .kit-ts-legend-swatch {\n        width: 10px;\n        height: 10px;\n        border-radius: 50%;\n        flex-shrink: 0;\n      }\n\n      .kit-ts-legend-swatch.dashed {\n        width: 14px;\n        height: 0;\n        border-radius: 0;\n        border-top: 2px dashed;\n        background: transparent;\n      }\n\n      .kit-ts-legend-hint {\n        font-size: 0.72rem;\n        font-weight: 500;\n        color: var(--%NS%kit-on-surface-variant);\n      }\n\n      .kit-ts-stage {\n        position: relative;\n        width: 100%;\n        min-width: 0;\n      }\n\n      .kit-ts-svg {\n        display: block;\n        width: 100%;\n        overflow: visible;\n        user-select: none;\n      }\n\n      .kit-ts-grid-line {\n        stroke: var(--%NS%kit-outline-variant);\n        stroke-width: 1;\n        stroke-dasharray: 3 4;\n        opacity: 0.65;\n      }\n\n      .kit-ts-axis-text {\n        fill: var(--%NS%kit-on-surface-variant);\n        font-family: var(--%NS%kit-font-sans);\n        font-size: 11px;\n        font-weight: 500;\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-ts-axis-text.active {\n        fill: var(--%NS%kit-on-surface);\n        font-weight: 700;\n      }\n\n      .kit-ts-axis-caption {\n        fill: var(--%NS%kit-on-surface-variant);\n        font-family: var(--%NS%kit-font-sans);\n        font-size: 10px;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n      }\n\n      .kit-ts-line {\n        transition: opacity var(--%NS%kit-duration-fast) ease;\n      }\n\n      .kit-ts-dot {\n        stroke: var(--%NS%kit-surface-container);\n        stroke-width: 1.5;\n        transition: r var(--%NS%kit-duration-fast) ease;\n      }\n\n      .kit-ts-bar {\n        opacity: 0.88;\n        transition: opacity var(--%NS%kit-duration-fast) ease;\n      }\n\n      .kit-ts-bar.active {\n        opacity: 1;\n      }\n\n      .kit-ts-crosshair {\n        stroke: var(--%NS%kit-outline);\n        stroke-width: 1.25;\n        stroke-dasharray: 4 3;\n        pointer-events: none;\n      }\n\n      .kit-ts-hit-rect {\n        fill: transparent;\n        outline: none;\n      }\n\n      .kit-ts-hit-rect.clickable {\n        cursor: pointer;\n      }\n\n      .kit-ts-hit-rect:focus-visible {\n        fill: color-mix(in srgb, var(--%NS%kit-primary) 8%, transparent);\n      }\n\n      .kit-ts-tooltip {\n        position: absolute;\n        top: 8px;\n        z-index: 15;\n        transform: translateX(10px);\n        min-width: 185px;\n        max-width: 270px;\n        padding: 10px 12px;\n        border-radius: var(--%NS%kit-radius-sm);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-highest);\n        color: var(--%NS%kit-on-surface);\n        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);\n        pointer-events: none;\n        font-size: 0.78rem;\n        font-variant-numeric: tabular-nums;\n      }\n\n      .kit-ts-tooltip.align-right {\n        transform: translateX(calc(-100% - 10px));\n      }\n\n      .kit-ts-tooltip-title {\n        font-weight: 700;\n        color: var(--%NS%kit-on-surface);\n        margin-bottom: 6px;\n      }\n\n      .kit-ts-tooltip-rows {\n        display: flex;\n        flex-direction: column;\n        gap: 4px;\n      }\n\n      .kit-ts-tooltip-row {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        gap: 12px;\n      }\n\n      .kit-ts-tooltip-key {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        color: var(--%NS%kit-on-surface-variant);\n      }\n\n      .kit-ts-tooltip-dot {\n        width: 8px;\n        height: 8px;\n        border-radius: 50%;\n        flex-shrink: 0;\n      }\n\n      .kit-ts-tooltip-val {\n        color: var(--%NS%kit-on-surface);\n        font-weight: 700;\n      }\n\n      .kit-ts-empty {\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: center;\n        text-align: center;\n        padding: 24px;\n        border-radius: var(--%NS%kit-radius-sm);\n        border: 1px dashed var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n      }\n\n      .kit-ts-empty-title {\n        margin: 0 0 4px 0;\n        font-size: 0.92rem;\n        font-weight: 600;\n        color: var(--%NS%kit-on-surface);\n      }\n\n      .kit-ts-empty-message {\n        margin: 0;\n        font-size: 0.8rem;\n        color: var(--%NS%kit-on-surface-variant);\n        max-width: 440px;\n      }\n\n      @media (max-width: 600px) {\n        .kit-ts-tooltip {\n          position: static;\n          transform: none !important;\n          max-width: 100%;\n          margin-top: 8px;\n        }\n      }\n\n      @media (prefers-reduced-motion: reduce) {\n        .kit-ts-chart * {\n          animation-duration: 0.01ms !important;\n          animation-iteration-count: 1 !important;\n          transition-duration: 0.01ms !important;\n        }\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitTimeSeriesChartComponent, [{
         type: Component,

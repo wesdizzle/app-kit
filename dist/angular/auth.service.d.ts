@@ -116,5 +116,5 @@ export declare class KitAuthService<TUser extends BaseUserProfile = BaseUserProf
     logout(): Promise<void>;
     getLogoutRedirectUrl(): string;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitAuthService<any>, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<KitAuthService<any>>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }

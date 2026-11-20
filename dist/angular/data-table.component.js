@@ -24,15 +24,13 @@ function KitDataTableComponent_Conditional_1_For_5_Conditional_1_Template(rf, ct
     i0.ɵɵtext(4);
     i0.ɵɵelementEnd()();
 } if (rf & 2) {
-    let tmp_12_0;
-    let tmp_14_0;
     const col_r3 = i0.ɵɵnextContext().$implicit;
     const ctx_r0 = i0.ɵɵnextContext(2);
-    i0.ɵɵclassProp("active", ((tmp_12_0 = ctx_r0.sortState()) == null ? null : tmp_12_0.key) === col_r3.key);
+    i0.ɵɵclassProp("active", ctx_r0.sortState()?.key === col_r3.key);
     i0.ɵɵadvance(2);
     i0.ɵɵtextInterpolate(col_r3.label);
     i0.ɵɵadvance(2);
-    i0.ɵɵtextInterpolate1(" ", ((tmp_14_0 = ctx_r0.sortState()) == null ? null : tmp_14_0.key) === col_r3.key ? ((tmp_14_0 = ctx_r0.sortState()) == null ? null : tmp_14_0.direction) === "asc" ? "\u25B2" : "\u25BC" : "\u2195", " ");
+    i0.ɵɵtextInterpolate1(" ", ctx_r0.sortState()?.key === col_r3.key ? ctx_r0.sortState()?.direction === "asc" ? "\u25B2" : "\u25BC" : "\u2195", " ");
 } }
 function KitDataTableComponent_Conditional_1_For_5_Conditional_2_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵelementStart(0, "span");
@@ -166,16 +164,26 @@ export function sortKitTableRows(rows, columns, sort) {
  */
 export class KitDataTableComponent {
     constructor() {
-        this.columns = input.required(...(ngDevMode ? [{ debugName: "columns" }] : /* istanbul ignore next */ []));
-        this.rows = input.required(...(ngDevMode ? [{ debugName: "rows" }] : /* istanbul ignore next */ []));
-        this.trackByKey = input(null, ...(ngDevMode ? [{ debugName: "trackByKey" }] : /* istanbul ignore next */ []));
-        this.initialSort = input(null, ...(ngDevMode ? [{ debugName: "initialSort" }] : /* istanbul ignore next */ []));
-        this.emptyText = input('No records available.', ...(ngDevMode ? [{ debugName: "emptyText" }] : /* istanbul ignore next */ []));
-        this.tableTestId = input(null, ...(ngDevMode ? [{ debugName: "tableTestId" }] : /* istanbul ignore next */ []));
-        this.ariaLabel = input(null, ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
-        this.stickyHeader = input(true, ...(ngDevMode ? [{ debugName: "stickyHeader" }] : /* istanbul ignore next */ []));
-        this.cellTemplate = contentChild('cellTemplate', ...(ngDevMode ? [{ debugName: "cellTemplate" }] : /* istanbul ignore next */ []));
-        this.sortOverride = signal(null, ...(ngDevMode ? [{ debugName: "sortOverride" }] : /* istanbul ignore next */ []));
+        this.columns = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "columns" }] : /* istanbul ignore next */ []));
+        this.rows = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "rows" }] : /* istanbul ignore next */ []));
+        this.trackByKey = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "trackByKey" }] : /* istanbul ignore next */ []));
+        this.initialSort = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "initialSort" }] : /* istanbul ignore next */ []));
+        this.emptyText = input('No records available.', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "emptyText" }] : /* istanbul ignore next */ []));
+        this.tableTestId = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "tableTestId" }] : /* istanbul ignore next */ []));
+        this.ariaLabel = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "ariaLabel" }] : /* istanbul ignore next */ []));
+        this.stickyHeader = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "stickyHeader" }] : /* istanbul ignore next */ []));
+        this.cellTemplate = contentChild('cellTemplate', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "cellTemplate" }] : /* istanbul ignore next */ []));
+        this.sortOverride = signal(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "sortOverride" }] : /* istanbul ignore next */ []));
         this.sortState = computed(() => {
             const base = this.initialSort();
             const override = this.sortOverride();
@@ -183,10 +191,12 @@ export class KitDataTableComponent {
                 return override.value;
             }
             return base;
-        }, ...(ngDevMode ? [{ debugName: "sortState" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "sortState" }] : /* istanbul ignore next */ []));
         this.sortedRows = computed(() => {
             return sortKitTableRows(this.rows(), this.columns(), this.sortState());
-        }, ...(ngDevMode ? [{ debugName: "sortedRows" }] : /* istanbul ignore next */ []));
+        }, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "sortedRows" }] : /* istanbul ignore next */ []));
     }
     toggleSort(col) {
         if (!col.sortable)
@@ -233,7 +243,7 @@ export class KitDataTableComponent {
             i0.ɵɵconditionalCreate(0, KitDataTableComponent_Conditional_0_Template, 2, 1, "div", 0)(1, KitDataTableComponent_Conditional_1_Template, 9, 4, "div", 1);
         } if (rf & 2) {
             i0.ɵɵconditional(ctx.rows().length === 0 ? 0 : 1);
-        } }, dependencies: [NgTemplateOutlet], styles: ["\n      .kit-data-table-scroll {\n        width: 100%;\n        overflow-x: auto;\n        border-radius: var(--kit-radius-sm);\n        border: 1px solid var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n      }\n\n      .kit-data-table {\n        width: 100%;\n        border-collapse: collapse;\n        font-size: 0.84rem;\n      }\n\n      .kit-data-table thead th {\n        padding: 10px 12px;\n        text-align: left;\n        font-size: 0.74rem;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n        color: var(--kit-on-surface-variant);\n        background: var(--kit-surface-container);\n        border-bottom: 1.5px solid var(--kit-outline-variant);\n        white-space: nowrap;\n      }\n\n      .kit-data-table-sticky thead th {\n        position: sticky;\n        top: 0;\n        z-index: 2;\n      }\n\n      .kit-data-table th.align-center,\n      .kit-data-table td.align-center {\n        text-align: center;\n      }\n\n      .kit-data-table th.align-right,\n      .kit-data-table td.align-right {\n        text-align: right;\n      }\n\n      .kit-sort-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 5px;\n        border: none;\n        background: transparent;\n        color: inherit;\n        font: inherit;\n        letter-spacing: inherit;\n        text-transform: inherit;\n        padding: 0;\n        cursor: pointer;\n      }\n\n      .kit-sort-btn:hover,\n      .kit-sort-btn.active {\n        color: var(--kit-primary);\n      }\n\n      .kit-sort-btn:focus-visible {\n        outline: 2.5px solid var(--kit-primary);\n        outline-offset: 2px;\n      }\n\n      .kit-sort-indicator {\n        font-size: 0.68rem;\n        opacity: 0.75;\n      }\n\n      .kit-data-table tbody td {\n        padding: 9px 12px;\n        border-bottom: 1px solid var(--kit-outline-variant);\n        color: var(--kit-on-surface);\n        vertical-align: middle;\n      }\n\n      .kit-data-table tbody tr:last-child td {\n        border-bottom: none;\n      }\n\n      .kit-data-table tbody tr:hover td {\n        background: color-mix(in srgb, var(--kit-primary) 5%, transparent);\n      }\n\n      .kit-data-table-empty {\n        padding: 20px;\n        text-align: center;\n        border-radius: var(--kit-radius-sm);\n        border: 1px dashed var(--kit-outline-variant);\n        background: var(--kit-surface-container-low);\n        color: var(--kit-on-surface-variant);\n        font-size: 0.86rem;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, dependencies: [NgTemplateOutlet], styles: ["\n      .kit-data-table-scroll {\n        width: 100%;\n        overflow-x: auto;\n        border-radius: var(--%NS%kit-radius-sm);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n      }\n\n      .kit-data-table {\n        width: 100%;\n        border-collapse: collapse;\n        font-size: 0.84rem;\n      }\n\n      .kit-data-table thead th {\n        padding: 10px 12px;\n        text-align: left;\n        font-size: 0.74rem;\n        font-weight: 700;\n        letter-spacing: 0.04em;\n        text-transform: uppercase;\n        color: var(--%NS%kit-on-surface-variant);\n        background: var(--%NS%kit-surface-container);\n        border-bottom: 1.5px solid var(--%NS%kit-outline-variant);\n        white-space: nowrap;\n      }\n\n      .kit-data-table-sticky thead th {\n        position: sticky;\n        top: 0;\n        z-index: 2;\n      }\n\n      .kit-data-table th.align-center,\n      .kit-data-table td.align-center {\n        text-align: center;\n      }\n\n      .kit-data-table th.align-right,\n      .kit-data-table td.align-right {\n        text-align: right;\n      }\n\n      .kit-sort-btn {\n        display: inline-flex;\n        align-items: center;\n        gap: 5px;\n        border: none;\n        background: transparent;\n        color: inherit;\n        font: inherit;\n        letter-spacing: inherit;\n        text-transform: inherit;\n        padding: 0;\n        cursor: pointer;\n      }\n\n      .kit-sort-btn:hover,\n      .kit-sort-btn.active {\n        color: var(--%NS%kit-primary);\n      }\n\n      .kit-sort-btn:focus-visible {\n        outline: 2.5px solid var(--%NS%kit-primary);\n        outline-offset: 2px;\n      }\n\n      .kit-sort-indicator {\n        font-size: 0.68rem;\n        opacity: 0.75;\n      }\n\n      .kit-data-table tbody td {\n        padding: 9px 12px;\n        border-bottom: 1px solid var(--%NS%kit-outline-variant);\n        color: var(--%NS%kit-on-surface);\n        vertical-align: middle;\n      }\n\n      .kit-data-table tbody tr:last-child td {\n        border-bottom: none;\n      }\n\n      .kit-data-table tbody tr:hover td {\n        background: color-mix(in srgb, var(--%NS%kit-primary) 5%, transparent);\n      }\n\n      .kit-data-table-empty {\n        padding: 20px;\n        text-align: center;\n        border-radius: var(--%NS%kit-radius-sm);\n        border: 1px dashed var(--%NS%kit-outline-variant);\n        background: var(--%NS%kit-surface-container-low);\n        color: var(--%NS%kit-on-surface-variant);\n        font-size: 0.86rem;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitDataTableComponent, [{
         type: Component,

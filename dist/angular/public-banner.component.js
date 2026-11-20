@@ -23,14 +23,22 @@ function KitPublicBannerComponent_Conditional_9_Template(rf, ctx) { if (rf & 1) 
 } }
 export class KitPublicBannerComponent {
     constructor() {
-        this.badgeLabel = input('Public Collection', ...(ngDevMode ? [{ debugName: "badgeLabel" }] : /* istanbul ignore next */ []));
-        this.title = input.required(...(ngDevMode ? [{ debugName: "title" }] : /* istanbul ignore next */ []));
-        this.username = input.required(...(ngDevMode ? [{ debugName: "username" }] : /* istanbul ignore next */ []));
-        this.bio = input(null, ...(ngDevMode ? [{ debugName: "bio" }] : /* istanbul ignore next */ []));
-        this.showBackLink = input(true, ...(ngDevMode ? [{ debugName: "showBackLink" }] : /* istanbul ignore next */ []));
-        this.backHref = input('/', ...(ngDevMode ? [{ debugName: "backHref" }] : /* istanbul ignore next */ []));
-        this.backLabel = input('← My Collection', ...(ngDevMode ? [{ debugName: "backLabel" }] : /* istanbul ignore next */ []));
-        this.interceptBackClick = input(false, ...(ngDevMode ? [{ debugName: "interceptBackClick" }] : /* istanbul ignore next */ []));
+        this.badgeLabel = input('Public Collection', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "badgeLabel" }] : /* istanbul ignore next */ []));
+        this.title = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "title" }] : /* istanbul ignore next */ []));
+        this.username = input.required(/* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "username" }] : /* istanbul ignore next */ []));
+        this.bio = input(null, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "bio" }] : /* istanbul ignore next */ []));
+        this.showBackLink = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showBackLink" }] : /* istanbul ignore next */ []));
+        this.backHref = input('/', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "backHref" }] : /* istanbul ignore next */ []));
+        this.backLabel = input('← My Collection', /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "backLabel" }] : /* istanbul ignore next */ []));
+        this.interceptBackClick = input(false, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "interceptBackClick" }] : /* istanbul ignore next */ []));
         this.backClicked = output();
     }
     onBackClick(event) {
@@ -65,7 +73,7 @@ export class KitPublicBannerComponent {
             i0.ɵɵconditional(ctx.bio() ? 8 : -1);
             i0.ɵɵadvance();
             i0.ɵɵconditional(ctx.showBackLink() ? 9 : -1);
-        } }, styles: ["\n      .public-collection-banner {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        flex-wrap: wrap;\n        gap: 16px;\n        padding: 16px 20px;\n        margin-bottom: 20px;\n        border-radius: var(--kit-radius-lg);\n        background: var(--kit-surface-container);\n        border: 1px solid var(--kit-outline-variant);\n        color: var(--kit-on-surface);\n      }\n\n      .public-collection-banner .public-banner-info {\n        display: flex;\n        flex-direction: column;\n        gap: 4px;\n        min-width: 0;\n      }\n\n      .public-collection-banner .public-badge {\n        display: inline-flex;\n        align-self: flex-start;\n        padding: 3px 10px;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-primary-container);\n        color: var(--kit-on-primary-container);\n        font-size: 0.72rem;\n        font-weight: 700;\n        letter-spacing: 0.06em;\n        text-transform: uppercase;\n      }\n\n      .public-collection-banner h2 {\n        margin: 2px 0 0;\n        font-family: var(--kit-font-heading);\n        font-size: 1.35rem;\n        font-weight: 700;\n        line-height: 1.2;\n        color: var(--kit-on-surface);\n      }\n\n      .public-collection-banner .public-handle {\n        font-family: var(--kit-font-mono);\n        font-size: 0.85rem;\n        font-weight: 600;\n        color: var(--kit-primary);\n      }\n\n      .public-collection-banner .public-bio {\n        margin: 4px 0 0;\n        font-size: 0.9rem;\n        line-height: 1.45;\n        color: var(--kit-on-surface-variant);\n        max-width: 65ch;\n      }\n\n      .public-collection-banner .my-dex-link {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 9px 16px;\n        border-radius: var(--kit-radius-full);\n        background: var(--kit-primary);\n        color: var(--kit-on-primary);\n        font-size: 0.875rem;\n        font-weight: 600;\n        text-decoration: none;\n        white-space: nowrap;\n        transition: opacity 0.15s ease;\n      }\n\n      .public-collection-banner .my-dex-link:hover {\n        opacity: 0.92;\n      }\n    "], encapsulation: 2, changeDetection: 0 }); }
+        } }, styles: ["\n      .public-collection-banner {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        flex-wrap: wrap;\n        gap: 16px;\n        padding: 16px 20px;\n        margin-bottom: 20px;\n        border-radius: var(--%NS%kit-radius-lg);\n        background: var(--%NS%kit-surface-container);\n        border: 1px solid var(--%NS%kit-outline-variant);\n        color: var(--%NS%kit-on-surface);\n      }\n\n      .public-collection-banner .public-banner-info {\n        display: flex;\n        flex-direction: column;\n        gap: 4px;\n        min-width: 0;\n      }\n\n      .public-collection-banner .public-badge {\n        display: inline-flex;\n        align-self: flex-start;\n        padding: 3px 10px;\n        border-radius: var(--%NS%kit-radius-full);\n        background: var(--%NS%kit-primary-container);\n        color: var(--%NS%kit-on-primary-container);\n        font-size: 0.72rem;\n        font-weight: 700;\n        letter-spacing: 0.06em;\n        text-transform: uppercase;\n      }\n\n      .public-collection-banner h2 {\n        margin: 2px 0 0;\n        font-family: var(--%NS%kit-font-heading);\n        font-size: 1.35rem;\n        font-weight: 700;\n        line-height: 1.2;\n        color: var(--%NS%kit-on-surface);\n      }\n\n      .public-collection-banner .public-handle {\n        font-family: var(--%NS%kit-font-mono);\n        font-size: 0.85rem;\n        font-weight: 600;\n        color: var(--%NS%kit-primary);\n      }\n\n      .public-collection-banner .public-bio {\n        margin: 4px 0 0;\n        font-size: 0.9rem;\n        line-height: 1.45;\n        color: var(--%NS%kit-on-surface-variant);\n        max-width: 65ch;\n      }\n\n      .public-collection-banner .my-dex-link {\n        display: inline-flex;\n        align-items: center;\n        gap: 6px;\n        padding: 9px 16px;\n        border-radius: var(--%NS%kit-radius-full);\n        background: var(--%NS%kit-primary);\n        color: var(--%NS%kit-on-primary);\n        font-size: 0.875rem;\n        font-weight: 600;\n        text-decoration: none;\n        white-space: nowrap;\n        transition: opacity 0.15s ease;\n      }\n\n      .public-collection-banner .my-dex-link:hover {\n        opacity: 0.92;\n      }\n    "], encapsulation: 2 }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(KitPublicBannerComponent, [{
         type: Component,

@@ -1,7 +1,7 @@
 {
   "name": "@wesdizzle/app-kit",
-  "version": "1.8.0",
-  "description": "Shared Cloudflare Worker OIDC/session/WebAuthn/WebPush/R2-backup infrastructure, D1 cost-guard & schema-diff CLI scripts, semantic M3 Expressive CSS tokens, and Angular 21 shell components.",
+  "version": "2.0.0",
+  "description": "Shared Cloudflare Worker OIDC/session/WebAuthn/WebPush/R2-backup infrastructure, D1 cost-guard & schema-diff CLI scripts, semantic M3 Expressive CSS tokens, and Angular 22 shell components.",
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -34,10 +34,10 @@
     "prepare": "husky"
   },
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
     "better-sqlite3": "^12.0.0",
     "dotenv": "^17.0.0"
   },
@@ -62,30 +62,29 @@
     }
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.3.1",
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/compiler-cli": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
     "@cloudflare/workers-types": "^4.20260305.0",
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
     "better-sqlite3": "^12.6.2",
     "dotenv": "^17.3.1",
-    "eslint": "^10.2.0",
+    "eslint": "^10.15.0",
     "globals": "^15.15.0",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "rxjs": "^7.8.2",
-    "typescript": "~5.9.0",
-    "typescript-eslint": "^8.58.2",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.73.0",
     "vite": "^7.3.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.12"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown"
