@@ -4,6 +4,7 @@ import {
   SESSION_COOKIE,
   base64UrlEncode,
   buildCspHeader,
+  buildPushNotificationBody,
   derToP1363,
   isAllowedPushEndpoint,
   isCrossOriginMutatingRequest,
@@ -310,6 +311,49 @@ describe('@wesdizzle/app-kit/worker', () => {
     const [, init] = okFetch.mock.calls[0] as [string, RequestInit];
     expect(init.redirect).toBe('manual');
     expect(init.redirect).not.toBe('error');
+    const defaultHeaders = init.headers as Record<string, string>;
+    expect(defaultHeaders['Urgency']).toBe('high');
+    expect(defaultHeaders['TTL']).toBe('86400');
+
+    const customFetch = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 201 }));
+    await sendWebPushNotification(
+      sub,
+      { title: 'Custom', body: 'Headers' },
+      {
+        fetchFn: customFetch as unknown as typeof fetch,
+        publicKey: vapidPublicB64,
+        privateKeyJwk: {
+          kty: 'EC',
+          crv: 'P-256',
+          d: vapidJwk.d,
+          x: vapidJwk.x,
+          y: vapidJwk.y,
+        },
+        urgency: 'normal',
+        ttl: 3600,
+      },
+    );
+    const [, customInit] = customFetch.mock.calls[0] as [string, RequestInit];
+    const customHeaders = customInit.headers as Record<string, string>;
+    expect(customHeaders['Urgency']).toBe('normal');
+    expect(customHeaders['TTL']).toBe('3600');
+
+    const builtPayload = JSON.parse(
+      buildPushNotificationBody({
+        title: 'T',
+        body: 'B',
+        tag: 'test-1',
+        renotify: true,
+        timestamp: 1700000000000,
+      }),
+    ) as {
+      notification: { tag?: string; renotify?: boolean; timestamp?: number };
+    };
+    expect(builtPayload.notification.tag).toBe('test-1');
+    expect(builtPayload.notification.renotify).toBe(true);
+    expect(builtPayload.notification.timestamp).toBe(1700000000000);
 
     const redirectFetch = vi.fn().mockResolvedValue(
       new Response(null, {

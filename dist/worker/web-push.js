@@ -218,6 +218,11 @@ export function buildPushNotificationBody(payload) {
             body: payload.body,
             icon,
             badge,
+            ...(payload.tag !== undefined ? { tag: payload.tag } : {}),
+            ...(payload.renotify !== undefined ? { renotify: payload.renotify } : {}),
+            ...(payload.timestamp !== undefined
+                ? { timestamp: payload.timestamp }
+                : {}),
             data: notificationData,
             ...(payload.notification || {}),
         },
@@ -238,12 +243,18 @@ export async function sendWebPushNotification(subscription, payload, options) {
         const jsonBody = buildPushNotificationBody(payload);
         const encryptedBody = await encryptWebPushPayload(subscription.p256dh, subscription.auth, jsonBody);
         const authHeader = await createVapidAuthHeader(subscription.endpoint, options);
+        const ttl = typeof options?.ttl === 'number' &&
+            Number.isFinite(options.ttl) &&
+            options.ttl >= 0
+            ? Math.floor(options.ttl)
+            : 86400;
+        const urgency = options?.urgency ?? 'high';
         const response = await fetchFn(subscription.endpoint, {
             method: 'POST',
             redirect: 'manual',
             headers: {
-                TTL: '86400',
-                Urgency: 'normal',
+                TTL: String(ttl),
+                Urgency: urgency,
                 'Content-Encoding': 'aes128gcm',
                 'Content-Type': 'application/octet-stream',
                 Authorization: authHeader,
@@ -251,7 +262,14 @@ export async function sendWebPushNotification(subscription, payload, options) {
             body: encryptedBody,
         });
         const status = response.status;
-        if (response.type === 'opaqueredirect' || (status >= 300 && status < 400)) {
+        const responseType = response.type;
+        try {
+            await response.body?.cancel();
+        }
+        catch {
+            // Ignore already-closed or synthetic mock response bodies
+        }
+        if (responseType === 'opaqueredirect' || (status >= 300 && status < 400)) {
             return {
                 success: false,
                 status,

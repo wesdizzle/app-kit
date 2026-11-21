@@ -19,11 +19,15 @@ export interface WebPushSubscription {
     p256dh: string;
     auth: string;
 }
+export type WebPushUrgency = 'very-low' | 'low' | 'normal' | 'high';
 export interface WebPushNotificationPayload {
     title: string;
     body: string;
     icon?: string;
     badge?: string;
+    tag?: string;
+    renotify?: boolean;
+    timestamp?: number;
     data?: {
         url?: string;
         onActionClick?: Record<string, {
@@ -37,6 +41,9 @@ export interface WebPushNotificationPayload {
         body: string;
         icon?: string;
         badge?: string;
+        tag?: string;
+        renotify?: boolean;
+        timestamp?: number;
         data?: {
             url?: string;
             onActionClick?: Record<string, {
@@ -56,6 +63,8 @@ export interface SendWebPushOptions {
     privateKeyJwk?: VapidJwk;
     fetchFn?: typeof fetch;
     allowTestHost?: boolean;
+    urgency?: WebPushUrgency;
+    ttl?: number;
 }
 export interface SendWebPushResult {
     success: boolean;

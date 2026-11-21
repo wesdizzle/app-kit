@@ -1,4 +1,4 @@
-# `@wesdizzle/app-kit` (`v2.0.1`)
+# `@wesdizzle/app-kit` (`v2.0.2`)
 
 Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push & stateless session infrastructure, D1 $(1 + K)$ Cost Guard / Declarative Schema Diff CLI scripts, Material 3 Expressive semantic CSS tokens, and Angular 22 zoneless `OnPush` shell components.
 
@@ -9,7 +9,7 @@ Shared Cloudflare Worker OIDC 1.0 Relying Party, WebCrypto, WebAuthn, Web Push &
   - **OIDC 1.0 + PKCE (`S256`) Verifier**: `verifyOidcIdToken` (enforcing `token_use !== 'access'`, `typ !== 'at+jwt'`, and `email_verified` normalization), `resetOidcJwksCache`
   - **WebCrypto Primitives (`crypto.ts`)**: `base64UrlEncode`, `base64UrlDecode`, `timingSafeEqualBytes`, `timingSafeEqualStrings`, `generateRandomBytes`, `generateRandomToken`, `sha256Bytes`, `sha256Hex`, `sha256Base64Url`, `hmacSha256Bytes`, `hmacSha256Hex`, `derToP1363`, `resolveStrongSecret`
   - **WebAuthn Parser (`webauthn-utils.ts`)**: `parseAuthenticatorData` (RP ID hash, `UP`/`UV`/`BE`/`BS`/`AT` flags, `signCount`, `aaguid`, attested `credentialId`)
-  - **Web Push (`web-push.ts`)**: Zero-dependency RFC 8291 (`aes128gcm`) + RFC 8292 (VAPID) `sendWebPushNotification`, `isAllowedPushEndpoint` (HTTPS + port `443` + `redirect: 'manual'` + 3xx rejection)
+  - **Web Push (`web-push.ts`)**: Zero-dependency RFC 8291 (`aes128gcm`) + RFC 8292 (VAPID) `sendWebPushNotification` (configurable `Urgency` defaulting to `'high'` & `TTL`), `isAllowedPushEndpoint` (HTTPS + port `443` + `redirect: 'manual'` + 3xx rejection)
   - **CSRF & Security Headers**: `isCrossOriginMutatingRequest`, `validateSameOriginMutation`, `buildCspHeader` (including optional `mediaSrc` directive), `withSecurityHeaders` (CSP without `'unsafe-inline'` in `script-src`, HSTS, `Permissions-Policy`, `X-Frame-Options: DENY`, `nosniff`)
   - **R2 Scheduled Backup (`r2-backup.ts`)**: `performScheduledBackup` (identifier validation, single-pass compact JSON, WebCrypto SHA-256 `head()` zero-download `skipIfUnchanged`, cursor-paginated retention pruning)
 - **`@wesdizzle/app-kit/scripts`**:
