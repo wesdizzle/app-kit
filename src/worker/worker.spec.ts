@@ -16,6 +16,7 @@ import {
   resetR2SnapshotCache,
   resolveStrongSecret,
   sanitizeReturnToPath,
+  sendWebPushNotification,
   serializeClearSessionCookies,
   serializeSessionCookie,
   sha256Hex,
@@ -245,6 +246,97 @@ describe('@wesdizzle/app-kit/worker', () => {
       ),
     ).toBe(false);
     expect(isAllowedPushEndpoint('https://evil.example.com/push')).toBe(false);
+  });
+
+  it('sends Web Push requests with redirect: "manual" and rejects 3xx redirects without deleting subscription', async () => {
+    const uaKeyPair = (await crypto.subtle.generateKey(
+      { name: 'ECDH', namedCurve: 'P-256' },
+      true,
+      ['deriveBits'],
+    )) as CryptoKeyPair;
+    const uaPublicB64 = base64UrlEncode(
+      new Uint8Array(await crypto.subtle.exportKey('raw', uaKeyPair.publicKey)),
+    );
+    const uaAuthB64 = base64UrlEncode(
+      crypto.getRandomValues(new Uint8Array(16)),
+    );
+
+    const vapidKeyPair = (await crypto.subtle.generateKey(
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      true,
+      ['sign', 'verify'],
+    )) as CryptoKeyPair;
+    const vapidPublicB64 = base64UrlEncode(
+      new Uint8Array(
+        await crypto.subtle.exportKey('raw', vapidKeyPair.publicKey),
+      ),
+    );
+    const vapidJwk = (await crypto.subtle.exportKey(
+      'jwk',
+      vapidKeyPair.privateKey,
+    )) as { d: string; x: string; y: string };
+
+    const sub = {
+      endpoint: 'https://fcm.googleapis.com/fcm/send/test-sub-token',
+      p256dh: uaPublicB64,
+      auth: uaAuthB64,
+    };
+
+    const okFetch = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 201 }));
+    const okResult = await sendWebPushNotification(
+      sub,
+      { title: 'Test', body: 'Hello' },
+      {
+        fetchFn: okFetch as unknown as typeof fetch,
+        publicKey: vapidPublicB64,
+        privateKeyJwk: {
+          kty: 'EC',
+          crv: 'P-256',
+          d: vapidJwk.d,
+          x: vapidJwk.x,
+          y: vapidJwk.y,
+        },
+      },
+    );
+
+    expect(okResult).toEqual({
+      success: true,
+      status: 201,
+      shouldDelete: false,
+    });
+    expect(okFetch).toHaveBeenCalledTimes(1);
+    const [, init] = okFetch.mock.calls[0] as [string, RequestInit];
+    expect(init.redirect).toBe('manual');
+    expect(init.redirect).not.toBe('error');
+
+    const redirectFetch = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { Location: 'https://evil.example.com/' },
+      }),
+    );
+    const redirectResult = await sendWebPushNotification(
+      sub,
+      { title: 'Test', body: 'Redirect' },
+      {
+        fetchFn: redirectFetch as unknown as typeof fetch,
+        publicKey: vapidPublicB64,
+        privateKeyJwk: {
+          kty: 'EC',
+          crv: 'P-256',
+          d: vapidJwk.d,
+          x: vapidJwk.x,
+          y: vapidJwk.y,
+        },
+      },
+    );
+
+    expect(redirectResult.success).toBe(false);
+    expect(redirectResult.status).toBe(302);
+    expect(redirectResult.shouldDelete).toBe(false);
+    expect(redirectResult.error).toMatch(/redirect/i);
   });
 
   it('verifies ES256 OIDC ID tokens and rejects access_token confusion (at+jwt / token_use=access)', async () => {

@@ -4,7 +4,7 @@
  *
  * Zero-dependency Web Push payload encryption and VAPID signing built strictly
  * on Cloudflare Workers native C++ WebCrypto (`crypto.subtle`) with SSRF
- * host, port (`443`), and redirect (`redirect: 'error'`) protections.
+ * host, port (`443`), and redirect (`redirect: 'manual'` with explicit 3xx rejection) protections.
  */
 import { base64UrlDecode, base64UrlEncode } from './crypto.js';
 export interface VapidJwk {

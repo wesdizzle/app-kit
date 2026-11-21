@@ -4,7 +4,7 @@
  *
  * Zero-dependency Web Push payload encryption and VAPID signing built strictly
  * on Cloudflare Workers native C++ WebCrypto (`crypto.subtle`) with SSRF
- * host, port (`443`), and redirect (`redirect: 'error'`) protections.
+ * host, port (`443`), and redirect (`redirect: 'manual'` with explicit 3xx rejection) protections.
  */
 import { base64UrlDecode, base64UrlEncode } from './crypto.js';
 const ALLOWED_PUSH_HOST_SUFFIXES = [
@@ -240,7 +240,7 @@ export async function sendWebPushNotification(subscription, payload, options) {
         const authHeader = await createVapidAuthHeader(subscription.endpoint, options);
         const response = await fetchFn(subscription.endpoint, {
             method: 'POST',
-            redirect: 'error',
+            redirect: 'manual',
             headers: {
                 TTL: '86400',
                 Urgency: 'normal',
@@ -251,6 +251,14 @@ export async function sendWebPushNotification(subscription, payload, options) {
             body: encryptedBody,
         });
         const status = response.status;
+        if (response.type === 'opaqueredirect' || (status >= 300 && status < 400)) {
+            return {
+                success: false,
+                status,
+                shouldDelete: false,
+                error: `Push service returned unexpected redirect (status ${status})`,
+            };
+        }
         const shouldDelete = status === 404 || status === 410;
         const success = response.ok || status === 201;
         return {

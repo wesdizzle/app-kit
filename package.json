@@ -1,6 +1,6 @@
 {
   "name": "@wesdizzle/app-kit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Shared Cloudflare Worker OIDC/session/WebAuthn/WebPush/R2-backup infrastructure, D1 cost-guard & schema-diff CLI scripts, semantic M3 Expressive CSS tokens, and Angular 22 shell components.",
   "type": "module",
   "sideEffects": false,
