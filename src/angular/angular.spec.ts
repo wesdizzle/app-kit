@@ -114,6 +114,7 @@ import {
   readKitInstallDismissalState,
 } from './pwa-install.service.js';
 import { KitPwaInstallPromptComponent } from './pwa-install-prompt.component.js';
+import { KitLandingCardComponent } from './landing-card.component.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -2194,5 +2195,32 @@ describe('@wesdizzle/app-kit/angular', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it('supports theme toggle and projected detail/footer slots in KitLandingCardComponent', () => {
+    const injector = {
+      get: (token: unknown) =>
+        token === DestroyRef ? { onDestroy: () => () => {} } : null,
+    } as unknown as Injector;
+    const card = runInInjectionContext(
+      injector,
+      () => new KitLandingCardComponent(),
+    );
+    expect(card.showThemeToggle()).toBe(true);
+    expect(card.effectiveTheme()).toBe('auto');
+
+    const emitted: string[] = [];
+    card.themeToggled.subscribe((mode) => emitted.push(mode));
+    card.onThemeToggled('dark');
+    expect(emitted).toEqual(['dark']);
+
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const landingSource = readFileSync(
+      join(specDir, 'landing-card.component.ts'),
+      'utf8',
+    );
+    expect(landingSource).toContain('select="[landingDetails]"');
+    expect(landingSource).toContain('select="[landingFooter]"');
+    expect(landingSource).toContain('<kit-theme-toggle');
   });
 });
