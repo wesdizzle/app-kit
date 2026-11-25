@@ -2048,4 +2048,29 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(hiddenSvg).toContain('aria-hidden="true"');
     expect(hiddenSvg).not.toContain('aria-label=');
   });
+
+  it('styles filter bar quick select pills as separate bordered chips on desktop', () => {
+    const specDir = dirname(fileURLToPath(import.meta.url));
+    const stylesSource = readFileSync(
+      join(specDir, 'filter-primitives.styles.ts'),
+      'utf8',
+    );
+    const desktopGroupMatch = stylesSource.match(
+      /\.kit-filter-bar \.segmented-status-group\s*\{([^}]*)\}/,
+    );
+    expect(desktopGroupMatch).not.toBeNull();
+    const groupBody = desktopGroupMatch![1]!;
+    expect(groupBody).toContain('background: transparent');
+    expect(groupBody).toContain('border: none');
+    expect(groupBody).toContain('gap: 6px');
+
+    const desktopPillMatch = stylesSource.match(
+      /\.kit-filter-bar \.status-pill-btn\s*\{([^}]*)\}/,
+    );
+    expect(desktopPillMatch).not.toBeNull();
+    const pillBody = desktopPillMatch![1]!;
+    expect(pillBody).toContain('background: var(--kit-surface-container-high)');
+    expect(pillBody).toContain('border: 1px solid var(--kit-outline)');
+    expect(pillBody).toContain('border-radius: var(--kit-radius-full)');
+  });
 });

@@ -625,13 +625,14 @@ export const KIT_FILTER_BAR_CSS = `
 
   .kit-filter-bar .segmented-status-group {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    background: var(--kit-surface-container-high);
-    border: 1px solid var(--kit-outline);
-    border-radius: var(--kit-radius-full);
-    padding: 3px;
-    gap: 2px;
-    height: 46px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    gap: 6px;
+    height: auto;
     box-sizing: border-box;
   }
 
@@ -639,22 +640,24 @@ export const KIT_FILTER_BAR_CSS = `
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: transparent;
-    border: none;
+    background: var(--kit-surface-container-high);
+    border: 1px solid var(--kit-outline);
     border-radius: var(--kit-radius-full);
-    padding: 0.3125rem 0.75rem;
+    padding: 0.3125rem 0.875rem;
     font-family: var(--kit-font-sans);
-    font-size: 0.78125rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--kit-on-surface-variant);
     cursor: pointer;
     transition:
       background-color 200ms var(--kit-ease-emphasized),
+      border-color 200ms var(--kit-ease-emphasized),
       color 180ms var(--kit-ease-standard),
       transform var(--kit-duration-fast) var(--kit-ease-spring),
       box-shadow 200ms var(--kit-ease-standard);
     white-space: nowrap;
     height: 38px;
+    flex-shrink: 0;
   }
 
   .kit-filter-bar .status-pill-btn:hover {
@@ -669,12 +672,14 @@ export const KIT_FILTER_BAR_CSS = `
   .kit-filter-bar .status-pill-btn.active {
     background: var(--kit-primary);
     color: var(--kit-on-primary);
+    border-color: var(--kit-primary);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
 
   .kit-filter-bar .status-pill-btn.deals-pill.active {
     background: #ef4444;
     color: #ffffff;
+    border-color: #dc2626;
     box-shadow: 0 1px 4px rgba(239, 68, 68, 0.4);
   }
 
@@ -937,15 +942,8 @@ export const KIT_FILTER_BAR_CSS = `
     }
     .kit-filter-bar .segmented-status-group {
       display: flex;
-      flex-wrap: wrap;
       width: 100%;
       max-width: 100%;
-      height: auto;
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      padding: 0;
-      gap: 6px;
       justify-content: flex-start;
       flex-shrink: 0;
       overflow: visible;
@@ -954,20 +952,6 @@ export const KIT_FILTER_BAR_CSS = `
       height: 32px;
       padding: 0.25rem 0.6875rem;
       font-size: 0.75rem;
-      background: var(--kit-surface-container-high);
-      border: 1px solid var(--kit-outline);
-      border-radius: var(--kit-radius-full);
-      flex-shrink: 0;
-    }
-    .kit-filter-bar .status-pill-btn.active {
-      background: var(--kit-primary);
-      color: var(--kit-on-primary);
-      border-color: var(--kit-primary);
-    }
-    .kit-filter-bar .status-pill-btn.deals-pill.active {
-      background: #ef4444;
-      color: #ffffff;
-      border-color: #dc2626;
     }
     .kit-filter-bar .quick-toolbar > kit-select {
       flex: 1 1 0;
