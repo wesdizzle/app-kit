@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, ViewChild, ViewEncapsulation, input, output, computed, effect, signal, } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, ViewEncapsulation, inject, input, output, computed, effect, signal, } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
 import { KIT_DIALOG_KEYFRAMES_CSS } from './dialog-keyframes.styles.js';
 import { canAnimateKitDialogExit } from './dialog-sheet.component.js';
+import { KitPwaInstallService } from './pwa-install.service.js';
 import * as i0 from "@angular/core";
 import * as i1 from "@angular/forms";
 const _c0 = ["dialogEl"];
@@ -253,31 +254,55 @@ function KitProfileModalComponent_Conditional_7_Conditional_15_Template(rf, ctx)
     i0.ɵɵproperty("href", ctx_r1.loginUrl(), i0.ɵɵsanitizeUrl);
 } }
 function KitProfileModalComponent_Conditional_7_Conditional_17_Template(rf, ctx) { if (rf & 1) {
+    const _r8 = i0.ɵɵgetCurrentView();
+    i0.ɵɵelementStart(0, "div", 37)(1, "span", 69);
+    i0.ɵɵtext(2, "App");
+    i0.ɵɵelementEnd();
+    i0.ɵɵelementStart(3, "div", 70)(4, "button", 71);
+    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_17_Template_button_click_4_listener() { i0.ɵɵrestoreView(_r8); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.onInstallAppClick()); });
+    i0.ɵɵelementStart(5, "div", 72);
+    i0.ɵɵnamespaceSVG();
+    i0.ɵɵelementStart(6, "svg", 73);
+    i0.ɵɵelement(7, "path", 74)(8, "polyline", 75)(9, "line", 76);
+    i0.ɵɵelementEnd();
+    i0.ɵɵnamespaceHTML();
+    i0.ɵɵelementStart(10, "div", 77)(11, "span", 78);
+    i0.ɵɵtext(12, "Install App");
+    i0.ɵɵelementEnd();
+    i0.ɵɵelementStart(13, "span", 79);
+    i0.ɵɵtext(14, " Add to your home screen for offline access ");
+    i0.ɵɵelementEnd()()();
+    i0.ɵɵnamespaceSVG();
+    i0.ɵɵelementStart(15, "svg", 80);
+    i0.ɵɵelement(16, "polyline", 81);
+    i0.ɵɵelementEnd()()()();
+} }
+function KitProfileModalComponent_Conditional_7_Conditional_18_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵelementStart(0, "div", 37)(1, "span", 69);
     i0.ɵɵtext(2, "Account");
     i0.ɵɵelementEnd();
-    i0.ɵɵelementStart(3, "div", 70)(4, "a", 71)(5, "div", 72);
+    i0.ɵɵelementStart(3, "div", 70)(4, "a", 82)(5, "div", 72);
     i0.ɵɵnamespaceSVG();
     i0.ɵɵelementStart(6, "svg", 73);
     i0.ɵɵelement(7, "rect", 64)(8, "path", 65);
     i0.ɵɵelementEnd();
     i0.ɵɵnamespaceHTML();
-    i0.ɵɵelementStart(9, "div", 74)(10, "span", 75);
+    i0.ɵɵelementStart(9, "div", 77)(10, "span", 78);
     i0.ɵɵtext(11, " Account & Security Hub ");
     i0.ɵɵelementEnd();
-    i0.ɵɵelementStart(12, "span", 76);
+    i0.ɵɵelementStart(12, "span", 79);
     i0.ɵɵtext(13, " Passkeys, 2FA authenticator, password & active sessions ");
     i0.ɵɵelementEnd()()();
     i0.ɵɵnamespaceSVG();
-    i0.ɵɵelementStart(14, "svg", 77);
-    i0.ɵɵelement(15, "polyline", 78);
+    i0.ɵɵelementStart(14, "svg", 80);
+    i0.ɵɵelement(15, "polyline", 81);
     i0.ɵɵelementEnd()()()();
 } if (rf & 2) {
     const ctx_r1 = i0.ɵɵnextContext(2);
     i0.ɵɵadvance(4);
     i0.ɵɵproperty("href", ctx_r1.accountHubUrl(), i0.ɵɵsanitizeUrl);
 } }
-function KitProfileModalComponent_Conditional_7_Conditional_18_Template(rf, ctx) { if (rf & 1) {
+function KitProfileModalComponent_Conditional_7_Conditional_19_Template(rf, ctx) { if (rf & 1) {
     i0.ɵɵelementStart(0, "p", 31);
     i0.ɵɵtext(1);
     i0.ɵɵelementEnd();
@@ -288,28 +313,28 @@ function KitProfileModalComponent_Conditional_7_Conditional_18_Template(rf, ctx)
     i0.ɵɵadvance();
     i0.ɵɵtextInterpolate1(" ", ctx_r1.statusMessage(), " ");
 } }
-function KitProfileModalComponent_Conditional_7_Conditional_20_Template(rf, ctx) { if (rf & 1) {
-    const _r8 = i0.ɵɵgetCurrentView();
-    i0.ɵɵelementStart(0, "button", 79);
-    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_20_Template_button_click_0_listener() { i0.ɵɵrestoreView(_r8); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.signOutClicked.emit()); });
+function KitProfileModalComponent_Conditional_7_Conditional_21_Template(rf, ctx) { if (rf & 1) {
+    const _r9 = i0.ɵɵgetCurrentView();
+    i0.ɵɵelementStart(0, "button", 83);
+    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_21_Template_button_click_0_listener() { i0.ɵɵrestoreView(_r9); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.signOutClicked.emit()); });
     i0.ɵɵnamespaceSVG();
-    i0.ɵɵelementStart(1, "svg", 80);
-    i0.ɵɵelement(2, "path", 81)(3, "polyline", 82)(4, "line", 83);
+    i0.ɵɵelementStart(1, "svg", 84);
+    i0.ɵɵelement(2, "path", 85)(3, "polyline", 86)(4, "line", 87);
     i0.ɵɵelementEnd();
     i0.ɵɵnamespaceHTML();
     i0.ɵɵelementStart(5, "span");
     i0.ɵɵtext(6, "Sign Out");
     i0.ɵɵelementEnd()();
-    i0.ɵɵelementStart(7, "div", 28)(8, "button", 84);
-    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_20_Template_button_click_8_listener() { i0.ɵɵrestoreView(_r8); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.requestClose()); });
+    i0.ɵɵelementStart(7, "div", 28)(8, "button", 88);
+    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_21_Template_button_click_8_listener() { i0.ɵɵrestoreView(_r9); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.requestClose()); });
     i0.ɵɵtext(9, " Close ");
     i0.ɵɵelementEnd()();
 } }
-function KitProfileModalComponent_Conditional_7_Conditional_21_Template(rf, ctx) { if (rf & 1) {
-    const _r9 = i0.ɵɵgetCurrentView();
+function KitProfileModalComponent_Conditional_7_Conditional_22_Template(rf, ctx) { if (rf & 1) {
+    const _r10 = i0.ɵɵgetCurrentView();
     i0.ɵɵelement(0, "div");
-    i0.ɵɵelementStart(1, "div", 28)(2, "button", 84);
-    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_21_Template_button_click_2_listener() { i0.ɵɵrestoreView(_r9); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.requestClose()); });
+    i0.ɵɵelementStart(1, "div", 28)(2, "button", 88);
+    i0.ɵɵlistener("click", function KitProfileModalComponent_Conditional_7_Conditional_22_Template_button_click_2_listener() { i0.ɵɵrestoreView(_r10); const ctx_r1 = i0.ɵɵnextContext(2); return i0.ɵɵresetView(ctx_r1.requestClose()); });
     i0.ɵɵtext(3, " Close ");
     i0.ɵɵelementEnd()();
 } }
@@ -334,27 +359,35 @@ function KitProfileModalComponent_Conditional_7_Template(rf, ctx) { if (rf & 1) 
     i0.ɵɵelementStart(13, "div", 17);
     i0.ɵɵconditionalCreate(14, KitProfileModalComponent_Conditional_7_Conditional_14_Template, 13, 7)(15, KitProfileModalComponent_Conditional_7_Conditional_15_Template, 11, 3, "div", 36);
     i0.ɵɵprojection(16, 2);
-    i0.ɵɵconditionalCreate(17, KitProfileModalComponent_Conditional_7_Conditional_17_Template, 16, 1, "div", 37);
-    i0.ɵɵconditionalCreate(18, KitProfileModalComponent_Conditional_7_Conditional_18_Template, 2, 4, "p", 26);
+    i0.ɵɵconditionalCreate(17, KitProfileModalComponent_Conditional_7_Conditional_17_Template, 17, 0, "div", 37);
+    i0.ɵɵconditionalCreate(18, KitProfileModalComponent_Conditional_7_Conditional_18_Template, 16, 1, "div", 37);
+    i0.ɵɵconditionalCreate(19, KitProfileModalComponent_Conditional_7_Conditional_19_Template, 2, 4, "p", 26);
     i0.ɵɵelementEnd();
-    i0.ɵɵelementStart(19, "footer", 27);
-    i0.ɵɵconditionalCreate(20, KitProfileModalComponent_Conditional_7_Conditional_20_Template, 10, 0)(21, KitProfileModalComponent_Conditional_7_Conditional_21_Template, 4, 0);
+    i0.ɵɵelementStart(20, "footer", 27);
+    i0.ɵɵconditionalCreate(21, KitProfileModalComponent_Conditional_7_Conditional_21_Template, 10, 0)(22, KitProfileModalComponent_Conditional_7_Conditional_22_Template, 4, 0);
     i0.ɵɵelementEnd()();
 } if (rf & 2) {
     const ctx_r1 = i0.ɵɵnextContext();
     i0.ɵɵadvance(14);
     i0.ɵɵconditional(ctx_r1.isAuthenticated() ? 14 : 15);
     i0.ɵɵadvance(3);
-    i0.ɵɵconditional(ctx_r1.isAuthenticated() && ctx_r1.accountHubUrl() ? 17 : -1);
+    i0.ɵɵconditional(ctx_r1.showInstallAction() && ctx_r1.pwaInstall?.canShowManualInstall() ? 17 : -1);
     i0.ɵɵadvance();
-    i0.ɵɵconditional(ctx_r1.statusMessage() ? 18 : -1);
+    i0.ɵɵconditional(ctx_r1.isAuthenticated() && ctx_r1.accountHubUrl() ? 18 : -1);
+    i0.ɵɵadvance();
+    i0.ɵɵconditional(ctx_r1.statusMessage() ? 19 : -1);
     i0.ɵɵadvance(2);
-    i0.ɵɵconditional(ctx_r1.isAuthenticated() ? 20 : 21);
+    i0.ɵɵconditional(ctx_r1.isAuthenticated() ? 21 : 22);
 } }
 export class KitProfileModalComponent {
     constructor() {
+        this.pwaInstall = inject(KitPwaInstallService, {
+            optional: true,
+        });
         this.isOpen = input(true, /* @ts-ignore */
         ...(ngDevMode ? [{ debugName: "isOpen" }] : /* istanbul ignore next */ []));
+        this.showInstallAction = input(true, /* @ts-ignore */
+        ...(ngDevMode ? [{ debugName: "showInstallAction" }] : /* istanbul ignore next */ []));
         this.activeView = input('profile', /* @ts-ignore */
         ...(ngDevMode ? [{ debugName: "activeView" }] : /* istanbul ignore next */ []));
         this.isAuthenticated = input(false, /* @ts-ignore */
@@ -481,6 +514,14 @@ export class KitProfileModalComponent {
         this.isPublicChange.emit(checked);
         this.publicToggleSaved.emit(checked);
     }
+    async onInstallAppClick() {
+        if (!this.pwaInstall)
+            return;
+        const outcome = await this.pwaInstall.promptInstall();
+        if (outcome === 'accepted' || outcome === 'ios-guide') {
+            this.requestClose();
+        }
+    }
     ngOnDestroy() {
         if (this.copyTimer) {
             clearTimeout(this.copyTimer);
@@ -569,7 +610,7 @@ export class KitProfileModalComponent {
         } if (rf & 2) {
             let _t;
             i0.ɵɵqueryRefresh(_t = i0.ɵɵloadQuery()) && (ctx.dialogEl = _t.first);
-        } }, inputs: { isOpen: [1, "isOpen"], activeView: [1, "activeView"], isAuthenticated: [1, "isAuthenticated"], user: [1, "user"], displayName: [1, "displayName"], bio: [1, "bio"], isPublic: [1, "isPublic"], saving: [1, "saving"], statusMessage: [1, "statusMessage"], isError: [1, "isError"], copied: [1, "copied"], accountHubUrl: [1, "accountHubUrl"], loginUrl: [1, "loginUrl"], collectionNoun: [1, "collectionNoun"], guestTitle: [1, "guestTitle"], guestDescription: [1, "guestDescription"] }, outputs: { displayNameChange: "displayNameChange", bioChange: "bioChange", isPublicChange: "isPublicChange", publicToggleSaved: "publicToggleSaved", editProfileClicked: "editProfileClicked", saveClicked: "saveClicked", copyClicked: "copyClicked", signOutClicked: "signOutClicked", closed: "closed", backToProfile: "backToProfile" }, ngContentSelectors: _c2, decls: 8, vars: 9, consts: [["dialogEl", ""], [1, "kit-profile-dialog", "profile-dialog", 3, "click", "cancel"], [1, "modal-card", 3, "click", "touchstart", "touchmove", "touchend", "touchcancel"], [1, "sheet-drag-area"], [1, "sheet-handle"], [1, "profile-view-panel", "view-enter-subview"], ["data-testid", "profile-edit-subview", 1, "profile-view-panel", "view-enter-subview"], ["data-testid", "profile-hub-view", 1, "profile-view-panel", "view-enter-profile"], [1, "modal-header"], [1, "header-title-row"], ["type", "button", "aria-label", "Back to Profile", "data-testid", "profile-edit-back-btn", 1, "subview-back-btn", "state-layer", 3, "click"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2.2", "stroke-linecap", "round", "stroke-linejoin", "round", "aria-hidden", "true"], ["d", "M19 12H5M12 19l-7-7 7-7"], ["type", "button", "aria-label", "Close profile dialog", "data-testid", "profile-modal-close-btn", 1, "close-btn", 3, "click"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["x1", "18", "y1", "6", "x2", "6", "y2", "18"], ["x1", "6", "y1", "6", "x2", "18", "y2", "18"], [1, "modal-body"], [1, "field-group"], [1, "field-label-row"], ["for", "kit-profile-display-name"], [1, "char-hint"], ["id", "kit-profile-display-name", "type", "text", "maxlength", "60", "placeholder", "Your collector handle", 1, "text-input", 3, "ngModelChange", "ngModel"], [1, "field-hint"], ["for", "kit-profile-bio"], ["id", "kit-profile-bio", "rows", "3", "maxlength", "300", "placeholder", "Share what you collect or hunt...", 1, "text-input", "bio-input", 3, "ngModelChange", "ngModel"], ["aria-live", "polite", 1, "status-msg", 3, "error"], [1, "modal-footer"], [1, "footer-actions"], ["type", "button", "data-testid", "profile-edit-cancel-btn", 1, "cancel-btn", 3, "click"], ["type", "button", "data-testid", "profile-save-btn", 1, "save-btn", "state-layer", 3, "click", "disabled"], ["aria-live", "polite", 1, "status-msg"], ["aria-hidden", "true", 1, "header-icon"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"], ["cx", "12", "cy", "7", "r", "4"], ["data-testid", "profile-guest-view", 1, "guest-card"], [1, "kit-nav-group"], [1, "identity-banner"], [1, "public-sharing-card"], ["for", "kit-profile-is-public", 1, "toggle-row"], [1, "toggle-text"], [1, "toggle-title"], [1, "toggle-desc"], [1, "switch-wrapper"], ["id", "kit-profile-is-public", "type", "checkbox", "role", "switch", 1, "sr-only-checkbox", 3, "ngModelChange", "ngModel"], [1, "switch-track"], [1, "switch-thumb"], [1, "share-inline-bar"], [1, "identity-top-row"], [1, "identity-avatar"], [1, "identity-details"], [1, "identity-primary"], [1, "identity-display-name"], [1, "username-tag"], [1, "role-badge"], [1, "identity-email"], ["type", "button", "data-testid", "profile-edit-btn", "aria-label", "Edit profile details", 1, "identity-edit-btn", "state-layer", 3, "click"], [1, "identity-bio-preview"], [1, "share-url"], ["type", "button", "data-testid", "copy-public-url-btn", 1, "copy-btn", 3, "click"], ["target", "_blank", "rel", "noopener noreferrer", "title", "Open public collection page", "aria-label", "Open public collection page", 1, "share-open-link", 3, "href"], [1, "guest-icon-circle"], ["viewBox", "0 0 24 24", "width", "24", "height", "24", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["x", "3", "y", "11", "width", "18", "height", "11", "rx", "2", "ry", "2"], ["d", "M7 11V7a5 5 0 0 1 10 0v4"], [1, "guest-title"], [1, "guest-desc"], ["data-testid", "profile-guest-signin-btn", 1, "signin-cta-btn", "state-layer", 3, "href"], [1, "kit-nav-group-label"], [1, "kit-nav-group-list"], ["target", "_blank", "rel", "noopener noreferrer", "data-testid", "profile-account-hub-link", 1, "nav-section-btn", 3, "href"], [1, "nav-section-left"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true", 1, "nav-section-icon"], [1, "nav-section-text"], [1, "nav-section-title"], [1, "nav-section-desc"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true", 1, "nav-section-chevron"], ["points", "9 18 15 12 9 6"], ["type", "button", "data-testid", "profile-signout-link", 1, "signout-link", 3, "click"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["points", "16 17 21 12 16 7"], ["x1", "21", "y1", "12", "x2", "9", "y2", "12"], ["type", "button", 1, "cancel-btn", 3, "click"]], template: function KitProfileModalComponent_Template(rf, ctx) { if (rf & 1) {
+        } }, inputs: { isOpen: [1, "isOpen"], showInstallAction: [1, "showInstallAction"], activeView: [1, "activeView"], isAuthenticated: [1, "isAuthenticated"], user: [1, "user"], displayName: [1, "displayName"], bio: [1, "bio"], isPublic: [1, "isPublic"], saving: [1, "saving"], statusMessage: [1, "statusMessage"], isError: [1, "isError"], copied: [1, "copied"], accountHubUrl: [1, "accountHubUrl"], loginUrl: [1, "loginUrl"], collectionNoun: [1, "collectionNoun"], guestTitle: [1, "guestTitle"], guestDescription: [1, "guestDescription"] }, outputs: { displayNameChange: "displayNameChange", bioChange: "bioChange", isPublicChange: "isPublicChange", publicToggleSaved: "publicToggleSaved", editProfileClicked: "editProfileClicked", saveClicked: "saveClicked", copyClicked: "copyClicked", signOutClicked: "signOutClicked", closed: "closed", backToProfile: "backToProfile" }, ngContentSelectors: _c2, decls: 8, vars: 9, consts: [["dialogEl", ""], [1, "kit-profile-dialog", "profile-dialog", 3, "click", "cancel"], [1, "modal-card", 3, "click", "touchstart", "touchmove", "touchend", "touchcancel"], [1, "sheet-drag-area"], [1, "sheet-handle"], [1, "profile-view-panel", "view-enter-subview"], ["data-testid", "profile-edit-subview", 1, "profile-view-panel", "view-enter-subview"], ["data-testid", "profile-hub-view", 1, "profile-view-panel", "view-enter-profile"], [1, "modal-header"], [1, "header-title-row"], ["type", "button", "aria-label", "Back to Profile", "data-testid", "profile-edit-back-btn", 1, "subview-back-btn", "state-layer", 3, "click"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2.2", "stroke-linecap", "round", "stroke-linejoin", "round", "aria-hidden", "true"], ["d", "M19 12H5M12 19l-7-7 7-7"], ["type", "button", "aria-label", "Close profile dialog", "data-testid", "profile-modal-close-btn", 1, "close-btn", 3, "click"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["x1", "18", "y1", "6", "x2", "6", "y2", "18"], ["x1", "6", "y1", "6", "x2", "18", "y2", "18"], [1, "modal-body"], [1, "field-group"], [1, "field-label-row"], ["for", "kit-profile-display-name"], [1, "char-hint"], ["id", "kit-profile-display-name", "type", "text", "maxlength", "60", "placeholder", "Your collector handle", 1, "text-input", 3, "ngModelChange", "ngModel"], [1, "field-hint"], ["for", "kit-profile-bio"], ["id", "kit-profile-bio", "rows", "3", "maxlength", "300", "placeholder", "Share what you collect or hunt...", 1, "text-input", "bio-input", 3, "ngModelChange", "ngModel"], ["aria-live", "polite", 1, "status-msg", 3, "error"], [1, "modal-footer"], [1, "footer-actions"], ["type", "button", "data-testid", "profile-edit-cancel-btn", 1, "cancel-btn", 3, "click"], ["type", "button", "data-testid", "profile-save-btn", 1, "save-btn", "state-layer", 3, "click", "disabled"], ["aria-live", "polite", 1, "status-msg"], ["aria-hidden", "true", 1, "header-icon"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "2"], ["d", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"], ["cx", "12", "cy", "7", "r", "4"], ["data-testid", "profile-guest-view", 1, "guest-card"], [1, "kit-nav-group"], [1, "identity-banner"], [1, "public-sharing-card"], ["for", "kit-profile-is-public", 1, "toggle-row"], [1, "toggle-text"], [1, "toggle-title"], [1, "toggle-desc"], [1, "switch-wrapper"], ["id", "kit-profile-is-public", "type", "checkbox", "role", "switch", 1, "sr-only-checkbox", 3, "ngModelChange", "ngModel"], [1, "switch-track"], [1, "switch-thumb"], [1, "share-inline-bar"], [1, "identity-top-row"], [1, "identity-avatar"], [1, "identity-details"], [1, "identity-primary"], [1, "identity-display-name"], [1, "username-tag"], [1, "role-badge"], [1, "identity-email"], ["type", "button", "data-testid", "profile-edit-btn", "aria-label", "Edit profile details", 1, "identity-edit-btn", "state-layer", 3, "click"], [1, "identity-bio-preview"], [1, "share-url"], ["type", "button", "data-testid", "copy-public-url-btn", 1, "copy-btn", 3, "click"], ["target", "_blank", "rel", "noopener noreferrer", "title", "Open public collection page", "aria-label", "Open public collection page", 1, "share-open-link", 3, "href"], [1, "guest-icon-circle"], ["viewBox", "0 0 24 24", "width", "24", "height", "24", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["x", "3", "y", "11", "width", "18", "height", "11", "rx", "2", "ry", "2"], ["d", "M7 11V7a5 5 0 0 1 10 0v4"], [1, "guest-title"], [1, "guest-desc"], ["data-testid", "profile-guest-signin-btn", 1, "signin-cta-btn", "state-layer", 3, "href"], [1, "kit-nav-group-label"], [1, "kit-nav-group-list"], ["type", "button", "data-testid", "profile-install-app-btn", 1, "nav-section-btn", 3, "click"], [1, "nav-section-left"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true", 1, "nav-section-icon"], ["d", "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"], ["points", "7 10 12 15 17 10"], ["x1", "12", "y1", "15", "x2", "12", "y2", "3"], [1, "nav-section-text"], [1, "nav-section-title"], [1, "nav-section-desc"], ["viewBox", "0 0 24 24", "width", "18", "height", "18", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true", 1, "nav-section-chevron"], ["points", "9 18 15 12 9 6"], ["target", "_blank", "rel", "noopener noreferrer", "data-testid", "profile-account-hub-link", 1, "nav-section-btn", 3, "href"], ["type", "button", "data-testid", "profile-signout-link", 1, "signout-link", 3, "click"], ["viewBox", "0 0 24 24", "width", "16", "height", "16", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "aria-hidden", "true"], ["d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["points", "16 17 21 12 16 7"], ["x1", "21", "y1", "12", "x2", "9", "y2", "12"], ["type", "button", 1, "cancel-btn", 3, "click"]], template: function KitProfileModalComponent_Template(rf, ctx) { if (rf & 1) {
             i0.ɵɵprojectionDef(_c1);
             i0.ɵɵelementStart(0, "dialog", 1, 0);
             i0.ɵɵlistener("click", function KitProfileModalComponent_Template_dialog_click_0_listener($event) { return ctx.onDialogClick($event); })("cancel", function KitProfileModalComponent_Template_dialog_cancel_0_listener($event) { return ctx.onDialogCancel($event); });
@@ -578,7 +619,7 @@ export class KitProfileModalComponent {
             i0.ɵɵelementStart(3, "div", 3);
             i0.ɵɵelement(4, "div", 4);
             i0.ɵɵelementEnd();
-            i0.ɵɵconditionalCreate(5, KitProfileModalComponent_Conditional_5_Template, 2, 0, "div", 5)(6, KitProfileModalComponent_Conditional_6_Template, 38, 7, "div", 6)(7, KitProfileModalComponent_Conditional_7_Template, 22, 4, "div", 7);
+            i0.ɵɵconditionalCreate(5, KitProfileModalComponent_Conditional_5_Template, 2, 0, "div", 5)(6, KitProfileModalComponent_Conditional_6_Template, 38, 7, "div", 6)(7, KitProfileModalComponent_Conditional_7_Template, 23, 5, "div", 7);
             i0.ɵɵelementEnd()();
         } if (rf & 2) {
             i0.ɵɵstyleProp("transform", ctx.effectiveTransformY() !== 0 ? "translateY(" + ctx.effectiveTransformY() + "px)" : null)("transition", ctx.isDragging() ? "none" : "transform var(--kit-duration-medium, 260ms) var(--kit-ease-smooth, cubic-bezier(0.22, 1, 0.36, 1))");
@@ -921,6 +962,55 @@ export class KitProfileModalComponent {
 
               <ng-content select="[profileExtraNav]" />
 
+              @if (showInstallAction() && pwaInstall?.canShowManualInstall()) {
+                <div class="kit-nav-group">
+                  <span class="kit-nav-group-label">App</span>
+                  <div class="kit-nav-group-list">
+                    <button
+                      type="button"
+                      class="nav-section-btn"
+                      (click)="onInstallAppClick()"
+                      data-testid="profile-install-app-btn"
+                    >
+                      <div class="nav-section-left">
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          class="nav-section-icon"
+                          aria-hidden="true"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <div class="nav-section-text">
+                          <span class="nav-section-title">Install App</span>
+                          <span class="nav-section-desc">
+                            Add to your home screen for offline access
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        class="nav-section-chevron"
+                        aria-hidden="true"
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+
               @if (isAuthenticated() && accountHubUrl()) {
                 <div class="kit-nav-group">
                   <span class="kit-nav-group-label">Account</span>
@@ -1045,5 +1135,5 @@ export class KitProfileModalComponent {
     }], () => [], { dialogEl: [{
             type: ViewChild,
             args: ['dialogEl']
-        }], isOpen: [{ type: i0.Input, args: [{ isSignal: true, alias: "isOpen", required: false }] }], activeView: [{ type: i0.Input, args: [{ isSignal: true, alias: "activeView", required: false }] }], isAuthenticated: [{ type: i0.Input, args: [{ isSignal: true, alias: "isAuthenticated", required: false }] }], user: [{ type: i0.Input, args: [{ isSignal: true, alias: "user", required: false }] }], displayName: [{ type: i0.Input, args: [{ isSignal: true, alias: "displayName", required: false }] }], bio: [{ type: i0.Input, args: [{ isSignal: true, alias: "bio", required: false }] }], isPublic: [{ type: i0.Input, args: [{ isSignal: true, alias: "isPublic", required: false }] }], saving: [{ type: i0.Input, args: [{ isSignal: true, alias: "saving", required: false }] }], statusMessage: [{ type: i0.Input, args: [{ isSignal: true, alias: "statusMessage", required: false }] }], isError: [{ type: i0.Input, args: [{ isSignal: true, alias: "isError", required: false }] }], copied: [{ type: i0.Input, args: [{ isSignal: true, alias: "copied", required: false }] }], accountHubUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "accountHubUrl", required: false }] }], loginUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "loginUrl", required: false }] }], collectionNoun: [{ type: i0.Input, args: [{ isSignal: true, alias: "collectionNoun", required: false }] }], guestTitle: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestTitle", required: false }] }], guestDescription: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestDescription", required: false }] }], displayNameChange: [{ type: i0.Output, args: ["displayNameChange"] }], bioChange: [{ type: i0.Output, args: ["bioChange"] }], isPublicChange: [{ type: i0.Output, args: ["isPublicChange"] }], publicToggleSaved: [{ type: i0.Output, args: ["publicToggleSaved"] }], editProfileClicked: [{ type: i0.Output, args: ["editProfileClicked"] }], saveClicked: [{ type: i0.Output, args: ["saveClicked"] }], copyClicked: [{ type: i0.Output, args: ["copyClicked"] }], signOutClicked: [{ type: i0.Output, args: ["signOutClicked"] }], closed: [{ type: i0.Output, args: ["closed"] }], backToProfile: [{ type: i0.Output, args: ["backToProfile"] }] }); })();
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitProfileModalComponent, { className: "KitProfileModalComponent", filePath: "profile-modal.component.ts", lineNumber: 1271 }); })();
+        }], isOpen: [{ type: i0.Input, args: [{ isSignal: true, alias: "isOpen", required: false }] }], showInstallAction: [{ type: i0.Input, args: [{ isSignal: true, alias: "showInstallAction", required: false }] }], activeView: [{ type: i0.Input, args: [{ isSignal: true, alias: "activeView", required: false }] }], isAuthenticated: [{ type: i0.Input, args: [{ isSignal: true, alias: "isAuthenticated", required: false }] }], user: [{ type: i0.Input, args: [{ isSignal: true, alias: "user", required: false }] }], displayName: [{ type: i0.Input, args: [{ isSignal: true, alias: "displayName", required: false }] }], bio: [{ type: i0.Input, args: [{ isSignal: true, alias: "bio", required: false }] }], isPublic: [{ type: i0.Input, args: [{ isSignal: true, alias: "isPublic", required: false }] }], saving: [{ type: i0.Input, args: [{ isSignal: true, alias: "saving", required: false }] }], statusMessage: [{ type: i0.Input, args: [{ isSignal: true, alias: "statusMessage", required: false }] }], isError: [{ type: i0.Input, args: [{ isSignal: true, alias: "isError", required: false }] }], copied: [{ type: i0.Input, args: [{ isSignal: true, alias: "copied", required: false }] }], accountHubUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "accountHubUrl", required: false }] }], loginUrl: [{ type: i0.Input, args: [{ isSignal: true, alias: "loginUrl", required: false }] }], collectionNoun: [{ type: i0.Input, args: [{ isSignal: true, alias: "collectionNoun", required: false }] }], guestTitle: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestTitle", required: false }] }], guestDescription: [{ type: i0.Input, args: [{ isSignal: true, alias: "guestDescription", required: false }] }], displayNameChange: [{ type: i0.Output, args: ["displayNameChange"] }], bioChange: [{ type: i0.Output, args: ["bioChange"] }], isPublicChange: [{ type: i0.Output, args: ["isPublicChange"] }], publicToggleSaved: [{ type: i0.Output, args: ["publicToggleSaved"] }], editProfileClicked: [{ type: i0.Output, args: ["editProfileClicked"] }], saveClicked: [{ type: i0.Output, args: ["saveClicked"] }], copyClicked: [{ type: i0.Output, args: ["copyClicked"] }], signOutClicked: [{ type: i0.Output, args: ["signOutClicked"] }], closed: [{ type: i0.Output, args: ["closed"] }], backToProfile: [{ type: i0.Output, args: ["backToProfile"] }] }); })();
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassDebugInfo(KitProfileModalComponent, { className: "KitProfileModalComponent", filePath: "profile-modal.component.ts", lineNumber: 1322 }); })();

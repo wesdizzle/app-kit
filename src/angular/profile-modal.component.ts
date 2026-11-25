@@ -5,6 +5,7 @@ import {
   OnDestroy,
   ViewChild,
   ViewEncapsulation,
+  inject,
   input,
   output,
   computed,
@@ -16,6 +17,7 @@ import { BaseUserProfile } from './auth.service.js';
 import { BottomSheetDragController } from './bottom-sheet-drag.js';
 import { KIT_DIALOG_KEYFRAMES_CSS } from './dialog-keyframes.styles.js';
 import { canAnimateKitDialogExit } from './dialog-sheet.component.js';
+import { KitPwaInstallService } from './pwa-install.service.js';
 
 export interface ProfileSavePayload {
   displayName: string;
@@ -1146,6 +1148,55 @@ export interface ProfileSavePayload {
 
               <ng-content select="[profileExtraNav]" />
 
+              @if (showInstallAction() && pwaInstall?.canShowManualInstall()) {
+                <div class="kit-nav-group">
+                  <span class="kit-nav-group-label">App</span>
+                  <div class="kit-nav-group-list">
+                    <button
+                      type="button"
+                      class="nav-section-btn"
+                      (click)="onInstallAppClick()"
+                      data-testid="profile-install-app-btn"
+                    >
+                      <div class="nav-section-left">
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          class="nav-section-icon"
+                          aria-hidden="true"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <div class="nav-section-text">
+                          <span class="nav-section-title">Install App</span>
+                          <span class="nav-section-desc">
+                            Add to your home screen for offline access
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        class="nav-section-chevron"
+                        aria-hidden="true"
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+
               @if (isAuthenticated() && accountHubUrl()) {
                 <div class="kit-nav-group">
                   <span class="kit-nav-group-label">Account</span>
@@ -1271,7 +1322,12 @@ export interface ProfileSavePayload {
 export class KitProfileModalComponent implements OnDestroy {
   @ViewChild('dialogEl') dialogEl?: ElementRef<HTMLDialogElement>;
 
+  protected readonly pwaInstall = inject(KitPwaInstallService, {
+    optional: true,
+  });
+
   readonly isOpen = input<boolean>(true);
+  readonly showInstallAction = input<boolean>(true);
   readonly activeView = input<string>('profile');
   readonly isAuthenticated = input<boolean>(false);
   readonly user = input<BaseUserProfile | null>(null);
@@ -1388,6 +1444,14 @@ export class KitProfileModalComponent implements OnDestroy {
   onPublicToggleChange(checked: boolean): void {
     this.isPublicChange.emit(checked);
     this.publicToggleSaved.emit(checked);
+  }
+
+  async onInstallAppClick(): Promise<void> {
+    if (!this.pwaInstall) return;
+    const outcome = await this.pwaInstall.promptInstall();
+    if (outcome === 'accepted' || outcome === 'ios-guide') {
+      this.requestClose();
+    }
   }
 
   ngOnDestroy(): void {

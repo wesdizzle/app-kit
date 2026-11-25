@@ -105,6 +105,15 @@ import {
   canPlayKitAudioMime,
   stopActiveKitAudio,
 } from './audio-button.component.js';
+import {
+  KIT_PWA_INSTALL_STORAGE_KEY,
+  KitPwaInstallService,
+  detectKitIosSafari,
+  detectKitStandaloneMode,
+  isKitInstallAutoPromptSuppressed,
+  readKitInstallDismissalState,
+} from './pwa-install.service.js';
+import { KitPwaInstallPromptComponent } from './pwa-install-prompt.component.js';
 
 describe('@wesdizzle/app-kit/angular', () => {
   beforeEach(() => {
@@ -2072,5 +2081,118 @@ describe('@wesdizzle/app-kit/angular', () => {
     expect(pillBody).toContain('background: var(--kit-surface-container-high)');
     expect(pillBody).toContain('border: 1px solid var(--kit-outline)');
     expect(pillBody).toContain('border-radius: var(--kit-radius-full)');
+  });
+
+  it('tracks PWA beforeinstallprompt, iOS Safari detection, snooze, permanent dismissal, and appinstalled lifecycle', async () => {
+    expect(
+      detectKitIosSafari(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+        5,
+      ),
+    ).toBe(true);
+    expect(
+      detectKitIosSafari(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/130.0.0.0 Mobile/15E148 Safari/604.1',
+        5,
+      ),
+    ).toBe(false);
+    expect(
+      detectKitIosSafari(
+        'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36',
+        5,
+      ),
+    ).toBe(false);
+
+    const storageMap = new Map<string, string>();
+    const mockStorage = {
+      getItem: (k: string) => storageMap.get(k) ?? null,
+      setItem: (k: string, v: string) => storageMap.set(k, v),
+      removeItem: (k: string) => storageMap.delete(k),
+    };
+    const listeners = new Map<string, Set<(ev?: Event) => void>>();
+    let standalone = false;
+
+    vi.stubGlobal('localStorage', mockStorage);
+    vi.stubGlobal('navigator', {
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36',
+      maxTouchPoints: 0,
+    });
+    vi.stubGlobal('window', {
+      matchMedia: vi.fn((q: string) => ({
+        matches: q.includes('standalone') ? standalone : false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+      addEventListener: (type: string, cb: (ev?: Event) => void) => {
+        if (!listeners.has(type)) listeners.set(type, new Set());
+        listeners.get(type)!.add(cb);
+      },
+      removeEventListener: (type: string, cb: (ev?: Event) => void) => {
+        listeners.get(type)?.delete(cb);
+      },
+    });
+
+    try {
+      expect(detectKitStandaloneMode()).toBe(false);
+      const service = new KitPwaInstallService();
+      expect(service.canPromptNative()).toBe(false);
+      expect(service.shouldShowAutoPrompt()).toBe(false);
+
+      const preventDefault = vi.fn();
+      const promptSpy = vi.fn(async () => {});
+      const bipEvent = {
+        preventDefault,
+        prompt: promptSpy,
+        userChoice: Promise.resolve({
+          outcome: 'dismissed' as const,
+          platform: 'web',
+        }),
+      } as unknown as Event;
+
+      for (const cb of listeners.get('beforeinstallprompt') ?? []) {
+        cb(bipEvent);
+      }
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(service.canPromptNative()).toBe(true);
+      expect(service.shouldShowAutoPrompt()).toBe(true);
+
+      // Snooze suppresses auto-prompt while preserving manual install availability
+      service.snooze(14);
+      expect(service.shouldShowAutoPrompt()).toBe(false);
+      expect(service.canShowManualInstall()).toBe(true);
+      const savedAfterSnooze = readKitInstallDismissalState(mockStorage);
+      expect(isKitInstallAutoPromptSuppressed(savedAfterSnooze)).toBe(true);
+
+      // Prompt outcome 'accepted' marks app installed
+      const acceptedEvent = {
+        preventDefault: vi.fn(),
+        prompt: vi.fn(async () => {}),
+        userChoice: Promise.resolve({
+          outcome: 'accepted' as const,
+          platform: 'web',
+        }),
+      } as unknown as Event;
+      for (const cb of listeners.get('beforeinstallprompt') ?? []) {
+        cb(acceptedEvent);
+      }
+      const outcome = await service.promptInstall();
+      expect(outcome).toBe('accepted');
+      expect(service.isInstalled()).toBe(true);
+      expect(service.shouldShowAutoPrompt()).toBe(false);
+      expect(service.canShowManualInstall()).toBe(false);
+
+      service.ngOnDestroy();
+      storageMap.clear();
+      standalone = true;
+      expect(detectKitStandaloneMode()).toBe(true);
+      const installedService = new KitPwaInstallService();
+      expect(installedService.isInstalled()).toBe(true);
+      installedService.ngOnDestroy();
+      expect(KIT_PWA_INSTALL_STORAGE_KEY).toBe('kit-pwa-install-v1');
+      expect(KitPwaInstallPromptComponent).toBeDefined();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

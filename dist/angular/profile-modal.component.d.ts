@@ -1,5 +1,6 @@
 import { ElementRef, OnDestroy } from '@angular/core';
 import { BaseUserProfile } from './auth.service.js';
+import { KitPwaInstallService } from './pwa-install.service.js';
 import * as i0 from "@angular/core";
 export interface ProfileSavePayload {
     displayName: string;
@@ -8,7 +9,9 @@ export interface ProfileSavePayload {
 }
 export declare class KitProfileModalComponent implements OnDestroy {
     dialogEl?: ElementRef<HTMLDialogElement>;
+    protected readonly pwaInstall: KitPwaInstallService | null;
     readonly isOpen: import("@angular/core").InputSignal<boolean>;
+    readonly showInstallAction: import("@angular/core").InputSignal<boolean>;
     readonly activeView: import("@angular/core").InputSignal<string>;
     readonly isAuthenticated: import("@angular/core").InputSignal<boolean>;
     readonly user: import("@angular/core").InputSignal<BaseUserProfile | null>;
@@ -52,6 +55,7 @@ export declare class KitProfileModalComponent implements OnDestroy {
     openEditProfile(): void;
     closeEditProfile(): void;
     onPublicToggleChange(checked: boolean): void;
+    onInstallAppClick(): Promise<void>;
     ngOnDestroy(): void;
     copyLink(): void;
     requestClose(): void;
@@ -62,5 +66,5 @@ export declare class KitProfileModalComponent implements OnDestroy {
     onTouchEnd(): void;
     onTouchCancel(): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<KitProfileModalComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<KitProfileModalComponent, "kit-profile-modal", never, { "isOpen": { "alias": "isOpen"; "required": false; "isSignal": true; }; "activeView": { "alias": "activeView"; "required": false; "isSignal": true; }; "isAuthenticated": { "alias": "isAuthenticated"; "required": false; "isSignal": true; }; "user": { "alias": "user"; "required": false; "isSignal": true; }; "displayName": { "alias": "displayName"; "required": false; "isSignal": true; }; "bio": { "alias": "bio"; "required": false; "isSignal": true; }; "isPublic": { "alias": "isPublic"; "required": false; "isSignal": true; }; "saving": { "alias": "saving"; "required": false; "isSignal": true; }; "statusMessage": { "alias": "statusMessage"; "required": false; "isSignal": true; }; "isError": { "alias": "isError"; "required": false; "isSignal": true; }; "copied": { "alias": "copied"; "required": false; "isSignal": true; }; "accountHubUrl": { "alias": "accountHubUrl"; "required": false; "isSignal": true; }; "loginUrl": { "alias": "loginUrl"; "required": false; "isSignal": true; }; "collectionNoun": { "alias": "collectionNoun"; "required": false; "isSignal": true; }; "guestTitle": { "alias": "guestTitle"; "required": false; "isSignal": true; }; "guestDescription": { "alias": "guestDescription"; "required": false; "isSignal": true; }; }, { "displayNameChange": "displayNameChange"; "bioChange": "bioChange"; "isPublicChange": "isPublicChange"; "publicToggleSaved": "publicToggleSaved"; "editProfileClicked": "editProfileClicked"; "saveClicked": "saveClicked"; "copyClicked": "copyClicked"; "signOutClicked": "signOutClicked"; "closed": "closed"; "backToProfile": "backToProfile"; }, never, ["[profileSubview]", "[profileExtraFields]", "[profileIdentityBadges]", "[profileExtraNav]"], true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<KitProfileModalComponent, "kit-profile-modal", never, { "isOpen": { "alias": "isOpen"; "required": false; "isSignal": true; }; "showInstallAction": { "alias": "showInstallAction"; "required": false; "isSignal": true; }; "activeView": { "alias": "activeView"; "required": false; "isSignal": true; }; "isAuthenticated": { "alias": "isAuthenticated"; "required": false; "isSignal": true; }; "user": { "alias": "user"; "required": false; "isSignal": true; }; "displayName": { "alias": "displayName"; "required": false; "isSignal": true; }; "bio": { "alias": "bio"; "required": false; "isSignal": true; }; "isPublic": { "alias": "isPublic"; "required": false; "isSignal": true; }; "saving": { "alias": "saving"; "required": false; "isSignal": true; }; "statusMessage": { "alias": "statusMessage"; "required": false; "isSignal": true; }; "isError": { "alias": "isError"; "required": false; "isSignal": true; }; "copied": { "alias": "copied"; "required": false; "isSignal": true; }; "accountHubUrl": { "alias": "accountHubUrl"; "required": false; "isSignal": true; }; "loginUrl": { "alias": "loginUrl"; "required": false; "isSignal": true; }; "collectionNoun": { "alias": "collectionNoun"; "required": false; "isSignal": true; }; "guestTitle": { "alias": "guestTitle"; "required": false; "isSignal": true; }; "guestDescription": { "alias": "guestDescription"; "required": false; "isSignal": true; }; }, { "displayNameChange": "displayNameChange"; "bioChange": "bioChange"; "isPublicChange": "isPublicChange"; "publicToggleSaved": "publicToggleSaved"; "editProfileClicked": "editProfileClicked"; "saveClicked": "saveClicked"; "copyClicked": "copyClicked"; "signOutClicked": "signOutClicked"; "closed": "closed"; "backToProfile": "backToProfile"; }, never, ["[profileSubview]", "[profileExtraFields]", "[profileIdentityBadges]", "[profileExtraNav]"], true, never>;
 }

@@ -19,6 +19,8 @@ export * from './profile-modal.component.js';
 export * from './public-banner.component.js';
 export * from './header-bar.component.js';
 export * from './landing-card.component.js';
+export * from './pwa-install.service.js';
+export * from './pwa-install-prompt.component.js';
 export * from './icon.component.js';
 export * from './filter-primitives.component.js';
 export * from './filter-bar.component.js';
